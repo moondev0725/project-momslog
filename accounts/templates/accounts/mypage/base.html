@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/mypage.css' %}">
+
+<div class="mypage-wrap">
+  <aside class="mypage-side">
+    <div class="mypage-side__title">마이페이지</div>
+
+    <nav class="mypage-nav">
+      <a class="mypage-nav__item {% if request.resolver_match.url_name == 'mypage_profile' %}is-active{% endif %}"
+         href="{% url 'accounts:mypage_profile' %}">
+        개인정보
+      </a>
+
+      <a class="mypage-nav__item {% if request.resolver_match.url_name == 'mypage_my_posts' %}is-active{% endif %}"
+         href="{% url 'accounts:mypage_my_posts' %}">
+        내가 쓴 글
+      </a>
+      
+      <a class="mypage-nav__item {% if request.resolver_match.url_name == 'mypage_grade_exp' %}is-active{% endif %}"
+         href="{% url 'accounts:mypage_grade_exp' %}">
+        등급 / 경험치
+      </a>
+      
+      <a class="mypage-nav__item {% if request.resolver_match.url_name == 'mypage_password_change' %}is-active{% endif %}"
+         href="{% url 'accounts:mypage_password_change' %}">
+        계정 관리
+      </a>
+    </nav>
+
+    <form action="{% url 'accounts:logout' %}" method="post" class="mypage-logout">
+      {% csrf_token %}
+      <button type="submit" class="mypage-logout__btn">로그아웃</button>
+    </form>
+  </aside>
+
+  <main class="mypage-main">
+    <div class="mypage-card">
+      {% if messages %}
+        <div class="mypage-msg">
+          {% for message in messages %}
+            <div class="mypage-msg__item">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% block mypage_content %}{% endblock %}
+    </div>
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h2>레시피 작성하기</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <h3>조리 단계</h3>
+    <div id="formset-area">
+        {{ formset.management_form }}
+        {% for form in formset %}
+            <div class="step-form" style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
+                {{ form.order.label_tag }} {{ form.order }}
+                {{ form.description.label_tag }} {{ form.description }}
+                {{ form.image.label_tag }} {{ form.image }}
+                {% if form.instance.pk %}
+                    {{ form.DELETE.label_tag }} {{ form.DELETE }}
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="button" id="add-step-btn">단계 추가</button>
+    <br><br>
+    <button type="submit">저장하기</button>
+</form>
+
+<script>
+    const addBtn = document.getElementById('add-step-btn');
+    const formsetArea = document.getElementById('formset-area');
+    let totalForms = document.querySelector('#id_steps-TOTAL_FORMS');
+
+    addBtn.addEventListener('click', () => {
+        const currentFormCount = parseInt(totalForms.value);
+        const newFormHtml = formsetArea.querySelector('.step-form').outerHTML.replace(/steps-(\d+)-/g, `steps-${currentFormCount}-`);
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newFormHtml;
+        const newForm = tempDiv.firstElementChild;
+
+        newForm.querySelectorAll('input, textarea').forEach(el => {
+            if(el.type === 'file') el.value = '';
+            else if(el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+            else el.value = '';
+        });
+
+        formsetArea.appendChild(newForm);
+        totalForms.value = currentFormCount + 1;
+    });
+</script>
+{% endblock %}

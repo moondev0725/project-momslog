@@ -1,0 +1,282 @@
+/* =========================
+   메인 페이지 배너 슬라이더
+========================= */
+.banner-slider{
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  height: 235px;
+  overflow: hidden;
+  border-radius: 15px;
+  background: #fff;
+}
+
+.banner-track{
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s ease-in-out;
+}
+
+.banner-item{
+  min-width: 100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 40px;
+  flex-shrink: 0;
+  gap: 20px;
+}
+
+.banner-text{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.banner-text h2{
+  font-size: 26px;
+  margin-bottom: 10px;
+  color: #333;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+}
+
+.banner-text p{
+  font-size: 16px;
+  color: #555;
+  margin: 0;
+}
+
+.banner-image{
+  max-height: 140px;
+  max-width: 140px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.slider-btn{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  border:none;
+  background:rgba(255,255,255,.6);
+  font-size:18px;
+  cursor:pointer;
+  z-index:10;
+  transition:.2s;
+}
+.slider-btn:hover{ background:rgba(255,255,255,.9); }
+.prev-btn{ left:15px; }
+.next-btn{ right:15px; }
+
+
+/* =========================
+   등급 / 포인트 UI
+========================= */
+
+/* 등급 칩 */
+.user-grade-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 12px;
+  border-radius:999px;
+  background:linear-gradient(135deg,#fff0f3,#ffe4ec);
+  color:#d6336c;
+  font-size:12px;
+  font-weight:700;
+  box-shadow:0 3px 8px rgba(214,51,108,.12);
+  transform:translateY(-12px);
+  position:relative;
+  will-change:transform, box-shadow, filter;
+}
+.grade-suffix{
+  font-size:10px;
+  opacity:.7;
+  font-weight:600;
+}
+
+/* 상단 줄 */
+.grade-top-row{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:10px;
+  font-size:13px;
+}
+.grade-top-left{
+  justify-self:start;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.grade-top-mid{ justify-self:center; }
+.grade-top-right{
+  justify-self:end;
+  white-space:nowrap;
+}
+
+/* 토스트 기본 */
+#point-toast{
+  padding:6px 10px;
+  background:#111;
+  color:#fff;
+  border-radius:999px;
+  font-size:12px;
+  line-height:1.1;
+  opacity:0;
+  transform:translateY(-4px);
+  white-space:nowrap;
+}
+
+/* =========================
+   경험치 바
+========================= */
+.grade-bar-bg{
+  margin-top:10px;
+  height:16px;
+  border-radius:999px;
+  background:#f1f3f5;
+  overflow:hidden;
+  position:relative;
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,.08),
+    0 1px 0 rgba(255,255,255,.6);
+}
+
+.grade-bar-fill{
+  height:100%;
+  width:0%;
+  min-width:10px;
+  border-radius:999px;
+  position:relative;
+  background:linear-gradient(90deg,#ff5c8a,#ff7aa2 35%,#ff9dbf 70%,#ffd1df);
+  transition:width .52s cubic-bezier(.2,.9,.2,1);
+  box-shadow:
+    0 6px 16px rgba(255,92,138,.28),
+    0 2px 6px rgba(255,92,138,.18);
+}
+
+/* 샤인 */
+@keyframes gradeShine{
+  0%{ transform:translateX(-120%) skewX(-20deg); opacity:0; }
+  40%{ opacity:.9; }
+  100%{ transform:translateX(420%) skewX(-20deg); opacity:0; }
+}
+.grade-bar-fill::after{
+  content:"";
+  position:absolute;
+  top:0; left:-40%;
+  width:40%;
+  height:100%;
+  background:linear-gradient(90deg,
+    rgba(255,255,255,0),
+    rgba(255,255,255,.45),
+    rgba(255,255,255,0)
+  );
+  opacity:.55;
+  animation:gradeShine 2s ease-in-out infinite;
+  animation-play-state:paused;
+}
+.grade-bar-fill.is-impact::after{
+  animation-play-state:running;
+}
+
+/* 바 탁! */
+@keyframes barPop{
+  0%{ transform:scaleX(1); }
+  45%{ transform:scaleX(1.08); }
+  100%{ transform:scaleX(1); }
+}
+.grade-bar-animate{
+  animation:barPop .32s cubic-bezier(.2,.9,.2,1);
+  transform-origin:left;
+}
+
+/* 끝 팡! */
+@keyframes barImpact{
+  0%{ opacity:0; transform:scale(.9); }
+  30%{ opacity:.9; }
+  100%{ opacity:0; transform:scale(1.2); }
+}
+.grade-bar-fill.is-impact::before{
+  content:"";
+  position:absolute;
+  right:-6px;
+  top:-7px;
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  background:radial-gradient(circle,rgba(255,255,255,.95),transparent 65%);
+  animation:barImpact .42s ease-out;
+}
+
+/* 80% 이상 막판 폭발 */
+.grade-bar-fill.is-near-full{
+  background:linear-gradient(90deg,#ff3b7a,#ff5c8a 35%,#ff7aa2 70%,#ffe1ea);
+  box-shadow:
+    0 10px 22px rgba(255,59,122,.35),
+    0 0 0 6px rgba(255,59,122,.14);
+}
+
+
+/* =========================
+   등급 업 칩
+========================= */
+.user-grade-chip.is-levelup{
+  animation:chipBounce .52s cubic-bezier(.2,.9,.2,1),
+           chipGlow .9s ease-out;
+}
+@keyframes chipBounce{
+  0%{ transform:translateY(-12px) scale(1); }
+  35%{ transform:translateY(-18px) scale(1.06); }
+  65%{ transform:translateY(-10px) scale(.98); }
+  100%{ transform:translateY(-12px) scale(1); }
+}
+@keyframes chipGlow{
+  0%{ box-shadow:0 3px 8px rgba(214,51,108,.12); }
+  35%{
+    box-shadow:
+      0 10px 24px rgba(255,92,138,.38),
+      0 0 0 6px rgba(255,92,138,.18);
+  }
+  100%{ box-shadow:0 3px 8px rgba(214,51,108,.12); }
+}
+.user-grade-chip.is-levelup::after{
+  content:"";
+  position:absolute;
+  inset:-10px;
+  border-radius:999px;
+  background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.95),transparent 55%);
+  animation:chipSpark .65s ease-out;
+}
+@keyframes chipSpark{
+  0%{ opacity:0; transform:scale(.85); }
+  30%{ opacity:.85; transform:scale(1.05); }
+  100%{ opacity:0; transform:scale(1.2); }
+}
+
+
+/* =========================
+   Toast Pop
+========================= */
+@keyframes toastPop{
+  0%{ opacity:0; transform:translateY(-4px) scale(.98); }
+  30%{ opacity:1; transform:scale(1.06); }
+  70%{ opacity:1; transform:scale(1); }
+  100%{ opacity:0; transform:translateY(-4px); }
+}
+#point-toast.is-pop{
+  animation:toastPop 1.4s cubic-bezier(.2,.9,.2,1);
+}
+#point-toast.is-levelup{
+  box-shadow:
+    0 10px 22px rgba(255,92,138,.25),
+    0 0 0 6px rgba(255,92,138,.12);
+}

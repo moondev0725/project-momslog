@@ -1,0 +1,727 @@
+
+.flea-detail-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.flea-detail-header {
+    border-bottom: 2px solid #ff6b6b;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.flea-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.flea-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    flex: 1;
+}
+
+.flea-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #666;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.status-toggle {
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.status-toggle:hover {
+    border-color: rgba(0,0,0,0.2);
+    transform: translateY(-1px);
+}
+
+.status-selling {
+    background-color: #e7f5ff;
+    color: #1971c2;
+}
+
+.status-reserved {
+    background-color: #fff3bf;
+    color: #d39e00;
+}
+
+.status-sold {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-share {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.flea-image {
+    margin: 30px 0;
+    position: relative;
+}
+
+.flea-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.sold-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 20px 40px;
+    border-radius: 12px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.flea-price {
+    background: #f9f9f9;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 10px 0 0; /* ✅ 위쪽 붙이고 아래 여백 최소화 */
+}
+
+
+.price-label {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.price-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ff6b6b;
+}
+
+.flea-content {
+    line-height: 1.8;
+    font-size: 15px;
+    color: #333;
+    white-space: pre-wrap;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.like-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.like-count {
+    font-weight: 700;
+    color: #ff6b6b;
+    font-size: 16px;
+}
+
+.like-btn {
+    color: #adb5bd;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.like-btn:hover {
+    color: #ff6b6b;
+}
+
+.like-btn.liked {
+    color: #ff6b6b;
+}
+
+.report-box {
+    margin: 10px 0 20px;
+    padding: 14px;
+    background: #fff7f7;
+    border: 1px solid #ffdede;
+    border-radius: 10px;
+}
+
+.report-top {
+    display: flex;
+    align-items: flex-start;      /* ✅ 상단 기준 정렬 */
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.report-top > div:first-child {
+    flex: 1;                      /* ✅ 왼쪽 영역이 너비 차지 */
+}
+
+.report-top > div:last-child {
+    margin-left: auto;            /* ✅ 버튼을 오른쪽 끝으로 */
+}
+
+
+.report-meta {
+    font-size: 13px;
+    color: #666;
+}
+
+.report-toggle {
+    background: #ff6b6b;
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.report-toggle:hover {
+    background: #ff5252;
+}
+
+.report-form {
+    display: none;
+    margin-top: 12px;
+    background: #fff;
+    border: 1px solid #f1f1f1;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.report-form.show {
+    display: block;
+}
+
+.report-form .form-group {
+    margin-bottom: 12px;
+}
+
+.flea-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-primary {
+    background: #4f9cff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #3d8ee0;
+}
+
+.btn-danger {
+    background: #ff6b6b;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #ff5252;
+}
+
+.status-wrap{
+    position: relative; /* ✅ status-menu absolute 기준 */
+}
+
+.status-toggle{
+    border: none;
+    cursor: pointer;
+}
+.wish-toggle{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-weight: 800;
+    color: #ff6b6b;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid #ffd6d6;
+    background: #fff2f2;
+    transition: background-color .15s ease, transform .05s ease;
+}
+
+.wish-toggle:hover{
+    background: #ffe9e9;
+}
+
+.wish-toggle:active{
+    transform: translateY(1px);
+}
+
+.wish-toggle.is-liked{
+    background: #ff6b6b;
+    color: #fff;
+    border-color: #ff6b6b;
+}
+
+.wish-toggle.is-disabled{
+    opacity: .6;
+}
+
+.wish-heart{
+    font-weight: 900;
+}
+
+.wish-count{
+    margin-left: 6px;
+    font-weight: 900;
+}
+
+.wish-login{
+    margin-left: 10px;
+    font-size: 12px;
+    color: #888;
+}
+.flea-actions{
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-end; /* ✅ 우측 정렬 */
+}
+
+.flea-actions .btn{
+    flex: 0;               /* ✅ 여기서만 꽉 차는거 방지 */
+    min-width: 120px;
+}
+
+
+.status-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 140px;
+    z-index: 1000;
+    margin-top: 4px;
+}
+
+.status-menu.show {
+    display: block;
+}
+
+.status-option {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-weight: 600;
+}
+
+.status-option:hover {
+    background-color: #f8f9fa;
+}
+/* ================= 댓글 영역: 한 박스(카드)로 묶기 ================= */
+.comments-section {
+    margin-top: 20px;      /* 기존 40 -> 줄임 */
+    padding-top: 0;        /* 상단 여백 제거 */
+    border-top: 0;         /* 구분선 제거(대신 박스 사용) */
+}
+
+.comments-box {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.comments-header {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.comments-list {
+    margin-top: 14px;
+}
+
+.comment-form-wrap {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid #f1f1f1;
+}
+
+
+.comments-header {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.comment-item {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+/* 댓글 상단(작성자 + 수정/삭제 한 줄) */
+.comment-top {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* ✅ 오른쪽 밀어내지 않음 */
+    margin-bottom: 6px;
+}
+
+.comment-author {
+    display: flex;              /* ✅ 작성자/비밀글/수정삭제 한 줄 */
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-weight: 600;
+    color: #333;
+    font-size: 13px;
+}
+
+
+.comment-author-name {
+  font-weight: 700;
+}
+
+/* 상단에 붙는 수정/삭제 버튼용 */
+.comment-actions.is-inline {
+  margin-top: 0;
+  gap: 8px;
+}
+
+.comment-meta {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 10px;
+}
+
+.comment-content {
+    line-height: 1.6;
+    white-space: pre-wrap;
+    margin: 10px 0;
+}
+
+.comment-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 10px;
+}
+
+.comment-btn {
+    background: transparent;
+    border: none;
+    color: #666;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+}
+/* ✅ 작성자 옆(빨간영역) 수정/삭제 */
+.comment-actions-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 6px;
+}
+
+.comment-btn.comment-btn-danger {
+    color: #ff6b6b;        /* ✅ 빨간 글씨 */
+    font-weight: 700;
+}
+
+.comment-btn.comment-btn-danger:hover {
+    text-decoration: underline;
+    opacity: 0.85;
+}
+
+
+.comment-btn:hover {
+    color: #ff6b6b;
+}
+
+.secret-badge {
+    color: #ff6b6b;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.comment-form textarea:focus {
+    outline: none;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 13px;
+}
+
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .flea-meta {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .flea-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .flea-title {
+        font-size: 22px;
+    }
+}
+/* =========================
+   26-01-09 리뉴얼: 헤더 카드 + 2열(이미지/내용) + 댓글 전체폭
+========================= */
+.flea-header-card{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:14px;
+    padding:18px 20px;
+    box-shadow:0 6px 16px rgba(0,0,0,0.04);
+    margin-bottom:18px;
+}
+.flea-header-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+}
+.flea-header-price{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid #f1f3f5;
+}
+.status-wrap{ position:relative; }
+.status-toggle{
+    border:none;
+    cursor:pointer;
+}
+.status-toggle:focus,
+.status-toggle:active{
+    outline:none;
+    box-shadow:none;
+}
+.status-caret{
+    font-size:14px;
+    margin-left:8px;
+    opacity:1;
+    font-weight:900;
+}
+.status-menu{
+    position:absolute;
+    top: calc(100% + 8px);
+    right:0;
+    min-width: 140px;
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:12px;
+    box-shadow:0 10px 24px rgba(0,0,0,0.10);
+    padding:6px;
+    display:none;
+    z-index:50;
+}
+.status-menu.show{ display:block; }
+.status-option{
+    padding:10px 10px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+}
+.status-option:hover{
+    background:#fff1f1;
+}
+
+.flea-body-card{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:14px;
+    padding:18px 20px;
+    box-shadow:0 6px 16px rgba(0,0,0,0.04);
+    margin-bottom:18px;
+}
+.flea-body-grid{
+    display:grid;
+    grid-template-columns: 360px 1fr;
+    gap:22px;
+    align-items:start;
+}
+.flea-gallery .flea-image{
+    width:100%;
+    border-radius:14px;
+    overflow:hidden;
+    background:#f8f9fa;
+    border:1px solid #f1f3f5;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height: 320px;
+}
+.flea-gallery .flea-image.is-empty{
+    min-height: 320px;
+}
+.no-image{
+    color:#999;
+    font-size:14px;
+}
+.flea-main-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+.flea-thumbs{
+    margin-top:10px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+.thumb-btn{
+    width:72px;
+    height:72px;
+    border-radius:12px;
+    overflow:hidden;
+    border:1px solid #eee;
+    background:#fff;
+    padding:0;
+    position:relative;
+    cursor:pointer;
+}
+.thumb-btn img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+.thumb-btn.is-active{
+    border-color:#ff6b6b;
+    box-shadow:0 0 0 3px rgba(255,107,107,0.18);
+}
+.thumb-num{
+    position:absolute;
+    top:6px;
+    left:6px;
+    background:rgba(0,0,0,0.55);
+    color:#fff;
+    font-size:12px;
+    font-weight:800;
+    padding:2px 7px;
+    border-radius:999px;
+}
+.thumb-btn:focus,
+.thumb-btn:active{
+    outline:none;
+    box-shadow:none;
+}
+
+.flea-body-content .flea-description{
+    border:1px solid #f1f3f5;
+    border-radius:14px;
+    padding:16px;
+    min-height: 220px;
+    background:#fff;
+}
+.flea-actions{
+    display:flex;
+    gap:10px;
+    margin-top:16px;
+    justify-content:flex-end;
+}
+.flea-actions .btn{
+    flex:0;
+    width:auto;
+    min-width:110px;
+}
+
+/* 모바일 */
+@media (max-width: 900px){
+    .flea-body-grid{
+        grid-template-columns: 1fr;
+    }
+    .flea-gallery .flea-image{
+        min-height: 260px;
+    }
+}

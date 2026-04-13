@@ -1,0 +1,28 @@
+<!--
+═══════════════════════════════════════════════════════════════════════
+flea_delete.html - 벼룩시장 삭제 확인
+═══════════════════════════════════════════════════════════════════════
+작성일: 2025-12-29
+기능: 상품 삭제 확인 폼
+-->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="login-container" style="max-width: 480px;">
+    <h2>글 삭제</h2>
+
+    <div style="padding:20px; background:#f8f9fa; border-radius:12px; margin-bottom:20px;">
+        <p style="text-align:center; color:#868e96; margin:0;">정말로 삭제하시겠습니까?</p>
+        <p style="text-align:center; font-weight:600; color:#343a40; margin-top:10px;">{{ item.title }}</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn-login-submit" style="background: linear-gradient(135deg, #ff9a9e 0%, #ff6b6b 100%); margin-bottom:10px;">삭제하기</button>
+    </form>
+
+    <div class="login-links" style="text-align:center;">
+        <a href="{% url 'board:flea_detail' item.pk %}">취소</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,349 @@
+{% extends "accounts/mypage/base.html" %}
+
+{% block title %}등급/경험치 - 마이페이지{% endblock %}
+
+{% block mypage_content %}
+<style>
+.grade-exp-container {
+    padding: 20px 0;
+}
+
+.grade-card {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);
+}
+
+.grade-display {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.grade-name {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.exp-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.exp-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.exp-item-label {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+
+.exp-item-value {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.progress-section {
+    margin-top: 30px;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    transition: width .3s ease;
+}
+
+.grade-tiers {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.grade-tiers-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ff6b6b;
+}
+
+.grade-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.grade-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    transition: .2s;
+}
+
+.grade-item.current {
+    background: #ffe0e0;
+    border-left: 4px solid #ff6b6b;
+}
+
+.grade-item:hover {
+    background: #f0f0f0;
+}
+
+.grade-item.current:hover {
+    background: #ffd4d4;
+}
+
+.grade-details {
+    flex: 1;
+}
+
+.grade-tier-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.grade-tier-info {
+    display: flex;
+    gap: 15px;
+    font-size: 13px;
+    color: #999;
+}
+
+.ranking-section {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ranking-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ff6b6b;
+}
+
+.ranking-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-box {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ff6b6b;
+}
+
+.grade-distribution {
+    margin-top: 20px;
+}
+
+.distribution-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.distribution-bar {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.distribution-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.distribution-segment {
+    width: 100%;
+    height: 30px;
+    background: #ffe0e0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ff6b6b;
+    transition: .2s;
+}
+
+.distribution-segment:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
+}
+
+.distribution-label {
+    font-size: 11px;
+    color: #999;
+    margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+    .grade-card {
+        padding: 20px;
+    }
+    
+    .exp-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .ranking-stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="grade-exp-container">
+    <!-- 현재 등급/경험치 카드 -->
+    <div class="grade-card">
+        <div class="grade-display">
+            <div class="grade-name">{{ user.get_grade_display }}</div>
+        </div>
+
+        <div class="exp-info">
+            <div class="exp-item">
+                <div class="exp-item-label">현재 경험치</div>
+                <div class="exp-item-value">{{ current_exp }} XP</div>
+            </div>
+            <div class="exp-item">
+                <div class="exp-item-label">다음 등급까지</div>
+                <div class="exp-item-value">
+                    {% if next_grade %}
+                        {{ exp_to_next }} XP
+                    {% else %}
+                        최고 등급
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if next_grade %}
+        <div class="progress-section">
+            <div class="progress-label">
+                <span>진행도</span>
+                <span>{{ progress_percent|floatformat:1 }}%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ progress_percent }}%;"></div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 등급 시스템 안내 -->
+    <div class="grade-tiers">
+        <div class="grade-tiers-title">등급 시스템</div>
+        
+        <div class="grade-list">
+            {% for grade in grade_list %}
+            <div class="grade-item {% if grade.is_current %}current{% endif %}">
+                <div class="grade-details">
+                    <div class="grade-tier-name">{{ grade.name }}</div>
+                    <div class="grade-tier-info">
+                        <span>{{ grade.exp_required }} XP 이상</span>
+                        <span>{{ grade.user_count }} 명</span>
+                    </div>
+                </div>
+                {% if grade.is_current %}
+                <div style="color: #ff6b6b; font-weight: 700; font-size: 12px;">현재 등급</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 랭킹 정보 -->
+    <div class="ranking-section">
+        <div class="ranking-title">랭킹 정보</div>
+        
+        <div class="ranking-stats">
+            <div class="stat-box">
+                <div class="stat-label">현재 등급 내 순위</div>
+                <div class="stat-value">#{{ user_rank_in_grade }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">전체 활성 회원</div>
+                <div class="stat-value">{{ total_users }}</div>
+            </div>
+        </div>
+
+        <div class="grade-distribution">
+            <div class="distribution-title">등급별 회원 분포</div>
+            <div class="distribution-bar">
+                {% for grade in grade_list %}
+                <div class="distribution-item">
+                    <div class="distribution-segment">
+                        {{ grade.user_count }}
+                    </div>
+                    <div class="distribution-label">
+                        {{ grade.name|truncatewords:1 }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 딕셔너리 접근을 위한 커스텀 필터 보조
+document.addEventListener('DOMContentLoaded', function() {
+    // 필요시 추가 스크립트
+});
+</script>
+{% endblock %}

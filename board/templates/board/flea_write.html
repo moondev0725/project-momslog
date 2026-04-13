@@ -1,0 +1,454 @@
+<!--
+═══════════════════════════════════════════════════════════════════════
+flea_write.html - 벼룩시장 글쓰기
+═══════════════════════════════════════════════════════════════════════
+26-01-06 표준화: 요리레시피 스타일로 리뉴얼
+기능: 상품 등록 (이미지 업로드)
+-->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+.flea-write-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.flea-write-header {
+    border-bottom: 2px solid #ff6b6b;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+.flea-write-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="number"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+.form-group textarea {
+    min-height: 180px;
+    resize: vertical;
+}
+
+.upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #f9f9f9;
+}
+
+.upload-area:hover {
+    border-color: #ff6b6b;
+    background: #fff5f5;
+}
+
+.upload-area.dragover {
+    border-color: #ff6b6b;
+    background: #fff5f5;
+}
+
+.upload-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.upload-text {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.upload-hint {
+    font-size: 12px;
+    color: #999;
+}
+
+#id_image {
+    display: none;
+}
+
+.image-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.image-preview-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f0f0f0;
+    aspect-ratio: 1;
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-remove-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.image-remove-btn:hover {
+    background: #ff5252;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn-submit {
+    flex: 1;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: #ff6b6b;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #ff5252;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+</style>
+
+<div class="flea-write-container">
+    <div class="flea-write-header">
+        <h1 class="flea-write-title">{% if item %}상품 정보 수정{% else %}상품 등록{% endif %}</h1>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="fleaForm">
+        {% csrf_token %}
+
+        <!-- 제목 -->
+        <div class="form-group">
+            <label for="id_title">상품명</label>
+            {{ form.title }}
+        </div>
+
+        <!-- 가격 -->
+        <div class="form-group">
+            <label for="id_price">가격(원)</label>
+            {{ form.price }}
+        </div>
+
+        <!-- 내용 -->
+        <div class="form-group">
+            <label for="id_description">상품 설명</label>
+            {{ form.description }}
+        </div>
+        
+        <!-- ✅ 거래 위치(지도 연동) -->
+        <div class="form-group">
+            <label>거래 희망 위치 (선택)</label>
+
+            <!-- form에 hidden으로 저장될 값들 -->
+            {{ form.location_address }}
+            {{ form.latitude }}
+            {{ form.longitude }}
+
+            <div class="lm-pick-wrap">
+                <div class="lm-pick-row">
+                    <input type="text" id="lm_pick_keyword" placeholder="장소 검색 (예: 역삼역, 키즈카페, 소아과)">
+                    <button type="button" id="lm_pick_search">검색</button>
+                    <button type="button" id="lm_pick_myloc">내 위치</button>
+                </div>
+
+                <div class="lm-picked">
+                    <div class="lm-picked-title">선택된 위치</div>
+                    <div id="lm_picked_text" class="lm-picked-text">
+                        아직 선택된 위치가 없어요. (지도 마커를 클릭하면 저장돼요)
+                    </div>
+                    <button type="button" id="lm_pick_clear" class="lm-pick-clear">위치 제거</button>
+                </div>
+
+                <div id="lm_pick_map" class="lm-pick-map"></div>
+                <div id="lm_pick_result" class="lm-pick-result"></div>
+            </div>
+        </div>
+
+
+        <!-- 이미지 업로드 -->
+        <div class="form-group">
+            <label>상품 이미지</label>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">클릭 또는 드래그해서 이미지를 업로드하세요</div>
+                <div class="upload-hint">JPG, PNG (최대 5MB, 최대 10장)</div>
+            </div>
+            {{ form.image }}
+            
+            <!-- 기존 이미지 표시 (수정시) -->
+            <div class="image-preview-grid" id="imagePreviewGrid">
+                {% if item.image %}
+                <div class="image-preview-item">
+                    <img src="{{ item.image.url }}" alt="현재 이미지">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="form-buttons">
+            <button type="button" class="btn-submit btn-secondary" onclick="location.href='{% url 'board:flea_list' %}'" >취소</button>
+            <button type="submit" class="btn-submit btn-primary">{% if item %}수정 완료{% else %}상품 등록{% endif %}</button>
+        </div>
+    </form>
+</div>
+
+<script>
+const uploadArea = document.getElementById('uploadArea');
+const imageInput = document.getElementById('id_image');
+const previewGrid = document.getElementById('imagePreviewGrid');
+const MAX_FILES = 10;
+let selectedFiles = [];
+
+// 여러 장 업로드 허용
+if (imageInput) {
+    imageInput.setAttribute('multiple', 'multiple');
+    imageInput.setAttribute('accept', 'image/*');
+}
+
+// 업로드 영역 클릭
+uploadArea.addEventListener('click', () => imageInput.click());
+
+// 파일 선택
+imageInput.addEventListener('change', handleFiles);
+
+// 드래그 & 드롭
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    imageInput.files = files;
+    handleFiles({ target: { files } });
+});
+
+function handleFiles(event) {
+    const files = Array.from(event.target.files || []);
+    const limitedFiles = files.slice(0, MAX_FILES);
+
+    if (files.length > MAX_FILES) {
+        alert(`이미지는 최대 ${MAX_FILES}장까지 업로드할 수 있습니다.`);
+    }
+
+    selectedFiles = [];
+    previewGrid.innerHTML = '';
+    
+    limitedFiles.forEach((file, idx) => {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.createElement('div');
+                preview.className = 'image-preview-item';
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="미리보기">
+                    <button type="button" class="image-remove-btn" data-idx="${idx}">✕</button>
+                `;
+                previewGrid.appendChild(preview);
+                
+                preview.querySelector('.image-remove-btn').addEventListener('click', () => {
+                    selectedFiles.splice(idx, 1);
+                    preview.remove();
+                    updateFileInput();
+                });
+            };
+            reader.readAsDataURL(file);
+            selectedFiles.push(file);
+        }
+    });
+    updateFileInput();
+}
+
+function updateFileInput() {
+    const dataTransfer = new DataTransfer();
+    selectedFiles.forEach(file => dataTransfer.items.add(file));
+    imageInput.files = dataTransfer.files;
+}
+
+// ✅ 가격 입력 필드 - 숫자만 입력 가능
+const priceInput = document.getElementById('id_price');
+if (priceInput) {
+    priceInput.addEventListener('input', function(e) {
+        // 숫자가 아닌 문자 제거
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+    
+    priceInput.addEventListener('keypress', function(e) {
+        // 숫자키와 제어키(백스페이스, 화살표 등)만 허용
+        if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+            e.preventDefault();
+        }
+    });
+    
+    // 붙여넣기 시에도 숫자만 허용
+    priceInput.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+        const numericValue = pastedText.replace(/[^0-9]/g, '');
+        this.value = numericValue;
+    });
+}
+</script>
+<!-- ✅ 카카오 지도 SDK + 위치 선택 JS -->
+<script type="text/javascript"
+        src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=470ebeffb625c90dc8a8d990366b63b2&libraries=services&autoload=false"></script>
+<script src="{% static 'js/flea_location_picker.js' %}"></script>
+
+<style>
+/* flea_write 위치선택 UI */
+.lm-pick-wrap{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:12px;
+    padding:12px;
+}
+.lm-pick-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+}
+#lm_pick_keyword{
+    flex:1;
+    height:40px;
+    border:1px solid #eee;
+    border-radius:10px;
+    padding:0 12px;
+}
+#lm_pick_search, #lm_pick_myloc{
+    height:40px;
+    padding:0 12px;
+    border:0;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:700;
+}
+#lm_pick_search{ background:#ff6b6b; color:#fff; }
+#lm_pick_myloc{ background:#6c757d; color:#fff; }
+.lm-picked{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:#fff5f5;
+    border:1px solid #ffd6d6;
+    border-radius:10px;
+    padding:10px 12px;
+    margin-bottom:10px;
+}
+.lm-picked-title{ font-weight:900; font-size:13px; color:#333; white-space:nowrap; }
+.lm-picked-text{ font-size:13px; color:#444; flex:1; }
+.lm-pick-clear{
+    border:0;
+    border-radius:10px;
+    padding:8px 10px;
+    cursor:pointer;
+    background:#fff;
+    font-weight:800;
+}
+.lm-pick-map{
+    width:100%;
+    height:320px;
+    border-radius:12px;
+    overflow:hidden;
+    background:#f3f3f3;
+}
+.lm-pick-result{
+    margin-top:10px;
+    max-height:160px;
+    overflow:auto;
+}
+.lm-pick-item{
+    padding:10px 10px;
+    border-radius:10px;
+    cursor:pointer;
+}
+.lm-pick-item:hover{ background:#f6f6f6; }
+.lm-pick-item .name{ font-weight:900; color:#333; }
+.lm-pick-item .addr{ font-size:12px; color:#777; margin-top:4px; }
+</style>
+
+{% endblock %}

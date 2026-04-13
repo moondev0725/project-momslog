@@ -1,0 +1,301 @@
+<!--
+═══════════════════════════════════════════════════════════════════════
+diary_create.html - 일기 작성
+═══════════════════════════════════════════════════════════════════════
+기능: 개인 일기 작성 폼 (기분 선택, 내용 입력, 익명 공유 옵션)
+-->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}일기 작성{% endblock %}
+
+{% block content %}
+<style>
+.diary-form-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.form-header {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #333;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: .2s;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 300px;
+}
+
+/* 기분 선택 */
+.mood-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.mood-option {
+    display: none;
+}
+
+.mood-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all .2s;
+    text-align: center;
+    font-size: 32px;
+}
+
+.mood-option:checked + .mood-label {
+    border-color: #667eea;
+    background: #f0f4ff;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.mood-label:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.mood-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+    display: block;
+}
+
+/* 체크박스 그룹 */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    border: 1px solid #f0f0f0;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #667eea;
+}
+
+.checkbox-group label {
+    cursor: pointer;
+    margin: 0;
+    font-weight: 500;
+    color: #333;
+}
+
+.checkbox-group label:hover {
+    color: #667eea;
+}
+
+.help-text {
+    font-size: 12px;
+    color: #999;
+    margin-top: 6px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: .2s;
+    flex: 1;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5568d3;
+}
+
+.btn-secondary {
+    background: #e0e0e0;
+    color: #666;
+}
+
+.btn-secondary:hover {
+    background: #d0d0d0;
+}
+
+@media (max-width: 768px) {
+    .diary-form-container {
+        padding: 20px;
+        margin: 15px;
+    }
+    
+    .form-header {
+        font-size: 22px;
+    }
+    
+    .mood-selector {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    }
+    
+    .mood-label {
+        padding: 12px;
+        font-size: 24px;
+    }
+}
+</style>
+
+<div class="diary-form-container">
+    <h1 class="form-header">📝 오늘의 일기</h1>
+
+    <form method="post" action="{% url 'board:diary_create' %}">
+        {% csrf_token %}
+
+        <!-- 기분 선택 -->
+        <div class="form-group">
+            <label class="form-label">오늘의 기분은?</label>
+            <div class="mood-selector">
+                {% for value, label in mood_choices %}
+                <input type="radio" name="mood" id="mood_{{ value }}" value="{{ value }}" class="mood-option" {% if value == 'peaceful' %}checked{% endif %}>
+                <label for="mood_{{ value }}" class="mood-label">
+                    {{ label }}
+                </label>
+                {% endfor %}
+            </div>
+            <div class="help-text">오늘의 기분을 선택해주세요.</div>
+        </div>
+
+        <!-- 제목 (선택사항) -->
+        <div class="form-group">
+            <label for="id_title" class="form-label">제목 (선택사항)</label>
+            <input type="text" name="title" id="id_title" class="form-control" placeholder="예: 오늘은 아이가 말썽 피웠다" maxlength="200">
+            <div class="help-text">일기의 주제나 핵심을 간단히 써보세요.</div>
+        </div>
+
+        <!-- 내용 -->
+        <div class="form-group">
+            <label for="id_content" class="form-label">내용</label>
+            <textarea name="content" id="id_content" required class="form-control" placeholder="오늘 하루는 어땠나요? 자유롭게 적어보세요..."></textarea>
+            <div class="help-text">감정과 생각을 솔직하게 표현해주세요.</div>
+        </div>
+
+        <!-- 태그 -->
+        <div class="form-group">
+            <label for="id_tags" class="form-label">태그 (선택사항)</label>
+            <input type="text" name="tags" id="id_tags" class="form-control" placeholder="예: 육아, 부부관계, 스트레스" maxlength="500">
+            <div class="help-text">쉼표로 구분하여 여러 태그를 입력할 수 있습니다.</div>
+        </div>
+
+        <!-- 비공개 설정 -->
+        <div class="form-group">
+            <div class="checkbox-group">
+                <input type="checkbox" name="is_secret" id="id_is_secret" checked>
+                <label for="id_is_secret">🔒 비공개 (나만 볼 수 있습니다)</label>
+            </div>
+            <div class="help-text">체크 해제 시 다른 사용자가 볼 수 있습니다.</div>
+        </div>
+
+        <!-- 익명 공유 -->
+        <div class="form-group">
+            <div class="checkbox-group">
+                <input type="checkbox" name="is_anonymous" id="id_is_anonymous">
+                <label for="id_is_anonymous">🎋 대나무숲에 익명으로 공유 (작성자 이름이 표시되지 않습니다)</label>
+            </div>
+            <div class="help-text">대나무숲: 다른 엄마들이 익명으로 작성한 일기들을 볼 수 있는 공간입니다.</div>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">작성 완료</button>
+            <a href="{% url 'board:diary_list' %}" class="btn btn-secondary">취소</a>
+        </div>
+    </form>
+</div>
+
+<script>
+// 기분 선택 라디오 버튼 스타일 처리
+document.querySelectorAll('.mood-option').forEach(option => {
+    option.addEventListener('change', function() {
+        console.log('선택한 기분:', this.value);
+    });
+});
+
+// 비공개와 익명 동시 선택 방지 (선택사항)
+const isSecretCheckbox = document.getElementById('id_is_secret');
+const isAnonymousCheckbox = document.getElementById('id_is_anonymous');
+
+isAnonymousCheckbox.addEventListener('change', function() {
+    if (this.checked) {
+        isSecretCheckbox.checked = false;
+        isSecretCheckbox.disabled = true;
+    } else {
+        isSecretCheckbox.disabled = false;
+        isSecretCheckbox.checked = true;
+    }
+});
+
+isSecretCheckbox.addEventListener('change', function() {
+    if (!this.checked && !isAnonymousCheckbox.checked) {
+        // 둘 다 체크 해제되면, 비공개는 다시 체크
+        this.checked = true;
+    }
+});
+</script>
+
+{% endblock %}

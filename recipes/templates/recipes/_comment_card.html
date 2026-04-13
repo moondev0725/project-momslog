@@ -1,0 +1,47 @@
+<div class="comment-card" data-comment-id="{{ comment.id }}">
+  <div class="comment-meta">
+    <span class="comment-author">{{ comment.author.nickname|default:comment.author.username }}</span>
+    <span>{{ comment.created_at|date:"Y.m.d H:i" }}</span>
+
+    <div class="comment-actions">
+      {% if user == comment.author %}
+        <button type="button" class="btn-danger-soft comment-edit-btn" data-comment-id="{{ comment.id }}" style="padding:6px 10px; font-size:12px;">수정</button>
+
+        <form method="post"
+              action="{% url 'recipes:comment_delete' post.pk comment.pk %}"
+              class="comment-delete-form"
+              style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn-danger-soft" style="padding:6px 10px; font-size:12px;">삭제</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="comment-content">{{ comment.content }}</div>
+
+  <!-- 답글 보기 버튼(항상 노출) -->
+  <button type="button"
+          class="btn-soft replies-toggle-btn"
+          data-comment-id="{{ comment.id }}"
+          style="padding:6px 10px; font-size:12px; margin-top:8px;">
+    ↳ 답글 보기 (0)
+  </button>
+
+  <!-- 답글 영역 -->
+  <div class="replies-wrap" data-comment-id="{{ comment.id }}" style="display:none;">
+    <div class="reply-list"></div>
+
+    {% if user.is_authenticated %}
+    <div class="reply-form-container" style="display:block; margin-top:8px;">
+      <form method="post"
+            action="{% url 'recipes:reply_create' post.pk comment.id %}"
+            class="reply-form">
+        {% csrf_token %}
+        <textarea name="content" class="reply-textarea" placeholder="답글을 작성해주세요."></textarea>
+        <button type="submit" class="btn-accent" style="margin-top:6px;">답글 등록</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>

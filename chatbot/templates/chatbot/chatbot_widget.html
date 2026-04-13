@@ -1,0 +1,232 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
+</head>
+<body>
+
+<!-- 실시간 채팅 기능 제거됨 -->
+
+<button class="chatbot-toggler" onclick="toggleChatbot()">
+    <span class="material-icons-round" style="font-size: 32px;">smart_toy</span>
+</button>
+
+<div class="chatbot-window" id="chatbotWindow">
+    <div class="chat-header">
+        <div class="header-title" style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px;"></span>
+            <h3>맘스로그 AI</h3>
+        </div>
+        <div class="header-actions">
+            <span class="material-icons-round" onclick="clearChat()">restart_alt</span>
+            <span class="material-icons-round" onclick="toggleChatbot()">close</span>
+        </div>
+    </div>
+
+    <div class="chat-body" id="chatBody">
+        <div class="chat-message bot">
+            <div class="bot-avatar">
+                <img src="{% static 'images/logo.png' %}" alt="맘스로그">
+            </div>
+            <div class="message-content">
+                안녕하세요! <b>맘스로그 AI</b>입니다.<br>
+                무엇이든 물어보세요!
+                <br><br>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-footer">
+        <div class="input-group">
+            <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." onkeypress="handleEnter(event)">
+            <button class="send-btn" onclick="sendMessage()">
+                <span class="material-icons-round">send</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 실시간 채팅 팝업 요소 제거됨 -->
+
+<script>
+    const chatWindow = document.getElementById('chatbotWindow');
+    const chatBody = document.getElementById('chatBody');
+    const chatInput = document.getElementById('chatInput');
+
+    // [사운드 엔진]
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSoundEffect(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        if (type === 'open') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+            gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5); osc.start(now); osc.stop(now + 0.5);
+        } else if (type === 'send') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now); gainNode.gain.setValueAtTime(0.05, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1);
+        } else if (type === 'receive') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, now); gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3);
+            const osc2 = audioCtx.createOscillator(); const gain2 = audioCtx.createGain(); osc2.connect(gain2); gain2.connect(audioCtx.destination); osc2.type = 'sine'; osc2.frequency.setValueAtTime(659.25, now + 0.15); gain2.gain.setValueAtTime(0.1, now + 0.15); gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.6); osc2.start(now + 0.15); osc2.stop(now + 0.6);
+        }
+    }
+
+    window.onload = function() {
+        const isOpen = localStorage.getItem('chatbotOpen');
+        if(isOpen === 'true') chatWindow.style.display = 'flex';
+        
+        // 대화 내역 복원
+        restoreChatHistory();
+    };
+
+    function toggleChatbot() {
+        if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
+            chatWindow.style.display = 'flex';
+            playSoundEffect('open');
+            localStorage.setItem('chatbotOpen', 'true');
+            setTimeout(() => chatInput.focus(), 300);
+        } else {
+            chatWindow.style.display = 'none';
+            localStorage.setItem('chatbotOpen', 'false');
+        }
+    }
+
+    // 대화 내역 저장
+    function saveChatHistory() {
+        const messages = [];
+        const messageElements = chatBody.querySelectorAll('.chat-message');
+        messageElements.forEach(el => {
+            const sender = el.classList.contains('bot') ? 'bot' : 'user';
+            const content = el.querySelector('.message-content');
+            if(content && !content.querySelector('.typing-indicator')) {
+                messages.push({
+                    sender: sender,
+                    text: content.innerHTML
+                });
+            }
+        });
+        localStorage.setItem('chatbotHistory', JSON.stringify(messages));
+    }
+
+    // 대화 내역 복원
+    function restoreChatHistory() {
+        const saved = localStorage.getItem('chatbotHistory');
+        if(!saved) return;
+        
+        try {
+            const messages = JSON.parse(saved);
+            if(messages.length > 0) {
+                // 기본 메시지 제거
+                chatBody.innerHTML = '';
+                // 저장된 메시지 복원
+                messages.forEach(msg => {
+                    const div = document.createElement('div');
+                    div.className = `chat-message ${msg.sender}`;
+                    let avatarHtml = '';
+                    if (msg.sender === 'bot') {
+                        avatarHtml = `
+                        <div class="bot-avatar">
+                            <img src="/static/images/8.png" alt="맘스로그">
+                        </div>`;
+                    }
+                    div.innerHTML = `${avatarHtml}<div class="message-content">${msg.text}</div>`;
+                    chatBody.appendChild(div);
+                });
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        } catch(e) {
+            console.error('Failed to restore chat history:', e);
+        }
+    }
+
+    function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+
+    function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        playSoundEffect('send');
+        addMessage(text, 'user');
+        chatInput.value = '';
+
+        const loadingId = 'loading-' + Date.now();
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'chat-message bot';
+        
+        // JS 로딩 중 로고
+        loadingDiv.innerHTML = `
+            <div class="bot-avatar">
+                <img src="/static/images/logo.png" alt="맘스로그">
+            </div>
+            <div class="message-content" id="${loadingId}">
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+                </div>
+            </div>`;
+        chatBody.appendChild(loadingDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        fetch("{% url 'chatbot:chat' %}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+            body: JSON.stringify({ "message": text })
+        })
+        .then(response => response.json())
+        .then(data => {
+            loadingDiv.remove();
+            playSoundEffect('receive');
+            addMessage(data.response, 'bot');
+        })
+        .catch(error => {
+            loadingDiv.remove();
+            addMessage("죄송합니다. 오류가 발생했습니다.", 'bot');
+        });
+    }
+
+    function addMessage(text, sender) {
+        const div = document.createElement('div');
+        div.className = `chat-message ${sender}`;
+        let formattedText = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        
+        let avatarHtml = '';
+        if (sender === 'bot') {
+            // JS 답변 로고
+            avatarHtml = `
+            <div class="bot-avatar">
+                <img src="/static/images/logo.png" alt="맘스로그">
+            </div>`;
+        }
+        
+        div.innerHTML = `${avatarHtml}<div class="message-content">${formattedText}</div>`;
+        chatBody.appendChild(div);
+        chatBody.scrollTop = chatBody.scrollHeight;
+        
+        // 대화 내역 저장
+        saveChatHistory();
+    }
+
+    function clearChat() {
+        if(confirm("대화 내용을 모두 지울까요?")) {
+            // JS 초기화 로고
+            chatBody.innerHTML = `
+            <div class="chat-message bot">
+                <div class="bot-avatar">
+                    <img src="/static/images/logo.png" alt="맘스로그">
+                </div>
+                <div class="message-content">대화가 초기화되었습니다. ✨<br>새로운 주제로 이야기해요!</div>
+            </div>`;
+            
+            // 저장된 내역 삭제
+            localStorage.removeItem('chatbotHistory');
+        }
+    }
+</script>
+
+<!-- 실시간 채팅 스크립트 제거됨 -->
+</body>
+</html>

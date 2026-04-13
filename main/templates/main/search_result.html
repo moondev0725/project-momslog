@@ -1,0 +1,134 @@
+<!--
+═══════════════════════════════════════════════════════════════════════
+search_result.html - 통합 검색 결과 페이지
+═══════════════════════════════════════════════════════════════════════
+작성일: 2025-12-29 (공지사항 검색 추가)
+수정일: 2026-01-13 (자유게시판 상세페이지 이동 수정)
+용도:
+  - 전체 게시판 통합 검색 결과 표시
+  - URL: /search/?q=검색어
+검색 대상:
+  - 공지사항: 제목, 내용
+  - 자유게시판: 제목, 내용
+  - 벼룩시장: 제목, 설명(description)
+포함 요소:
+  - 검색 키워드 및 결과 개수 표시
+  - 게시판별 배지 색상
+  - 게시물 제목 클릭 시 상세페이지 이동
+═══════════════════════════════════════════════════════════════════════
+-->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- CSS -->
+<link rel="stylesheet" href="{% static 'css/search_result.css' %}">
+
+<div class="search-container">
+    <div class="search-header">
+        <h2>'<span class="search-keyword">{{ q }}</span>' 검색 결과</h2>
+        <p>총 <strong>{{ posts|length }}</strong>건의 정보가 검색되었습니다.</p>
+    </div>
+
+    {% if posts %}
+    <div class="result-list">
+        {% for post in posts %}
+        <div class="result-item">
+
+            <!-- 게시판 배지 -->
+            {% if post.board_type == 'notice' %}
+                <span class="board-badge badge-notice">공지사항/이벤트</span>
+            {% elif post.board_type == 'free' %}
+                <span class="board-badge badge-free">엄마 이야기</span>
+            {% elif post.board_type == 'flea' %}
+                <span class="board-badge badge-flea">동네마켓</span>
+            {% elif post.board_type == 'recipe' %}
+                <span class="board-badge badge-recipe">오늘 밥상</span>
+            {% elif post.board_type == 'pet' %}
+                <span class="board-badge badge-pet">반려동물</span>
+            {% elif post.board_type == 'parenting' %}
+                <span class="board-badge badge-parenting">육아가이드</span>
+            {% endif %}
+
+            <!-- 제목 + 미리보기 -->
+            {% if post.board_type == 'notice' %}
+                <a href="{% url 'board:notice_detail' post.pk %}" class="result-title">
+                    {{ post.title }}
+                </a>
+                <div class="result-preview">
+                    {{ post.content|striptags|truncatechars:100 }}
+                </div>
+
+            {% elif post.board_type == 'free' %}
+                <!-- ✅ 수정 핵심: 자유게시판 상세페이지로 이동 -->
+                <a href="{% url 'board:free_detail' post.pk %}" class="result-title">
+                    {{ post.title }}
+                </a>
+                <div class="result-preview">
+                    {{ post.content|striptags|truncatechars:100 }}
+                </div>
+
+            {% elif post.board_type == 'flea' %}
+                <a href="{% url 'board:flea_detail' post.pk %}" class="result-title">
+                    {{ post.title }}
+                </a>
+                <div class="result-preview">
+                    {{ post.description|striptags|truncatechars:100 }}
+                </div>
+
+            {% elif post.board_type == 'hotdeal' %}
+                <a href="{% url 'board:hotdeal_detail' post.pk %}" class="result-title">
+                    {{ post.title }}
+                </a>
+                <div class="result-preview">
+                    {{ post.content|striptags|truncatechars:100 }}
+                </div>
+
+            {% elif post.board_type == 'recipe' %}
+                <a href="{% url 'recipes:recipe_detail' post.pk %}" class="result-title">
+                    {{ post.title }}
+                </a>
+                <div class="result-preview">
+                    {{ post.content|striptags|truncatechars:100 }}
+                </div>
+
+            {% elif post.board_type == 'pet' %}
+                <a href="{% url 'board:pet_detail' post.pk %}" class="result-title">
+                    {{ post.title }}
+                </a>
+                <div class="result-preview">
+                    {{ post.content|striptags|truncatechars:100 }}
+                </div>
+
+            {% elif post.board_type == 'parenting' %}
+                <a href="{% url 'board:parenting_detail' post.pk %}" class="result-title">
+                    {{ post.title }}
+                </a>
+                <div class="result-preview">
+                    {{ post.content|striptags|truncatechars:100 }}
+                </div>
+            {% endif %}
+
+            <!-- 메타 정보 -->
+            <div class="result-meta">
+                {% if post.board_type == 'notice' %}
+                    작성자: 관리자 |
+                {% else %}
+                    작성자: {{ post.author.nickname|default:post.author.username }} |
+                {% endif %}
+                {{ post.created_at|date:"Y.m.d" }}
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="no-result">
+        <p>검색 결과가 없습니다.</p>
+        <p>다른 키워드로 다시 시도해보세요!</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

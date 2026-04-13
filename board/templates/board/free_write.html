@@ -1,0 +1,244 @@
+<!--
+═══════════════════════════════════════════════════════════════════════
+free_write.html - 자유게시판 글쓰기 & 수정
+═══════════════════════════════════════════════════════════════════════
+작성일: 2025-12-29
+기능: 자유게시판 글 작성 및 수정 폼
+26-01-02 혜은 추가: 카테고리 선택 기능
+-->
+{% extends 'base.html' %}
+
+{% block title %}{% if is_edit %}글 수정{% else %}글쓰기{% endif %} - 자유게시판{% endblock %}
+
+{% block content %}
+<style>
+.free-form-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.form-header {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #ff6b6b;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: .2s;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+select.form-control {
+    cursor: pointer;
+}
+
+textarea.form-control {
+    resize: vertical;
+    font-family: inherit;
+    min-height: 300px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: .2s;
+}
+
+.btn-primary {
+    background: #ff6b6b;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #ff5252;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.help-text {
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto;
+    cursor: pointer;
+}
+
+.checkbox-group label {
+    cursor: pointer;
+    margin: 0;
+    font-weight: normal;
+}
+
+@media (max-width: 768px) {
+    .free-form-container {
+        padding: 15px;
+        margin: 15px;
+    }
+    
+    .form-header {
+        font-size: 20px;
+    }
+    
+    .form-actions {
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+/* 글 작성 - 내용 textarea */
+#id_content {
+    height: 320px;        /* ✅ 고정 높이 (원하면 조절) */
+    resize: none;         /* ✅ 빨간 동그라미(리사이즈 핸들) 제거 */
+    overflow-y: auto;     /* ✅ 내용 많아지면 세로 스크롤 */
+    overflow-x: hidden;   /* 가로 스크롤 방지 */
+    box-sizing: border-box;
+}
+</style>
+
+<div class="free-form-container">
+    <h1 class="form-header">
+        {% if is_edit %}✏️ 글 수정{% else %}💬 글쓰기{% endif %}
+    </h1>
+
+    <form method="post" action="{% url 'board:free_create' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- 카테고리 선택 유지 -->
+
+        <!-- 카테고리 -->
+        <div class="form-group">
+            <label for="id_category" class="form-label">카테고리</label>
+            <select name="category" id="id_category" required class="form-control">
+                <option value="">-- 카테고리를 선택하세요 --</option>
+                <option value="mom" {% if form.instance.category == 'mom' %}selected{% endif %}>육아수다</option>
+                <option value="husband" {% if form.instance.category == 'husband' %}selected{% endif %}>남편뒷담화</option>
+                <option value="family" {% if form.instance.category == 'family' %}selected{% endif %}>시댁/친정</option>
+                <option value="preg" {% if form.instance.category == 'preg' %}selected{% endif %}>임신출산</option>
+            </select>
+            <div class="help-text">게시글의 주제에 맞는 카테고리를 선택해주세요.</div>
+        </div>
+
+        <!-- 익명 체크박스 -->
+        <div class="form-group">
+            <div class="checkbox-group">
+                <input type="checkbox" name="is_anonymous" id="id_is_anonymous" {% if form.instance.is_anonymous %}checked{% endif %}>
+                <label for="id_is_anonymous">익명으로 작성 (작성자 이름이 표시되지 않습니다)</label>
+            </div>
+        </div>
+
+        <!-- 제목 -->
+        <div class="form-group">
+            <label for="id_title" class="form-label">제목</label>
+            <input type="text" name="title" id="id_title" value="{{ form.instance.title }}" required class="form-control" placeholder="제목을 입력하세요">
+            <div class="help-text">눈에 띄고 내용을 잘 표현하는 제목을 지어주세요.</div>
+        </div>
+
+        <!-- 내용 -->
+        <div class="form-group">
+            <label for="id_content" class="form-label">내용</label>
+            <textarea name="content" id="id_content" required class="form-control" placeholder="내용을 자유롭게 작성해주세요..."></textarea>
+            {% if form.instance.content %}<script>document.getElementById('id_content').value = `{{ form.instance.content }}`;</script>{% endif %}
+            <div class="help-text">감정을 솔직하게 표현해주세요. 다른 엄마들과의 공감대를 형성할 수 있습니다.</div>
+        </div>
+
+        <!-- 첨부파일 -->
+         <div style="margin-top: 16px;">
+            <label style="display:block; font-weight:600; margin-bottom:6px;">첨부파일 (최대 5개)</label>
+
+            <input type="file" name="files" multiple>
+
+
+            <small style="color:#888;">파일은 최대 5개까지 선택할 수 있어요.</small>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                {% if is_edit %}수정 완료{% else %}등록하기{% endif %}
+            </button>
+            <a href="{% url 'board:free_list' %}" class="btn btn-secondary" style="text-decoration: none; text-align: center;">취소</a>
+        </div>
+    </form>
+</div>
+
+
+
+<script>
+  const input = document.getElementById("id_files");
+  input.addEventListener("change", function () {
+    if (this.files.length > 5) {
+      alert("첨부파일은 최대 5개까지 가능합니다.");
+      this.value = "";
+    }
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,316 @@
+/* ================================================================
+   🎨 Premium UI Finish - "프로 느낌 + 우와"를 만드는 CSS
+   ================================================================ */
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   1️⃣ 카드 글로우 효과 (테두리 → 세련된 그림자)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* 대표 카드 (Curation Featured) */
+.curation-feature {
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(255, 107, 107, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.curation-feature:hover {
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    0 16px 40px rgba(255, 107, 107, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+/* 일반 카드 */
+.curation-item {
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: all 0.25s ease-out;
+  border-radius: 12px;
+}
+
+.curation-item:hover {
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    0 8px 20px rgba(255, 107, 107, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Mind Coordinates 카드 */
+.mind-coordinates-card {
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(255, 107, 107, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+.mind-coordinates-card:hover {
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 12px 32px rgba(255, 107, 107, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* 슬라이더 컨테이너 */
+.slider-container {
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(255, 107, 107, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   2️⃣ 버튼 상태 개선 (Hover + Active + Focus)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Primary 버튼 (CTA) */
+.cta-primary {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1) !important;
+  box-shadow: 
+    0 4px 16px rgba(255, 107, 107, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 28px rgba(255, 107, 107, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.3px;
+}
+
+.cta-primary:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 8px rgba(255, 107, 107, 0.3),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cta-primary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.cta-primary:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* 비슷한 고민 더 보기 버튼 */
+button[style*="background: #ffbfae"],
+.more-link-btn {
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.15);
+  position: relative;
+}
+
+button[style*="background: #ffbfae"]:hover,
+.more-link-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.25);
+  letter-spacing: 0.3px;
+}
+
+button[style*="background: #ffbfae"]:active,
+.more-link-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(255, 107, 107, 0.2);
+}
+
+/* 라디오 버튼 레이블 */
+label[style*="border:2px"] {
+  transition: all 0.25s ease-out;
+  background: linear-gradient(135deg, #f7f7fa 0%, #fafafc 100%);
+}
+
+label[style*="border:2px"]:hover {
+  background: linear-gradient(135deg, #fff 0%, #fafafc 100%);
+  border-color: #ffbfae !important;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.08);
+  transform: translateX(2px);
+}
+
+label[style*="border:2px"] input:checked + span {
+  font-weight: 700;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   3️⃣ 배지 & 메타 텍스트 정리
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* "오늘의 이슈" 배지 */
+span[style*="color: #ff6b6b; background: #fff0f0"] {
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.3px;
+  padding: 5px 13px 4px 11px !important;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.15);
+  transition: all 0.2s ease-out;
+}
+
+span[style*="color: #ff6b6b; background: #fff0f0"]:hover {
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);
+  transform: scale(1.02);
+}
+
+/* Signal 배지 */
+.badge-signal {
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  transition: all 0.2s ease-out;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.badge-signal:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   4️⃣ 섹션 타이틀 & 더보기 링크 디테일
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* 섹션 헤더 */
+.section-header h3 {
+  position: relative;
+  transition: color 0.25s ease-out;
+}
+
+.section-header h3::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 24px;
+  height: 3px;
+  background: linear-gradient(90deg, #ffbfae, transparent);
+  border-radius: 2px;
+  transition: width 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.section-header:hover h3::after {
+  width: 48px;
+}
+
+/* 더보기 링크 */
+.more-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: #666 !important;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.more-link:hover {
+  color: #ff6b6b !important;
+  background: rgba(255, 107, 107, 0.08);
+  transform: translateX(3px);
+  letter-spacing: 0.2px;
+}
+
+.more-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ff6b6b, transparent);
+  border-radius: 1px;
+  transition: width 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.more-link:hover::after {
+  width: 100%;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   5️⃣ 시각적 계층 강화 (텍스트 대비 + 크기)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* 헤로 제목 강조 */
+.cta-title span {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8a72 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+}
+
+/* 피처 타이틀 */
+.feature-title {
+  background: linear-gradient(135deg, #232323 0%, #1a1a1a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   6️⃣ 슬라이더 화살표 인터랙션
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+#sliderPrevBtn,
+#sliderNextBtn {
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1) !important;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
+}
+
+#sliderPrevBtn:hover,
+#sliderNextBtn:hover {
+  box-shadow: 
+    0 4px 16px rgba(255, 107, 107, 0.35),
+    inset 0 -1px 3px rgba(0, 0, 0, 0.1);
+  transform: scale(1.08) translateY(-1px);
+  letter-spacing: 1px;
+}
+
+#sliderPrevBtn:active,
+#sliderNextBtn:active {
+  transform: scale(0.95);
+  box-shadow: 
+    0 2px 4px rgba(255, 107, 107, 0.2),
+    inset 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   7️⃣ 추가: 포커스 상태 (접근성)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #ff6b6b;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   8️⃣ 부드러운 애니메이션 성능
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+* {
+  --transition-fast: 0.2s;
+  --transition-normal: 0.3s;
+  --transition-slow: 0.5s;
+  --ease-spring: cubic-bezier(0.23, 1, 0.320, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}

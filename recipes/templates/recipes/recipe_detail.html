@@ -1,0 +1,1068 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}{{ post.title }} - 요리레시피{% endblock %}
+
+{% block content %}
+<style>
+.recipe-detail-shell {
+    max-width: 960px;
+    margin: 32px auto 60px;
+    padding: 0 16px;
+}
+
+.recipe-hero {
+    background: linear-gradient(135deg, #fff6f6 0%, #ffecec 100%);
+    border: 1px solid #ffe0e0;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 16px 45px rgba(255, 143, 143, 0.16);
+}
+
+.hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.category-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    background: #fff;
+    color: #ff8f8f;
+    border: 1px solid #ffd3d3;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(255, 143, 143, 0.12);
+}
+
+.category-chip small {
+    color: #c86464;
+    font-weight: 600;
+}
+
+.meta-soft {
+    text-align: right;
+    color: #a36a6a;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.recipe-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: #2f2a28;
+    margin: 14px 0 10px;
+    line-height: 1.25;
+}
+
+.meta-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 14px;
+    color: #6b5555;
+}
+
+.meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid #f4d6d6;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.reader-note {
+    margin: 22px 0 0;
+    padding: 14px 16px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px dashed #ffd3d3;
+    color: #8b5d5d;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.recipe-body {
+    margin-top: 26px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #f1e8e8;
+    box-shadow: 0 10px 30px rgba(31, 41, 55, 0.06);
+    overflow: hidden;
+}
+
+.recipe-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+    padding: 18px 18px 6px;
+}
+
+.recipe-images img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 12px;
+    background: #f8f4f4;
+    box-shadow: 0 8px 20px rgba(31, 41, 55, 0.04);
+}
+
+.recipe-content {
+    padding: 18px 20px 22px;
+    line-height: 1.8;
+    font-size: 16px;
+    color: #3c3533;
+    white-space: pre-wrap;
+}
+
+.action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 26px;
+}
+
+.btn-ghost,
+.btn-accent,
+.btn-soft,
+.btn-danger-soft {
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn-ghost {
+    background: #fff;
+    color: #744f4f;
+    border-color: #f1dcdc;
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, #ff8f8f 0%, #ffa8a8 100%);
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(255, 143, 143, 0.35);
+}
+
+.btn-soft {
+    background: #faf7f7;
+    color: #8a6a6a;
+    border-color: #eadede;
+}
+
+.btn-danger-soft {
+    background: #fff7f7;
+    color: #c25555;
+    border-color: #f2cfcf;
+}
+
+.btn-ghost:hover,
+.btn-accent:hover,
+.btn-soft:hover,
+.btn-danger-soft:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+}
+
+.admin-actions {
+    display: inline-flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.comments-section {
+    margin-top: 42px;
+    padding: 28px;
+    background: #fff;
+    border: 1px solid #f1e8e8;
+    border-radius: 18px;
+    box-shadow: 0 12px 32px rgba(31, 41, 55, 0.07);
+}
+
+.comments-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.comments-lead {
+    color: #8b5d5d;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.comments-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #2f2a28;
+    margin: 0;
+}
+
+.count-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: #fff4f4;
+    border: 1px solid #ffd3d3;
+    border-radius: 999px;
+    color: #c25555;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+/* =========================
+댓글/대댓글 공통 UI
+========================= */
+
+.comment-list {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.comment-card {
+    background: #fff9f9;
+    border: 1px solid #f3e2e2;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 8px 18px rgba(31, 41, 55, 0.05);
+}
+
+.comment-meta {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #8a6a6a;
+    width: 100%;
+}
+
+.comment-actions {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    margin-left: auto;
+}
+
+.comment-meta button,
+.comment-meta form {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.comment-author {
+    font-weight: 800;
+    color: #5c4545;
+}
+
+.comment-content {
+    margin-top: 8px;
+    line-height: 1.6;
+    color: #3c3533;
+}
+
+.empty-comments {
+    text-align: center;
+    padding: 30px 10px;
+    color: #9c7a7a;
+    background: #fff9f9;
+    border: 1px dashed #f2d3d3;
+    border-radius: 14px;
+}
+
+/* =========================
+댓글 수정 textarea
+========================= */
+.comment-edit-textarea {
+    width: 100%;
+    min-height: 110px;
+    resize: none;
+    padding: 15px 14px;
+    border: 1px solid #eadede;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    background: #fff;
+    color: #3c3533;
+    outline: none;
+    box-sizing: border-box;
+}
+
+/* =========================
+대댓글(답글) UI
+========================= */
+
+/* 답글 영역 wrap(토글용) - 레이아웃만 */
+.replies-wrap {
+    margin-top: 10px;
+}
+
+/* 대댓글 묶음 */
+.reply-list {
+    position: relative;
+    margin-top: 10px;
+    margin-left: 26px;
+    padding-left: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.reply-card {
+    background: #fffdfd;
+    border: 1px solid #f3e2e2;
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 6px 16px rgba(31, 41, 55, 0.04);
+    position: relative;
+}
+
+/* 왼쪽 커넥터(가지) */
+.reply-card::before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    top: 18px;
+    width: 16px;
+    height: 12px;
+    border-left: 2px solid #f2d3d3;
+    border-bottom: 2px solid #f2d3d3;
+    border-bottom-left-radius: 10px;
+}
+
+/* 대댓글 메타/본문은 조금 더 컴팩트 */
+.reply-card .comment-meta {
+    font-size: 12px;
+    gap: 6px;
+    color: #8a6a6a;
+}
+
+.reply-card .comment-content {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* 대댓글 내부 버튼은 더 작게 */
+.reply-card .comment-actions button,
+.reply-card .comment-actions .btn-danger-soft {
+    padding: 5px 9px !important;
+    font-size: 11px !important;
+}
+
+/* =========================
+답글 작성 폼
+========================= */
+
+.reply-form-container {
+    margin-top: 10px;
+    background: #fff9f9;
+    border: 1px dashed #f2d3d3;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+/* 대댓글 작성 textarea */
+.reply-textarea {
+    width: 100%;
+    height: 110px;
+    resize: none;
+    padding: 15px 14px;
+    border: 1px solid #eadede;
+    border-radius: 12px;
+    font-size: 14px;
+    background: #fff;
+    color: #3c3533;
+    line-height: 1.6;
+    box-sizing: border-box;
+    outline: none;
+}
+
+/* =========================
+포커스(공통)
+- border:none 대신 border-color로 통일(안정적)
+========================= */
+.comment-edit-textarea:focus,
+.reply-textarea:focus,
+.comment-form textarea:focus {
+    border-color: #ffd3d3;
+    box-shadow: 0 0 0 3px rgba(255, 143, 143, 0.12);
+    outline: none;
+}
+
+/* =========================
+저장/등록 버튼
+========================= */
+.comment-save-btn,
+.reply-save-btn,
+.reply-form-container .btn-accent {
+    margin-left: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    border-radius: 20px;
+    background: #ffd3d3 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
+/* =========================
+모바일(답글 영역만)
+========================= */
+@media (max-width: 768px) {
+    .reply-list {
+        margin-left: 16px;
+        padding-left: 10px;
+    }
+
+    .reply-card::before {
+        left: -12px;
+        width: 12px;
+    }
+}
+
+.comment-author {
+    font-weight: 800;
+    color: #5c4545;
+}
+
+.comment-content {
+    margin-top: 8px;
+    line-height: 1.6;
+    color: #3c3533;
+}
+
+.empty-comments {
+    text-align: center;
+    padding: 30px 10px;
+    color: #9c7a7a;
+    background: #fff9f9;
+    border: 1px dashed #f2d3d3;
+    border-radius: 14px;
+}
+
+.comment-form {
+    margin-top: 20px;
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 15px 14px;
+    border: 1px solid #eadede;
+    border-radius: 12px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 110px;
+    background: #fff;
+    color: #3c3533;
+}
+
+.login-prompt {
+
+    text-align: center;
+    color: #9c7a7a;
+    padding: 18px 0 6px;
+}
+
+@media (max-width: 768px) {
+    .recipe-detail-shell {
+        margin: 22px auto 40px;
+    }
+    .hero-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .recipe-title {
+        font-size: 24px;
+    }
+    .meta-line {
+        flex-direction: column;
+        gap: 6px;
+    }
+    .action-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .admin-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    .comment-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .recipe-images img {
+        height: 200px;
+    }
+}
+</style>
+
+<div class="recipe-detail-shell">
+    <div class="recipe-hero">
+        <div class="hero-top">
+            <div>
+                <span class="category-chip">{{ post.get_category_display_name }} <small>오늘 밥상</small></span>
+                <h1 class="recipe-title">{{ post.title }}</h1>
+                <div class="meta-line">
+                    <span class="meta-pill">{{ post.author.nickname|default:post.author.username }} 님의 부엌 이야기</span>
+                    <span class="meta-pill">{{ post.created_at|date:"Y.m.d H:i" }}에 올린 따끈한 기록</span>
+                    <span class="meta-pill">{{ post.views|intcomma }}명이 들여다보고 갔어요</span>
+                </div>
+            </div>
+            <div class="meta-soft">
+                오늘 저녁 메뉴 고민 중인 엄마들에게<br>작은 영감이 되길 바라요.
+            </div>
+        </div>
+        <div class="reader-note">
+            한 입 먹기 전, 마음부터 데워요. 오늘은 어떤 순간을 위한 밥상이었나요?
+        </div>
+    </div>
+
+    <div class="recipe-body">
+        {% if images %}
+        <div class="recipe-images">
+            {% for image in images %}
+            <img src="{{ image.image.url }}" alt="{{ post.title }}">
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="recipe-content">
+            {{ post.content|linebreaksbr }}
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <a href="{% url 'recipes:recipe_list' %}" class="btn-ghost">← 목록으로 돌아가기</a>
+        <a href="#comment-form" class="btn-accent">💬 댓글로 응원 남기기</a>
+        {% if user == post.author %}
+        <div class="admin-actions">
+            <a href="{% url 'recipes:recipe_update' post.pk %}" class="btn-soft">✏️ 수정</a>
+            <form method="post" action="{% url 'recipes:recipe_delete' post.pk %}" style="display:inline;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger-soft">🗑 삭제</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="comments-section" id="comment-section">
+        <div class="comments-head">
+            <div>
+                <div class="comments-lead">따뜻한 한마디가 큰 힘이 돼요</div>
+                <h3 class="comments-title">이 레시피, 어떠셨어요? <span class="count-pill">{{ comments.count }}명 이야기</span></h3>
+            </div>
+        </div>
+
+        <div class="comment-list">
+            {% for comment in comments %}
+            <div class="comment-card" data-comment-id="{{ comment.id }}">
+                <div class="comment-meta">
+                    <span class="comment-author">{{ comment.author.nickname|default:comment.author.username }}</span>
+                    <span>{{ comment.created_at|date:"Y.m.d H:i" }}</span>
+                    <div class="comment-actions">
+                        {% if user == comment.author %}
+                        <button type="button" class="btn-danger-soft comment-edit-btn" data-comment-id="{{ comment.id }}" style="padding:6px 10px; font-size:12px;">수정</button>
+                        <form method="post" action="{% url 'recipes:comment_delete' post.pk comment.pk %}" class="comment-delete-form" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-danger-soft" style="padding:6px 10px; font-size:12px;">삭제</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="comment-content">{{ comment.content }}</div>
+
+                {% with reply_count=comment.replies.count %}
+                <button type="button"
+                        class="btn-soft replies-toggle-btn"
+                        data-comment-id="{{ comment.id }}"
+                        style="padding:6px 10px; font-size:12px; margin-top:8px;">
+                ↳ 답글 보기 ({{ reply_count }})
+                </button>
+                {% endwith %}
+
+                <!-- 대댓글 목록 -->
+                <div class="replies-wrap" data-comment-id="{{ comment.id }}" style="display:none;">
+                    <div class="reply-list">
+                        <!-- 대댓글 작성 폼 (기본 숨김) -->
+                        {% if user.is_authenticated %}
+                        <div class="reply-form-container" style="display:none; margin-top:8px;">
+                            <form method="post" action="{% url 'recipes:reply_create' post.pk comment.id %}" class="reply-form">
+                                {% csrf_token %}
+                                <textarea name="content" placeholder="답글을 작성해주세요." class="reply-textarea"></textarea>
+                                <button type="submit" class="btn-accent" style="margin-top:6px;">답글 등록</button>
+                            </form>
+                        </div>
+                        {% endif %}
+
+                        {% for reply in comment.replies.all %}
+                        <div class="reply-card" data-reply-id="{{ reply.id }}">
+                            <div class="comment-meta">
+                                <span class="comment-author">{{ reply.author.nickname|default:reply.author.username }}</span>
+                                <span>{{ reply.created_at|date:"Y.m.d H:i" }}</span>
+                                {% if user == reply.author %}
+                                <div class="comment-actions">
+                                    <button type="button" class="btn-danger-soft reply-edit-btn" data-reply-id="{{ reply.id }}" data-comment-id="{{ comment.id }}" style="padding:6px 10px; font-size:12px;">수정</button>
+                                    <form method="post" action="{% url 'recipes:reply_delete' post.pk comment.id reply.id %}" class="reply-delete-form" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-danger-soft" style="padding:6px 10px; font-size:12px;">삭제</button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="comment-content">{{ reply.content }}</div>
+                        </div>
+                        {% endfor %}
+                    </div> <!-- reply-list -->
+                </div> <!-- reply-wrap -->
+            </div>
+            {% empty %}
+            <div class="empty-comments">
+                아직 응원 한마디가 없어요. 첫 댓글로 오늘의 밥상을 따뜻하게 채워주세요.
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="comment-form" id="comment-form">
+            <form method="post" action="{% url 'recipes:comment_create' post.pk %}" class="comment-create-form">
+                {% csrf_token %}
+                {{ comment_form.content }}
+                <button type="submit" class="btn-accent" style="margin-top:10px;">따뜻한 댓글 남기기</button>
+            </form>
+        </div>
+        {% else %}
+        <p class="login-prompt">
+            <a href="{% url 'accounts:login' %}">로그인</a>하면 오늘의 밥상에 응원을 남길 수 있어요.
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- =========================
+        JavaScript
+========================= -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const commentList = document.querySelector(".comment-list");
+
+    // 안전장치: 댓글 리스트가 없으면 종료
+    if (!commentList) return;
+
+    // ===== 유틸 =====
+    function getCSRF(fromEl) {
+        return fromEl?.querySelector?.('[name="csrfmiddlewaretoken"]')?.value
+        || document.querySelector('[name="csrfmiddlewaretoken"]')?.value
+        || "";
+    }
+
+    function qs(sel, root = document) { return root.querySelector(sel); }
+    function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
+
+    function setRepliesBtnText(commentId, count, isOpen) {
+        const btn = qs(`.replies-toggle-btn[data-comment-id="${commentId}"]`);
+        if (!btn) return;
+        btn.textContent = isOpen ? `↳ 답글 접기 (${count})` : `↳ 답글 보기 (${count})`;
+    }
+
+    function getRepliesCountFromBtn(commentId) {
+        const btn = qs(`.replies-toggle-btn[data-comment-id="${commentId}"]`);
+        if (!btn) return 0;
+        const m = btn.textContent.match(/\((\d+)\)/);
+        return m ? parseInt(m[1], 10) : 0;
+    }
+
+    function openRepliesWrap(commentId) {
+        const wrap = qs(`.replies-wrap[data-comment-id="${commentId}"]`);
+        if (!wrap) return;
+        wrap.style.display = "block";
+        setRepliesBtnText(commentId, getRepliesCountFromBtn(commentId), true);
+
+        // 작성 폼도 같이 열기
+        const card = wrap.closest(".comment-card");
+        const formContainer = qs(".reply-form-container", card);
+        if (formContainer) formContainer.style.display = "block";
+    }
+
+    function closeRepliesWrap(commentId) {
+        const wrap = qs(`.replies-wrap[data-comment-id="${commentId}"]`);
+        if (!wrap) return;
+        wrap.style.display = "none";
+        setRepliesBtnText(commentId, getRepliesCountFromBtn(commentId), false);
+
+        const card = wrap.closest(".comment-card");
+        const formContainer = qs(".reply-form-container", card);
+        if (formContainer) formContainer.style.display = "none";
+    }
+
+    // ===== 답글 영역 열림 상태 유지 (localStorage) =====
+    const openCommentId = localStorage.getItem("openReplyCommentId");
+    if (openCommentId) {
+        const wrap = qs(`.replies-wrap[data-comment-id="${openCommentId}"]`);
+        if (wrap) {
+        openRepliesWrap(openCommentId);
+        } else {
+        localStorage.removeItem("openReplyCommentId");
+        }
+    }
+
+    // ===== 1) 부모댓글 등록: AJAX + (선택) DOM 추가 =====
+    // 2번 방식(진짜 SPA)로 하려면 서버가 JSON으로 html을 줘야 함.
+    // comment_create가 아직 redirect면 => 아래에서 fallback으로 location.reload() 처리할 수 있게 해둠.
+    const commentCreateForm = qs("form.comment-create-form");
+    if (commentCreateForm) {
+        commentCreateForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const csrf = getCSRF(commentCreateForm);
+        const textarea = qs("textarea", commentCreateForm);
+        const content = (textarea?.value || "").trim();
+
+        if (!content) {
+            alert("댓글 내용을 입력해주세요.");
+            return;
+        }
+
+        const submitBtn = qs('button[type="submit"]', commentCreateForm);
+        if (submitBtn) submitBtn.disabled = true;
+
+        try {
+            const res = await fetch(commentCreateForm.action, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `content=${encodeURIComponent(content)}&csrfmiddlewaretoken=${encodeURIComponent(csrf)}`
+            });
+
+            // JSON 응답 기대(2번 방식). 아니면 fallback.
+            const ct = res.headers.get("content-type") || "";
+            if (ct.includes("application/json")) {
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || "댓글 등록 실패");
+
+            // 서버가 html을 주는 경우: afterbegin으로 추가
+            if (data.html) {
+                commentList.insertAdjacentHTML("afterbegin", data.html);
+            } else {
+                // html이 없다면 안전하게 리로드
+                location.reload();
+                return;
+            }
+
+            if (textarea) textarea.value = "";
+            if (submitBtn) submitBtn.disabled = false;
+            } else {
+            // 아직 redirect 방식이면 새로고침으로 반영
+            location.reload();
+            }
+        } catch (err) {
+            console.error(err);
+            if (submitBtn) submitBtn.disabled = false;
+            alert("댓글 등록에 실패했습니다.");
+        }
+        });
+    }
+
+    // ===== 2) 이벤트 위임: click =====
+    commentList.addEventListener("click", async function (e) {
+        // (A) 댓글 수정 버튼
+        const commentEditBtn = e.target.closest(".comment-edit-btn");
+        if (commentEditBtn) {
+        const commentId = commentEditBtn.dataset.commentId;
+        const card = commentEditBtn.closest(".comment-card");
+        const contentDiv = qs(".comment-content", card);
+        if (!card || !contentDiv) return;
+
+        if (qs(".comment-edit-textarea", card)) return;
+
+        const original = contentDiv.innerHTML.trim();
+        contentDiv.innerHTML = `
+            <textarea class="comment-edit-textarea" style="height:110px;">${original}</textarea>
+            <button type="button" class="btn-accent comment-save-btn" data-comment-id="${commentId}" style="margin-top:6px;">저장</button>
+        `;
+        return;
+        }
+
+        // (B) 댓글 저장 버튼
+        const commentSaveBtn = e.target.closest(".comment-save-btn");
+        if (commentSaveBtn) {
+        const commentId = commentSaveBtn.dataset.commentId;
+        const card = commentSaveBtn.closest(".comment-card");
+        const contentDiv = qs(".comment-content", card);
+        const textarea = qs(".comment-edit-textarea", card);
+        if (!card || !contentDiv || !textarea) return;
+
+        const updated = textarea.value.trim();
+        if (!updated) return alert("댓글 내용을 입력해주세요.");
+
+        const csrf = getCSRF(card);
+
+        try {
+            const res = await fetch(`/recipes/{{ post.pk }}/comment/${commentId}/update/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `content=${encodeURIComponent(updated)}&csrfmiddlewaretoken=${encodeURIComponent(csrf)}`
+            });
+            const data = await res.json();
+            if (!data.success) return alert(data.message || "수정 실패");
+
+            contentDiv.innerHTML = updated;
+        } catch (err) {
+            console.error(err);
+            alert("댓글 수정에 실패했습니다.");
+        }
+        return;
+        }
+
+        // (C) 대댓글 수정 버튼
+        const replyEditBtn = e.target.closest(".reply-edit-btn");
+        if (replyEditBtn) {
+        const replyId = replyEditBtn.dataset.replyId;
+        const commentId = replyEditBtn.dataset.commentId;
+        const card = replyEditBtn.closest(".reply-card");
+        const contentDiv = qs(".comment-content", card);
+        if (!card || !contentDiv) return;
+
+        if (qs(".comment-edit-textarea", card)) return;
+
+        const original = contentDiv.innerHTML.trim();
+        contentDiv.innerHTML = `
+            <textarea class="comment-edit-textarea" style="height:110px;">${original}</textarea>
+            <button type="button" class="btn-accent reply-save-btn" data-reply-id="${replyId}" data-comment-id="${commentId}" style="margin-top:6px;">저장</button>
+        `;
+        return;
+        }
+
+        // (D) 대댓글 저장 버튼
+        const replySaveBtn = e.target.closest(".reply-save-btn");
+        if (replySaveBtn) {
+        const replyId = replySaveBtn.dataset.replyId;
+        const commentId = replySaveBtn.dataset.commentId;
+        const card = replySaveBtn.closest(".reply-card");
+        const contentDiv = qs(".comment-content", card);
+        const textarea = qs(".comment-edit-textarea", card);
+        if (!card || !contentDiv || !textarea) return;
+
+        const updated = textarea.value.trim();
+        if (!updated) return alert("답글 내용을 입력해주세요.");
+
+        const csrf = getCSRF(card);
+
+        try {
+            const res = await fetch(`/recipes/{{ post.pk }}/comment/${commentId}/reply/${replyId}/update/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `content=${encodeURIComponent(updated)}&csrfmiddlewaretoken=${encodeURIComponent(csrf)}`
+            });
+            const data = await res.json();
+            if (!data.success) return alert(data.message || "수정 실패");
+
+            contentDiv.innerHTML = updated;
+        } catch (err) {
+            console.error(err);
+            alert("대댓글 수정에 실패했습니다.");
+        }
+        return;
+        }
+
+        // (E) 답글 보기/접기 버튼
+        const repliesToggleBtn = e.target.closest(".replies-toggle-btn");
+        if (repliesToggleBtn) {
+        const commentId = repliesToggleBtn.dataset.commentId;
+        const card = repliesToggleBtn.closest(".comment-card");
+        const wrap = qs(`.replies-wrap[data-comment-id="${commentId}"]`, card);
+        if (!wrap) return;
+
+        const isOpen = (getComputedStyle(wrap).display !== "none");
+        if (isOpen) {
+            closeRepliesWrap(commentId);
+            localStorage.removeItem("openReplyCommentId");
+        } else {
+            openRepliesWrap(commentId);
+            localStorage.setItem("openReplyCommentId", commentId);
+
+            // 열릴 때 포커스
+            const formContainer = qs(".reply-form-container", card);
+            const ta = formContainer ? qs("textarea[name='content']", formContainer) : null;
+            if (ta) ta.focus();
+        }
+        return;
+        }
+    });
+
+    // ===== 3) 이벤트 위임: submit (대댓글 등록/댓글삭제/대댓글삭제) =====
+    commentList.addEventListener("submit", async function (e) {
+        const form = e.target;
+        if (!(form instanceof HTMLFormElement)) return;
+
+        // (A) 대댓글 등록 (reply-form)
+        if (form.classList.contains("reply-form")) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const submitBtn = qs('button[type="submit"]', form);
+        if (submitBtn) submitBtn.disabled = true;
+
+        const csrf = getCSRF(form);
+        const textarea = qs('textarea[name="content"]', form);
+        const content = (textarea?.value || "").trim();
+        if (!content) {
+            if (submitBtn) submitBtn.disabled = false;
+            alert("답글 내용을 입력해주세요.");
+            return;
+        }
+
+        try {
+            const res = await fetch(form.action, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `content=${encodeURIComponent(content)}&csrfmiddlewaretoken=${encodeURIComponent(csrf)}`
+            });
+
+            const ct = res.headers.get("content-type") || "";
+            if (ct.includes("application/json")) {
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || "답글 등록 실패");
+
+            const parentId = String(data.parent_id || form.action.match(/reply\/(\d+)\//)?.[1] || "");
+            if (parentId) {
+                openRepliesWrap(parentId);
+                localStorage.setItem("openReplyCommentId", parentId);
+            }
+
+            // 서버가 html을 주면 DOM에 append
+            if (data.html) {
+                const replyList = qs(".reply-list", form.closest(".replies-wrap"));
+                if (replyList) replyList.insertAdjacentHTML("beforeend", data.html);
+            } else {
+                // 아직 JSON+html 미적용이면 fallback
+                location.reload();
+                return;
+            }
+
+            // 카운트 갱신(서버가 reply_count 주는 경우)
+            if (typeof data.reply_count === "number" && parentId) {
+                setRepliesBtnText(parentId, data.reply_count, true);
+            }
+
+            if (textarea) textarea.value = "";
+            if (submitBtn) submitBtn.disabled = false;
+            } else {
+            // 기존 redirect 방식이면 fallback
+            location.reload();
+            }
+        } catch (err) {
+            console.error(err);
+            if (submitBtn) submitBtn.disabled = false;
+            alert("대댓글 등록에 실패했습니다.");
+        }
+        return;
+        }
+
+        // (B) 부모댓글 삭제
+        if (form.classList.contains("comment-delete-form")) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
+        const csrf = getCSRF(form);
+        const card = form.closest(".comment-card");
+        if (!card) return;
+
+        const submitBtn = qs('button[type="submit"]', form);
+        if (submitBtn) submitBtn.disabled = true;
+
+        try {
+            const res = await fetch(form.action, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `csrfmiddlewaretoken=${encodeURIComponent(csrf)}`
+            });
+
+            const ct = res.headers.get("content-type") || "";
+            if (ct.includes("application/json")) {
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || "삭제 실패");
+            card.remove();
+            } else {
+            // fallback
+            form.submit();
+            }
+        } catch (err) {
+            console.error(err);
+            form.submit();
+        }
+        return;
+        }
+
+        // (C) 대댓글 삭제
+        if (form.classList.contains("reply-delete-form")) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!confirm("답글을 삭제하시겠습니까?")) return;
+
+        const csrf = getCSRF(form);
+        const replyCard = form.closest(".reply-card");
+        const commentCard = form.closest(".comment-card");
+        const parentId = commentCard?.dataset?.commentId || replyCard?.dataset?.commentId;
+        const submitBtn = qs('button[type="submit"]', form);
+        if (submitBtn) submitBtn.disabled = true;
+
+        try {
+            const res = await fetch(form.action, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `csrfmiddlewaretoken=${encodeURIComponent(csrf)}`
+            });
+
+            const ct = res.headers.get("content-type") || "";
+            if (ct.includes("application/json")) {
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || "삭제 실패");
+
+            if (replyCard) replyCard.remove();
+
+            // reply_count 내려주면 버튼 텍스트 갱신
+            const pid = String(data.parent_id || parentId || "");
+            if (pid && typeof data.reply_count === "number") {
+                // wrap이 열려있는 상태면 접기 텍스트 유지
+                const wrap = qs(`.replies-wrap[data-comment-id="${pid}"]`);
+                const isOpen = wrap ? (getComputedStyle(wrap).display !== "none") : false;
+                setRepliesBtnText(pid, data.reply_count, isOpen);
+            }
+            } else {
+            // fallback
+            form.submit();
+            }
+        } catch (err) {
+            console.error(err);
+            form.submit();
+        }
+        return;
+        }
+    });
+    });
+</script>
+
+{% endblock %}

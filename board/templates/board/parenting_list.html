@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+.parenting-container { max-width: 960px; margin: 0 auto; padding: 20px; }
+.header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.title { font-size:22px; font-weight:800; color:#111827; }
+.subtitle { color:#6B7280; font-size:13px; }
+.cta-row { display:flex; gap:12px; margin-left:auto; }
+.cta { padding:10px 16px; border-radius:999px; background:#ff6b6b; color:#FFFFFF; text-decoration:none; font-weight:600; border:none; }
+.cta.secondary { background:#FFFFFF; color:#374151; border:1px solid #E5E7EB; }
+.cta:hover { background:#ff5252; }
+.cta.secondary:hover { background:#F3F4F6; }
+
+.tabs { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 16px; }
+.tab { padding:8px 14px; border-radius:999px; background:#FFFFFF; color:#6B7280; text-decoration:none; font-size:14px; border:1px solid #E5E7EB; }
+.tab.active { background:#ff6b6b; color:#FFFFFF; border-color:#ff6b6b; }
+
+.filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.chip { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:999px; background:#FFFFFF; color:#374151; text-decoration:none; font-size:13px; border:1px solid #E5E7EB; }
+.chip.active { background:#ff6b6b; color:#FFFFFF; border-color:#ff6b6b; }
+.chip .dot { width:8px; height:8px; border-radius:50%; background:#ff6b6b; }
+
+.grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:14px; }
+.card { background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); transition:.3s; }
+.card:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,0.12); }
+.thumb { width:100%; height:160px; display:flex; align-items:center; justify-content:center; background:#F3F4F6; }
+.thumb svg { fill:#9CA3AF; }
+.info { padding:14px; }
+.badges { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+.badge { padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; }
+.badge.cat { background:#F3F4F6; color:#6B7280; }
+.badge.month { background:#eef8ff; color:#3a78b7; }
+.badge.scrap { background:#f3fff0; color:#3a8f4b; }
+.title-line { font-size:15px; font-weight:700; color:#111827; margin-bottom:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.summary { font-size:12px; color:#6B7280; margin-bottom:8px; overflow:hidden; display:-webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.meta { display:flex; justify-content:space-between; font-size:12px; color:#9CA3AF; }
+
+@media (max-width: 768px) {
+  .parenting-container { padding:16px; }
+  .grid { grid-template-columns: 1fr; }
+}
+
+.pagination { text-align:center; margin:24px 0; }
+.pagination .btn { display:inline-block; margin:0 5px; padding:8px 12px; border:1px solid #E5E7EB; border-radius:999px; background:#fff; color:#374151; text-decoration:none; font-size:14px; }
+.pagination .btn.active { background:#ff6b6b; color:#fff; border-color:#ff6b6b; }
+.pagination .btn.disabled { cursor:not-allowed; opacity:.5; }
+</style>
+
+<div class="parenting-container">
+  <div class="header">
+    <div>
+      <div class="title">오늘의 육아 팁, 엄마들의 경험</div>
+      <div class="subtitle">엄마들이 저장해 둔 현실 육아 팁 모음</div>
+    </div>
+    <div class="cta-row">
+      <a class="cta" href="{% url 'board:parenting_create' %}">정보 작성</a>
+      <a class="cta secondary" href="{% url 'board:development_chart' %}">월령별 발달 체크</a>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <a class="tab {% if category == 'all' %}active{% endif %}" href="{% url 'board:parenting_list' %}">전체</a>
+    <a class="tab {% if category == 'development' %}active{% endif %}" href="?category=development">월령별 발달</a>
+    <a class="tab {% if category == 'sleep' %}active{% endif %}" href="?category=sleep">밤잠/수면</a>
+    <a class="tab {% if category == 'discipline' %}active{% endif %}" href="?category=discipline">떼쓰기/훈육</a>
+  </div>
+
+  <div class="filters">
+    <a class="chip {% if month == '12' %}active{% endif %}" href="?month=12{% if category and category != 'all' %}&category={{ category }}{% endif %}"><span class="dot"></span>12개월</a>
+    <a class="chip {% if month == '24' %}active{% endif %}" href="?month=24{% if category and category != 'all' %}&category={{ category }}{% endif %}"><span class="dot"></span>24개월</a>
+    <a class="chip {% if month == '36' %}active{% endif %}" href="?month=36{% if category and category != 'all' %}&category={{ category }}{% endif %}"><span class="dot"></span>36개월</a>
+    <a class="chip {% if kw == '밤잠' %}active{% endif %}" href="?kw=밤잠{% if category and category != 'all' %}&category={{ category }}{% endif %}"><span class="dot"></span>밤잠</a>
+    <a class="chip {% if kw == '떼쓰기' %}active{% endif %}" href="?kw=떼쓰기{% if category and category != 'all' %}&category={{ category }}{% endif %}"><span class="dot"></span>떼쓰기</a>
+  </div>
+
+  {% if search_query %}
+    <p style="color:#666; margin-bottom:10px;">"<strong>{{ search_query }}</strong>" 검색 결과: <strong>{{ total_count }}</strong>건</p>
+  {% endif %}
+
+  {% if posts %}
+  <div class="grid">
+    {% for post in posts %}
+    <a href="{% url 'board:parenting_detail' post.pk %}" style="text-decoration:none; color:inherit;">
+      <div class="card">
+        <div class="thumb">
+          {% with img=post.images.all|first %}
+            {% if img %}
+              <img src="{{ img.image.url }}" alt="{{ post.title }}">
+            {% else %}
+              <svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 8c0-2.761-2.239-5-5-5-1.657 0-3.123.806-4.03 2.04C10.38 4.376 9.227 4 8 4 5.239 4 3 6.239 3 9c0 2.313 1.651 4.238 3.83 4.8C6.312 14.395 6 15.16 6 16c0 2.209 1.791 4 4 4h6c2.209 0 4-1.791 4-4 0-1.568-.908-2.922-2.229-3.56C19.89 10.675 20 9.357 20 8z"/>
+              </svg>
+            {% endif %}
+          {% endwith %}
+        </div>
+
+        <div class="info">
+          <div class="badges">
+            <span class="badge cat">{{ post.get_category_display }}</span>
+            {% if post.month_age %}<span class="badge month">{{ post.month_age }}개월</span>{% endif %}
+            {% if post.bookmark_count %}<span class="badge scrap">스크랩 {{ post.bookmark_count }}</span>{% endif %}
+          </div>
+          <div class="title-line">{{ post.title }}</div>
+          <div class="summary">{{ post.content|striptags|truncatechars:60 }}</div>
+          <div class="meta">
+            <span>{{ post.author.nickname|default:post.author.username }}</span>
+            <span>{{ post.created_at|date:"Y.m.d" }}</span>
+          </div>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="no-results" style="text-align:center; padding:40px; color:#888;">등록된 글이 없습니다.</div>
+  {% endif %}
+
+  {% if posts.has_other_pages %}
+  <div class="pagination">
+    {% if posts.has_previous %}
+      <a class="btn" href="?page=1{% if category and category != 'all' %}&category={{ category }}{% endif %}{% if month %}&month={{ month }}{% endif %}{% if kw %}&kw={{ kw }}{% endif %}">«</a>
+      <a class="btn" href="?page={{ posts.previous_page_number }}{% if category and category != 'all' %}&category={{ category }}{% endif %}{% if month %}&month={{ month }}{% endif %}{% if kw %}&kw={{ kw }}{% endif %}">‹</a>
+    {% else %}
+      <span class="btn disabled">«</span>
+      <span class="btn disabled">‹</span>
+    {% endif %}
+
+    {% for page_num in posts.paginator.page_range %}
+      {% if posts.number == page_num %}
+        <span class="btn active">{{ page_num }}</span>
+      {% else %}
+        <a class="btn" href="?page={{ page_num }}{% if category and category != 'all' %}&category={{ category }}{% endif %}{% if month %}&month={{ month }}{% endif %}{% if kw %}&kw={{ kw }}{% endif %}">{{ page_num }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if posts.has_next %}
+      <a class="btn" href="?page={{ posts.next_page_number }}{% if category and category != 'all' %}&category={{ category }}{% endif %}{% if month %}&month={{ month }}{% endif %}{% if kw %}&kw={{ kw }}{% endif %}">›</a>
+      <a class="btn" href="?page={{ posts.paginator.num_pages }}{% if category and category != 'all' %}&category={{ category }}{% endif %}{% if month %}&month={{ month }}{% endif %}{% if kw %}&kw={{ kw }}{% endif %}">»</a>
+    {% else %}
+      <span class="btn disabled">›</span>
+      <span class="btn disabled">»</span>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

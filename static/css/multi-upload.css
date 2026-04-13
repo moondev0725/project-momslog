@@ -1,0 +1,197 @@
+/* 
+═══════════════════════════════════════════════════════════════════════
+multi-upload.css - 다중 이미지 업로드 스타일
+═══════════════════════════════════════════════════════════════════════
+*/
+
+.upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin: 20px 0;
+}
+
+.upload-area:hover,
+.upload-area.drag-over {
+    border-color: #ff6b6b;
+    background: #fff5f5;
+    transform: translateY(-2px);
+}
+
+.upload-area-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.upload-icon {
+    font-size: 48px;
+    color: #ff6b6b;
+}
+
+.upload-text {
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+}
+
+.upload-hint {
+    font-size: 13px;
+    color: #999;
+}
+
+.file-count {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+/* 이미지 미리보기 컨테이너 */
+#imagePreview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+    min-height: 50px;
+}
+
+.image-preview-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f5f5f5;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    animation: fadeIn 0.3s ease;
+}
+
+.image-preview-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.remove-image {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.remove-image:hover {
+    background: rgba(255, 0, 0, 1);
+    transform: scale(1.1);
+}
+
+.image-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.file-name {
+    font-size: 11px;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+.file-size {
+    font-size: 10px;
+    color: rgba(255,255,255,0.8);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 다크모드 지원 */
+.dark-mode .upload-area {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+.dark-mode .upload-area:hover,
+.dark-mode .upload-area.drag-over {
+    background: var(--bg-tertiary);
+    border-color: var(--accent);
+}
+
+.dark-mode .upload-text {
+    color: var(--text-primary);
+}
+
+.dark-mode .upload-hint {
+    color: var(--text-secondary);
+}
+
+.dark-mode .image-preview-item {
+    background: var(--bg-tertiary);
+}
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+    #imagePreview {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+
+    .image-preview-item img {
+        height: 120px;
+    }
+
+    .upload-area {
+        padding: 30px 15px;
+    }
+
+    .upload-icon {
+        font-size: 36px;
+    }
+
+    .upload-text {
+        font-size: 14px;
+    }
+}

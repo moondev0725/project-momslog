@@ -1,0 +1,2035 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+<link rel="stylesheet" href="{% static 'css/banner-slider.css' %}?v=1"> <!-- 26-01-15 혜은 배너 슬라이더 -->
+<style>
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.mission-title-animate {
+  animation: slideInFromLeft 0.8s ease-out forwards;
+}
+
+.mission-subtitle-animate {
+  opacity: 0;
+  animation: slideInFromLeft 0.8s ease-out 0.3s forwards;
+}
+
+.mission-body-animate {
+  opacity: 0;
+  animation: slideInFromLeft 0.8s ease-out 0.6s forwards;
+}
+
+.mission-card-animate {
+  opacity: 0;
+  animation: slideInFromLeft 0.8s ease-out 0.9s forwards;
+}
+
+.mission-detail-animate {
+  opacity: 0;
+  animation: slideInFromLeft 0.8s ease-out 1.2s forwards;
+}
+
+.mission-button-animate {
+  opacity: 0;
+  animation: fadeInScale 1s ease-out 1.6s forwards;
+}
+
+.mission-topbuttons-animate {
+  opacity: 0;
+  animation: fadeIn 0.6s ease-out 2s forwards;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mission-overlay" id="missionOverlay" aria-modal="true" role="dialog">
+  <div class="mission-card">
+    <!-- 상단 버튼들 -->
+    <div class="mission-topbuttons-animate" style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; z-index: 10;">
+      <button class="mission-hide-today" id="missionHideToday">오늘 하루 안보기</button>
+      <button class="mission-close-btn" id="missionClose">닫기</button>
+    </div>
+
+    <h1 class="mission-title-animate" style="font-size: 28px; font-weight: 800; color: #1f2633; line-height: 1.35; letter-spacing: -0.5px; margin-bottom: 12px;">엄마들의 진짜 후기 커뮤니티</h1>
+    <p class="mission-kicker mission-subtitle-animate" style="font-size: 16px; color: #ff8a72; font-weight: 600; margin-bottom: 20px; letter-spacing: -0.2px;">광고보다 솔직한, 검증된 경험</p>
+    <p class="mission-body mission-body-animate" style="font-size: 16px; color: #666; line-height: 1.65; margin: 0 0 28px 0;">
+      브랜드 후원 없이, 실제 엄마들이 직접 쓴 솔직한 리뷰와 경험담.<br>
+      <strong style="color: #333;">지금 1,420명의 엄마</strong>가 이 공간에서 고민을 나누고 답을 찾고 있어요.
+    </p>
+    
+    <!-- 예시 카드: 실제 커뮤니티 글처럼 -->
+    <div class="mission-card-animate" style="background: #f9f9fb; border-left: 3px solid #ff8a72; padding: 18px 22px; border-radius: 10px; margin-bottom: 28px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+        <span style="font-size: 13px; color: #999;">육아 수다</span>
+        <span style="font-size: 13px; color: #666;">· 방금 전</span>
+      </div>
+      <div style="font-size: 16px; font-weight: 600; color: #2d2d2d; margin-bottom: 8px;">"수면 교육 성공 후기"</div>
+      <div style="display: flex; align-items: center; gap: 14px; font-size: 13px; color: #888;">
+        <span>💬 45개 댓글</span>
+        <span>❤️ 178명 공감</span>
+        <span>🔖 89명 저장</span>
+      </div>
+    </div>
+    
+    <p class="mission-body mission-detail-animate" style="font-size: 15px; color: #555; margin-bottom: 24px;"><strong>이런 디테일이 실제 선택을 바꿔요.</strong></p>
+    
+    <button class="mission-primary mission-button-animate" id="missionOverlayClose">이야기 보러 가기 (메인으로)</button>
+  </div>
+</div>
+<div class="content-wrapper">
+  <div class="main-left">
+    <!-- Hero CTA: 브랜드 그라데이션 배경과 주요 액션 버튼 -->
+    <section class="hero-cta">
+      <div class="hero-inner">
+        <div class="cta-texts">
+          <div class="cta-kicker">지금, 맘들의 진짜 이야기</div>
+          <h2 class="cta-title">멈칫했던 그 순간, <span>저도 그랬어요</span></h2>
+          <p class="cta-subtext">👥 지금 <strong>1,420명</strong>의 엄마들이 이 순간을 함께 나누고 있어요</p>
+        </div>
+        <a href="#" class="cta-primary" onclick="openEmpathySheet(event)" title="같은 순간을 겪은 이야기 보기">저도 그랬어요 · 이야기 보기</a>
+      </div>
+    </section>
+    <!-- Curation: 1 Big + 3 Small -->
+    <section class="curation-section">
+      <div class="section-header" style="border-bottom:none; padding-bottom:0; margin-bottom:14px;">
+        <h3>오늘 멈춘 글, 한눈에</h3>
+        <a href="{% url 'main:realtime_feed' %}" class="more-link" style="color:#666; text-decoration:none; font-size:14px;">더 보기 ></a>
+      </div>
+      <div class="curation-grid">
+        {% if curation_featured %}
+          <a class="curation-feature" href="{% if curation_featured.post_type == 'free' %}{% url 'board:free_detail' curation_featured.pk %}{% elif curation_featured.post_type == 'hotdeal' %}{% url 'board:hotdeal_detail' curation_featured.pk %}{% else %}{% url 'board:parenting_detail' curation_featured.pk %}{% endif %}" style="display: flex; flex-direction: column; gap: 8px; padding: 28px 24px 22px 24px; border-radius: 18px; background: #fff; box-shadow: 0 2px 16px 0 rgba(0,0,0,0.04); position: relative; min-height: 180px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 2px;">
+              <span style="font-size: 0.98rem; font-weight: 700; color: #ff6b6b; background: #fff0f0; border-radius: 8px; padding: 4px 12px 3px 10px; letter-spacing: -0.5px;">오늘의 이슈 · 실시간 1위</span>
+              <span class="badge-signal {{ curation_featured.signal_class }}" style="font-size: 0.92rem; padding: 3px 10px; border-radius: 7px;">{{ curation_featured.signal_label }}</span>
+            </div>
+            <div class="feature-title" style="font-size: 1.22rem; font-weight: 700; color: #232323; line-height: 1.4; margin-bottom: 2px;">“{{ curation_featured.title }}”</div>
+            <div style="font-size: 0.98rem; color: #5a5a5a; margin-bottom: 2px;">오늘 오전, <b>{{ curation_featured.empathy_count|default:120 }}</b>명이 공감한 고민</div>
+            {% if curation_featured.summary %}
+            <div style="font-size: 1.01rem; color: #3a3a3a; background: #f7f7fa; border-radius: 8px; padding: 10px 14px; margin-bottom: 2px;">{{ curation_featured.summary }}</div>
+            {% endif %}
+            <div style="display: flex; align-items: center; gap: 14px; font-size: 0.97rem; color: #888; margin-bottom: 2px;">
+              <span>💬 {{ curation_featured.comment_count|default:0 }}개의 댓글</span>
+              <span>🔥 {{ curation_featured.empathy_count|default:120 }}명 ‘나도 궁금해요’</span>
+              <span>· {{ curation_featured.created_at|timesince }} 전</span>
+            </div>
+            <button style="margin-top: 4px; align-self: flex-start; background: #ffbfae; color: #2d2d2d; font-weight: 600; border: none; border-radius: 10px; padding: 7px 18px; font-size: 0.98rem; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#ffa07a'" onmouseout="this.style.background='#ffbfae'">
+              비슷한 고민 더 보기
+            </button>
+          </a>
+        {% endif %}
+
+        <div class="curation-list">
+          {% for p in curation_others %}
+          <a class="curation-item" href="{% if p.post_type == 'free' %}{% url 'board:free_detail' p.pk %}{% elif p.post_type == 'hotdeal' %}{% url 'board:hotdeal_detail' p.pk %}{% else %}{% url 'board:parenting_detail' p.pk %}{% endif %}">
+            <span class="badge-signal {{ p.signal_class }}">{{ p.signal_label }}</span>
+            <span class="item-title">{{ p.title }}</span>
+            <span class="item-meta">댓글 {{ p.comment_count|default:0 }} · {{ p.created_at|timesince }} 전</span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- 10초 마음체크 (혜은 버전 100%) -->
+    <section class="mind-coordinates-card" style="background:#fff; border-radius:18px; box-shadow:0 2px 16px 0 rgba(0,0,0,0.04); padding:32px 24px; margin:32px auto 36px auto;">
+      <div>
+        <div style="font-size:1.18rem; font-weight:800; color:#2d2d2d; margin-bottom:6px;">
+          10초만에 하는 마음체크!
+        </div>
+
+        <button type="button" id="openMindModal"
+          style="width:100%; margin-top:10px; background:#ffbfae; color:#2d2d2d; font-weight:700;
+                border:none; border-radius:10px; padding:12px 0; font-size:1.07rem; cursor:pointer;">
+          내 마음은 어떨까?
+        </button>
+      </div>
+    </section>
+
+    <!-- ✅ 추천 배너 슬라이더 -->
+    <div class="banner2-wrap" style="width:100%; margin-top:32px;">
+      <div class="banner2-viewport"
+           style="position:relative; width:100%;
+                  overflow:hidden; border-radius:20px;
+                  height:220px; line-height:0;">
+
+        <!-- ✅ 트랙 -->
+        <div id="banner2Track"
+             class="banner2-track"
+             style="display:flex; height:220px;
+                    transition:transform 0.45s ease; will-change:transform;">
+
+          <!-- ================== 슬라이드 1 ================== -->
+          <div class="banner2-item" style="flex:0 0 100%; height:220px;">
+            <div class="banner2-card"
+                 style="background:#fff; border-radius:20px; overflow:hidden;
+                        box-shadow:0 12px 40px rgba(0,0,0,0.08);
+                        display:flex; flex-direction:row; height:220px;">
+
+              <div class="banner2-media"
+                   style="flex:0 0 45%; height:220px;
+                          overflow:hidden; display:flex; align-items:center; justify-content:center; background:#ffb3a2;">
+                <img src="/static/images/77.png"
+                     style="width:100%; height:100%; object-fit:cover; display:block;">
+              </div>
+
+              <!-- ✅ 텍스트 위치: 가운데 정렬(첫번째 슬라이드 느낌) -->
+              <div class="banner2-body"
+                    style="flex:0 0 55%; padding:16px 20px;
+                            height:220px; box-sizing:border-box;
+                            display:flex; align-items:center; justify-content:flex-start;">
+
+                <div style="display:flex; flex-direction:column; gap:10px; line-height:1.25;">
+                  <div>
+                    <div style="font-size:12px; color:#ff8a72; font-weight:700; margin-bottom:6px;">
+                      👶 육아 정보 · 전문가 조언
+                    </div>
+
+                    <h4 style="font-size:18px; font-weight:800; margin:0 0 8px 0;">
+                      아이 편식, 이 방법으로 극복했어요
+                    </h4>
+
+                    <p style="font-size:13px; color:#666; margin:0;">
+                      강제하지 말고 이렇게 시도해보세요.
+                    </p>
+                  </div>
+
+                  <button onclick="openCurationModal()"
+                          style="background:#ff7b73;
+                                 color:#fff; padding:10px 16px; border-radius:12px;
+                                 border:none; font-weight:700; width:fit-content;
+                                 cursor:pointer; font-size:13px; line-height:1;">
+                    더 보기 →
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- ================== 슬라이드 2 ================== -->
+          <div class="banner2-item" style="flex:0 0 100%; height:220px;">
+            <div class="banner2-card"
+                 style="background:#fff; border-radius:20px; overflow:hidden;
+                        box-shadow:0 12px 40px rgba(0,0,0,0.08);
+                        display:flex; flex-direction:row; height:220px;">
+
+              <div class="banner2-media"
+                   style="flex:0 0 45%; height:220px;
+                          background:linear-gradient(135deg,#ffd9ec 0%,#ffb6d9 100%);
+                          overflow:hidden;">
+                <img src="/static/images/image_1.png"
+                     style="width:100%; height:100%; object-fit:cover; display:block;">
+              </div>
+
+              <!-- ✅ 슬라이드1과 동일한 텍스트 위치 -->
+              <div class="banner2-body"
+                    style="flex:0 0 55%; padding:16px 20px;
+                            height:220px; box-sizing:border-box;
+                            display:flex; align-items:center; justify-content:flex-start;">
+
+                <div style="display:flex; flex-direction:column; gap:10px; line-height:1.25;">
+                  <div>
+                    <div style="font-size:12px; color:#ff6b8b; font-weight:700; margin-bottom:6px;">
+                      🎁 지금 가입하면 더 많은 혜택
+                    </div>
+
+                    <h4 style="font-size:18px; font-weight:800; margin:0 0 8px 0;">
+                      회원가입 하고<br>맞춤 육아정보 받아가세요
+                    </h4>
+
+                    <p style="font-size:13px; color:#666; margin:0;">
+                      이유식표·육아팁·커뮤니티로 소통해요.
+                    </p>
+                  </div>
+
+                  <button onclick="location.href='/accounts/signup/'"
+                          style="background:#ff5e7a;
+                                 color:#fff; padding:10px 16px; border-radius:12px;
+                                 border:none; font-weight:700; width:fit-content;
+                                 cursor:pointer; font-size:13px; line-height:1;">
+                    지금 가입하기 →
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- ================== 슬라이드 3 ================== -->
+          <div class="banner2-item" style="flex:0 0 100%; height:220px;">
+            <div class="banner2-card"
+                 style="background:#fff; border-radius:20px; overflow:hidden;
+                        box-shadow:0 12px 40px rgba(0,0,0,0.08);
+                        display:flex; flex-direction:row; height:220px;">
+
+              <div class="banner2-media"
+                   style="flex:0 0 45%; height:220px;
+                          background:linear-gradient(135deg,#c9e7ff 0%,#9fd2ff 100%);
+                          overflow:hidden;">
+                <img src="/static/images/image_2.png"
+                     style="width:100%; height:100%; object-fit:cover; display:block;">
+              </div>
+
+              <!-- ✅ 슬라이드1과 동일한 텍스트 위치 -->
+              <div class="banner2-body"
+                    style="flex:0 0 55%; padding:16px 20px;
+                            height:220px; box-sizing:border-box;
+                            display:flex; align-items:center; justify-content:flex-start;">
+
+                <div style="display:flex; flex-direction:column; gap:10px; line-height:1.25;">
+                  <div>
+                    <div style="font-size:12px; color:#3b8cff; font-weight:700; margin-bottom:6px;">
+                      💬 AI 육아 챗봇 · 24시간 답변
+                    </div>
+
+                    <h4 style="font-size:18px; font-weight:800; margin:0 0 8px 0;">
+                      궁금한 육아 질문,<br>챗봇에게 물어보세요
+                    </h4>
+
+                    <p style="font-size:13px; color:#666; margin:0;">
+                      이유식·수면·예방접종 등 즉시 답변!
+                    </p>
+                  </div>
+
+                  <button id="chatbot-open-btn" onclick="toggleChatbot()" class="banner-btn"
+                          style="background:#3b8cff;
+                                 color:#fff; padding:10px 16px; border-radius:12px;
+                                 border:none; font-weight:700; width:fit-content;
+                                 cursor:pointer; font-size:13px; line-height:1;">
+                    챗봇 열기 →
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- ================== 슬라이드 4 ================== -->
+          <div class="banner2-item" style="flex:0 0 100%; height:220px;">
+            <div class="banner2-card"
+                 style="background:#fff; border-radius:20px; overflow:hidden;
+                        box-shadow:0 12px 40px rgba(0,0,0,0.08);
+                        display:flex; flex-direction:row; height:220px;">
+
+              <div class="banner2-media"
+                   style="flex:0 0 45%; height:220px;
+                          background:linear-gradient(135deg,#b4ffdd 0%,#00da78 100%);
+                          overflow:hidden;">
+                <img src="/static/images/image_3.png"
+                     style="width:100%; height:100%; object-fit:cover; display:block;"
+                     alt="월령별 발달 안내 이미지">
+              </div>
+
+              <!-- ✅ 슬라이드1과 동일한 텍스트 위치 -->
+              <div class="banner2-body"
+                    style="flex:0 0 55%; padding:16px 20px;
+                            height:220px; box-sizing:border-box;
+                            display:flex; align-items:center; justify-content:flex-start;">
+
+                <div style="display:flex; flex-direction:column; gap:10px; line-height:1.25;">
+                  <div>
+                    <div style="font-size:12px; color:#00da78; font-weight:700; margin-bottom:6px;">
+                      📈 발달 가이드
+                    </div>
+
+                    <h4 style="font-size:18px; font-weight:800; margin:0 0 8px 0;">
+                      월령별 발달 살펴보기
+                    </h4>
+
+                    <p style="font-size:13px; color:#666; margin:0;">
+                      발달 포인트를 한눈에 정리했어요
+                    </p>
+                  </div>
+
+                  <button style="background:#00da78;
+                                 color:#fff; padding:10px 16px; border-radius:12px;
+                                 border:none; font-weight:700; width:fit-content;
+                                 cursor:pointer; font-size:13px; line-height:1;"
+                          onclick="location.href='/board/parenting/?category=development'">
+                    발달 가이드 보기 →
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ✅ 좌/우 버튼 -->
+        <button onclick="banner2Prev()"
+                style="position:absolute; left:12px; top:50%; transform:translateY(-50%);
+                       width:36px; height:36px; border-radius:50%; border:none;
+                       background: rgba(255, 255, 255, 0.352); box-shadow:0 4px 14px rgba(0,0,0,0.18);
+                       cursor:pointer; font-size:20px; z-index:10;">‹</button>
+
+        <button onclick="banner2Next()"
+                style="position:absolute; right:12px; top:50%; transform:translateY(-50%);
+                       width:36px; height:36px; border-radius:50%; border:none;
+                       background: rgba(255, 255, 255, 0.352); box-shadow:0 4px 14px rgba(0,0,0,0.18);
+                       cursor:pointer; font-size:20px; z-index:10;">›</button>
+
+      </div>
+    </div>
+  </div>
+
+  <aside class="main-right">
+    <div class="login-box">
+      {% if user.is_authenticated %}
+        <div class="user-info-area">
+          <p class="login-text">
+            <span id="user-grade-chip"
+                class="user-grade-chip"
+                role="button"
+                tabindex="0"
+                aria-haspopup="dialog"
+                aria-controls="gradeModal"
+                data-current-grade="{{ user.get_grade_display }}"
+                data-next-grade="{% if grade_progress and not grade_progress.is_max %}{{ grade_progress.next_label }}{% else %}{% endif %}">
+            <span id="user-grade-name" class="grade-name">{{ user.get_grade_display }}</span>
+            <span class="grade-suffix">등급</span>
+          </span><br>
+            <strong>{{ user.nickname }}</strong>님,<br>
+            오늘도 행복한 하루 되세요!
+          </p>
+
+          <!-- ✅ 등급 안내 모달 (작게) -->
+          <div id="gradeModal" class="grade-modal is-hidden" aria-hidden="true">
+            <div class="grade-modal__backdrop" data-grade-close="1"></div>
+
+            <div class="grade-modal__panel" role="dialog" aria-modal="true" aria-labelledby="gradeModalTitle">
+              <button type="button" class="grade-modal__x" data-grade-close="1" aria-label="닫기">×</button>
+
+              <!-- 1) 헤더 -->
+              <div class="grade-modal__header">
+                <div id="gradeModalTitle" class="grade-modal__title"></div>
+                <div id="gradeModalDesc" class="grade-modal__desc"></div>
+              </div>
+
+              <!-- 3) 빨리 올리는 방법 -->
+              <div class="grade-modal__section">
+                <div class="grade-modal__stitle">다음 등급까지 빨리 오르는 법</div>
+                <ul class="grade-modal__list">
+                  <li>게시글/댓글 작성으로 경험치가 올라가요</li>
+                  <li>오늘의 미션 완료 시 추가 경험치를 얻어요</li>
+                  <li><b>연속 출석</b>을 유지하면 보너스가 붙어요</li>
+                </ul>
+              </div>
+
+              <!-- 4) 내 혜택 / 다음 혜택 -->
+              <div class="grade-modal__section">
+                <div class="grade-modal__grid">
+                  <div class="grade-modal__col">
+                    <div class="grade-modal__stitle">내 등급 혜택</div>
+                    <ul id="gradeModalPerks" class="grade-modal__list"></ul>
+                  </div>
+                  <div class="grade-modal__col">
+                    <div class="grade-modal__stitle">다음 등급 혜택 미리보기</div>
+                    <ul id="gradeModalNextPerks" class="grade-modal__list"></ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5) CTA -->
+              <div class="grade-modal__actions">
+                <a href="{% url 'accounts:mypage_grade_exp' %}" class="grade-modal__btn grade-modal__btn--primary">
+
+                  등급 자세히 보기
+                </a>
+                <button type="button" class="grade-modal__btn" data-grade-close="1">닫기</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="grade-progress-area">
+            {% if grade_progress %}
+            <div style="margin:10px 0 12px; padding:15px; border:1px solid #eee; border-radius:12px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+              <div class="grade-top-row" style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px; font-weight:bold; color:#555;">
+                <span class="grade-top-left">
+                  <b>Lv.</b> <span id="current-grade-label">{{ grade_progress.current_label }}</span>
+                </span>
+                <span class="grade-top-mid">
+                  <span id="point-toast" style="font-weight:bold; color:#ff6b6b;"></span>
+                </span>
+                <span class="grade-top-right"><b id="point-value" style="color:#ff6b6b;">{{ grade_progress.point }}</b> P</span>
+              </div>
+
+              <div class="grade-bar-bg" style="background:#eee; height:10px; border-radius:5px; overflow:hidden;">
+                <div id="grade-bar-fill"
+                     class="grade-bar-fill"
+                     style="width:{{ grade_progress.progress_percent }}%; background: linear-gradient(90deg, #ff9a9e 0%, #ff6b6b 100%); height:100%; transition: width 0.5s;">
+                </div>
+              </div>
+
+              <div id="grade-remaining-text" style="margin-top:10px; font-size:12px; color:#888; text-align:center;">
+                {% if grade_progress.is_max %}
+                  최고 등급이에요 ⭐
+                {% else %}
+                  다음 <b>{{ grade_progress.next_label }}</b>까지 <b>{{ grade_progress.remaining }}P</b> 남았어요!
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <script>
+            function toggleMotivationBox() {
+              const notifList = document.getElementById('motivationNotifList');
+              const toggleIcon = document.getElementById('motivationToggle');
+              
+              if (notifList) {
+                if (notifList.style.display === 'none') {
+                  notifList.style.display = 'grid';
+                  toggleIcon.textContent = '▼';
+                } else {
+                  notifList.style.display = 'none';
+                  toggleIcon.textContent = '▶';
+                }
+              }
+            }
+          </script>
+
+          <div id="quest-card-area">
+            {% if today_quest and not today_quest.completed and not today_quest.skipped %}
+            <div class="quest-card" style="margin:12px 0; padding:15px; border:1px solid #eee; border-radius:12px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+              <div style="font-weight:800; color:#333; margin-bottom:5px;">🎯 오늘의 작은 목표</div>
+              <div style="margin:8px 0 15px; color:#555; font-size:14px;">{{ today_quest.content }}</div>
+
+              <div style="display:flex; gap:8px;">
+                <form method="post" action="{% url 'quests:complete_today' %}" data-quest-action="complete" style="flex:1;">
+                  {% csrf_token %}
+                  <button class="btn-login" style="width:100%; padding:10px; background:#ff6b6b; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; transition:background 0.2s;">했어요 ✓</button>
+                </form>
+
+                <form method="post" action="{% url 'quests:skip_today' %}" style="flex:1;">
+                  {% csrf_token %}
+                  <button class="btn-login" style="width:100%; padding:10px; background:#f3f4f6; color:#666; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">패스</button>
+                </form>
+              </div>
+              <div style="margin-top:10px; font-size:12px; color:#999; text-align:center;">완료 시 +3 포인트 적립</div>
+            </div>
+            {% else %}
+            <div class="quest-card" style="margin:12px 0; padding:15px; border:1px solid #eee; border-radius:12px; background:#fff; text-align:center;">
+              <div style="font-weight:700; font-size:16px;">오늘 미션 클리어!</div>
+              <div style="margin-top:6px; color:#888; font-size:14px;">내일 새로운 목표로 만나요</div>
+            </div>
+            {% endif %}
+          </div>
+
+          <a href="{% url 'accounts:mypage_home' %}" class="btn-login" style="display:block;  text-align:center; padding:12px; background:#fff; color:#333; border:1px solid #ddd; border-radius:10px; text-decoration:none; font-weight:bold; transition:background 0.2s;">마이페이지</a>
+        </div>
+        <a href="{% url 'accounts:logout' %}" class="btn-login btn-logout" style="display:block;  text-align:center; padding:12px; margin-top:10px; background:#f1f3f5; color:#888; border-radius:10px; text-decoration:none; font-size:13px;">로그아웃</a>
+
+      {% else %}
+        <div class="user-info-area" style="padding:20px; background:white; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.05); text-align:center;">
+          <p class="login-text" style="margin-bottom:20px; color:#444;">
+            <strong style="font-size:18px; color:#ff6b6b;">로그인하고</strong><br>
+            나만의 육아 기록을 시작해보세요!
+          </p>
+          <a href="{% url 'accounts:login' %}" style="display:block;  padding:12px; background:#ff6b6b; color:white; text-align:center; border-radius:10px; text-decoration:none; font-weight:bold; margin-bottom:10px; box-shadow:0 4px 10px rgba(255, 107, 107, 0.3);">로그인</a>
+          <a href="{% url 'accounts:signup' %}" style="display:block;  padding:12px; background:#fff; border:1px solid #ddd; color:#333; text-align:center; border-radius:10px; text-decoration:none; font-weight:bold;">회원가입</a>
+        </div>
+      {% endif %}
+    </div>
+
+
+    <!-- 26-01-06 슬기 추가: 2026년 인터랙티브 달력 섹션 -->
+    <!-- 기능: 월별 달력 표시, 날짜 클릭 시 기록 작성 모달 열기, 기록 있는 날짜 표시 -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div style="margin-top: 20px;">
+      
+      <!-- 2026년 달력 (일요일 기준, 월별 네비게이션) -->
+      <div style="background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #eee;">
+        <div style="padding: 20px; border-bottom: 2px solid #ff6b6b; display: flex; align-items: center; justify-content: space-between;">
+          <button id="prevMonthBtn" style="background: #ff6b6b; color: white; border: none; border-radius: 6px; width: 40px; height: 40px; font-size: 18px; cursor: pointer; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">◀</button>
+          <h3 id="monthTitle" style="margin: 0; font-size: 20px; font-weight: 800; color: #1f2633; flex: 1; text-align: center;">1월</h3>
+          <button id="nextMonthBtn" style="background: #ff6b6b; color: white; border: none; border-radius: 6px; width: 40px; height: 40px; font-size: 18px; cursor: pointer; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">▶</button>
+        </div>
+        
+        <div style="padding: 30px; display: flex; justify-content: center; align-items: center;">
+          <div id="calendarContainer" style="width: 100%;">
+            <!-- 달력이 여기에 동적으로 표시됩니다 -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ✅ 등급 안내 모달 */
+      const gradeChip = document.getElementById("user-grade-chip");
+      const gradeModal = document.getElementById("gradeModal");
+
+      const titleEl = document.getElementById("gradeModalTitle");
+      const descEl = document.getElementById("gradeModalDesc");
+      const perksEl = document.getElementById("gradeModalPerks");
+      const nextPerksEl = document.getElementById("gradeModalNextPerks");
+
+      const gradeMeta = {
+        "새싹": {
+          desc: "가입 후 활동을 시작한 회원이에요.",
+          perks: ["글/댓글 작성 시 기본 경험치 획득", "미션 보상 정상 획득", "등급 뱃지 표시"],
+          nextPerks: ["글/댓글 경험치 보너스(+%)", "내 글/댓글 가시성 소폭 강화"]
+        },
+        "일반": {
+          desc: "꾸준히 활동하는 회원이에요.",
+          perks: ["글/댓글 경험치 보너스(+%)", "등급 뱃지 표시"],
+          nextPerks: ["내 글/댓글 강조 표시", "미션 보너스 보상(+P)"]
+        },
+        "우수": {
+          desc: "활동이 활발한 우수 회원이에요.",
+          perks: ["내 글/댓글 강조 표시", "미션 보너스 보상(+P)", "글/댓글 경험치 보너스(+%)"],
+          nextPerks: ["장터/게시글 노출 혜택(확률/우선)", "추가 보너스(+P/+%)"]
+        },
+        "VIP": {
+          desc: "커뮤니티에 큰 기여를 하는 VIP 회원이에요.",
+          perks: ["노출 혜택(확률/우선)", "미션 보너스 보상(+P)", "글/댓글 경험치 보너스(+%)"],
+          nextPerks: ["이벤트/노출 혜택 확장", "추가 보너스(+P/+%)"]
+        },
+        "운영": {
+          desc: "커뮤니티 운영에 참여하는 회원이에요.",
+          perks: ["운영진 전용 권한/표시", "특별 이벤트 혜택", "노출/보너스 혜택"],
+          nextPerks: ["최고 등급이에요 ⭐"]
+        },
+        "핵심": {
+          desc: "커뮤니티의 핵심 회원이에요.",
+          perks: ["핵심 멤버 표시", "우선 노출 혜택", "특별 이벤트 접근"],
+          nextPerks: ["최고 등급이에요 ⭐"]
+        }
+      };
+
+      function pickKey(label) {
+        if (!label) return null;
+        const normalizedLabel = label.trim().toLowerCase();
+        
+        if (normalizedLabel.includes("새싹")) return "새싹";
+        if (normalizedLabel.includes("일반")) return "일반";
+        if (normalizedLabel.includes("우수")) return "우수";
+        if (normalizedLabel.includes("vip")) return "VIP";
+        if (normalizedLabel.includes("운영")) return "운영";
+        if (normalizedLabel.includes("핵심")) return "핵심";
+        
+        return null;
+      }
+
+      function fillList(el, items) {
+        if (!el) return;
+        el.innerHTML = "";
+        (items || []).forEach((t) => {
+          const li = document.createElement("li");
+          li.textContent = t;
+          el.appendChild(li);
+        });
+      }
+
+      function openGradeModal() {
+        if (!gradeModal || !gradeChip) return;
+
+        const current = gradeChip.dataset.currentGrade || "";
+        const next = gradeChip.dataset.nextGrade || "";
+
+        const curKey = pickKey(current);
+        const nextKey = pickKey(next);
+
+        const curMeta = gradeMeta[curKey] || {
+          desc: "활동에 따라 등급이 올라가요.",
+          perks: ["등급 뱃지 표시", "활동 시 경험치 획득"],
+          nextPerks: ["더 많은 혜택이 열려요"]
+        };
+
+        titleEl.textContent = `${current} 등급`;
+        descEl.textContent = curMeta.desc;
+
+        fillList(perksEl, curMeta.perks);
+
+        if (next) {
+          const nextMeta = gradeMeta[nextKey] || { nextPerks: ["노출/보너스 혜택이 강화돼요"] };
+          fillList(nextPerksEl, nextMeta.nextPerks || ["노출/보너스 혜택이 강화돼요"]);
+        } else {
+          fillList(nextPerksEl, ["최고 등급이에요 ⭐"]);
+        }
+
+        gradeModal.classList.remove("is-hidden");
+        gradeModal.setAttribute("aria-hidden", "false");
+        document.body.classList.add("no-scroll");
+      }
+
+      function closeGradeModal() {
+        if (!gradeModal) return;
+        gradeModal.classList.add("is-hidden");
+        gradeModal.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("no-scroll");
+      }
+
+      if (gradeChip && gradeModal) {
+        gradeChip.addEventListener("click", openGradeModal);
+        gradeChip.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openGradeModal();
+          }
+        });
+
+        gradeModal.addEventListener("click", (e) => {
+          const t = e.target;
+          if (t && t.closest && t.closest("[data-grade-close='1']")) closeGradeModal();
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && !gradeModal.classList.contains("is-hidden")) {
+            closeGradeModal();
+          }
+        });
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 26-01-06 슬기 추가: 인터랙티브 달력 기능 (기록 작성 및 관리)
+      // 설명: 사용자가 달력의 날짜를 클릭하면 모달창에서 육아 기록을 작성하고 저장
+      //      로컬스토리지에 저장되어 브라우저를 닫아도 데이터 유지됨
+      //      기록이 있는 날짜에는 우측 하단에 빨간 동그라미 표시
+      // ═══════════════════════════════════════════════════════════════════════
+      
+      // 서버에서 기록 불러오기
+      let cachedRecords = {};
+      async function getCalendarRecords() {
+        {% if user.is_authenticated %}
+        try {
+          const response = await fetch('{% url "main:get_calendar_records" %}?year=2026');
+          const data = await response.json();
+          if (data.success) {
+            cachedRecords = data.records;
+            return cachedRecords;
+          }
+        } catch(e) {
+          console.error('Failed to load records:', e);
+        }
+        {% endif %}
+        return {};
+      }
+      
+      // 서버에 기록 저장하기
+      async function saveCalendarRecord(dateKey, content) {
+        {% if user.is_authenticated %}
+        try {
+          const response = await fetch('{% url "main:save_calendar_record" %}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+              date_key: dateKey,
+              content: content
+            })
+          });
+          const data = await response.json();
+          if (data.success) {
+            if (content.trim()) {
+              cachedRecords[dateKey] = content;
+            } else {
+              delete cachedRecords[dateKey];
+            }
+            return true;
+          }
+        } catch(e) {
+          console.error('Failed to save record:', e);
+          alert('저장에 실패했습니다.');
+        }
+        {% else %}
+        alert('로그인이 필요합니다.');
+        {% endif %}
+        return false;
+      }
+      
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+      
+      // 날짜 키 생성 (YYYY-MM-DD 형식)
+      function getDateKey(year, month, day) {
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      }
+      
+      // 모달 열기
+      async function openCalendarModal(year, month, day) {
+        const dateKey = getDateKey(year, month, day);
+        const records = await getCalendarRecords();
+        const currentRecord = records[dateKey] || '';
+        
+        const modal = document.createElement('div');
+        modal.id = 'calendarModal';
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        `;
+        
+        modal.innerHTML = `
+          <div style="background: white; border-radius: 12px; padding: 30px; max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);">
+            <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #1f2633;">
+              ${year}년 ${month}월 ${day}일 기록
+            </div>
+            <textarea id="recordInput" placeholder="오늘 육아 기록을 남겨보세요..." style="width: 100%; height: 150px; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical; margin-bottom: 16px;">${currentRecord}</textarea>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+              <button onclick="closeModal()" style="padding: 10px 20px; background: #f3f4f6; color: #333; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">취소</button>
+              <button onclick="saveRecord('${dateKey}')" style="padding: 10px 20px; background: #ff6b6b; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">저장</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        document.getElementById('recordInput').focus();
+      }
+      
+      function closeModal() {
+        const modal = document.getElementById('calendarModal');
+        if (modal) modal.remove();
+      }
+      
+      async function saveRecord(dateKey) {
+        const content = document.getElementById('recordInput').value;
+        
+        const success = await saveCalendarRecord(dateKey, content);
+        if (success) {
+          closeModal();
+          renderCalendar(currentMonthIndex); // 달력 새로고침
+        }
+      }
+      
+      // 달력 생성 함수
+      async function renderCalendar(monthIndex) {
+        const monthsData = {{ months_calendar|safe }};
+        const monthData = monthsData[monthIndex];
+        const year = 2026;
+        const month = monthData.month;
+        
+        // 제목 업데이트
+        document.getElementById('monthTitle').textContent = monthData.name;
+        
+        // HTML 생성
+        let html = '';
+        
+        // 요일 헤더
+        html += '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 15px;">';
+        monthData.weekdays.forEach(day => {
+          const color = day === '토' ? '#4ecdc4' : (day === '일' ? '#ff6b6b' : '#666');
+          html += `<div style="text-align: center; font-size: 16px; font-weight: 700; color: ${color}; padding: 12px 0; height: 40px; display: flex; align-items: center; justify-content: center;">${day}</div>`;
+        });
+        html += '</div>';
+        
+        // 날짜
+        html += '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">';
+        const records = await getCalendarRecords();
+        
+        monthData.days.forEach(week => {
+          week.forEach(day => {
+            if (day === 0) {
+              html += '<div style="aspect-ratio: 1;"></div>';
+            } else {
+              const dateKey = getDateKey(year, month, day);
+              const hasRecord = records[dateKey] ? true : false;
+              const recordDot = hasRecord ? `<div style="position: absolute; width: 8px; height: 8px; background: #ff6b6b; border-radius: 50%; bottom: 4px; right: 4px;"></div>` : '';
+              
+              html += `<div style="aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: white; border: 2px solid #eee; border-radius: 8px; font-size: 16px; font-weight: 600; color: #333; cursor: pointer; transition: all 0.2s; position: relative;" onmouseover="this.style.borderColor='#ff6b6b'; this.style.background='#fff5f5';" onmouseout="this.style.borderColor='#eee'; this.style.background='white';" onclick="openCalendarModal(${year}, ${month}, ${day})">${day}${recordDot}</div>`;
+            }
+          });
+        });
+        html += '</div>';
+        
+        document.getElementById('calendarContainer').innerHTML = html;
+      }
+      
+      // 초기 달력 렌더링 (1월)
+      let currentMonthIndex = 0;
+      renderCalendar(currentMonthIndex);
+      
+      // 이전 달 버튼
+      document.getElementById('prevMonthBtn').addEventListener('click', () => {
+        if (currentMonthIndex > 0) {
+          currentMonthIndex--;
+          renderCalendar(currentMonthIndex);
+        }
+      });
+      
+      // 다음 달 버튼
+      document.getElementById('nextMonthBtn').addEventListener('click', () => {
+        if (currentMonthIndex < 11) {
+          currentMonthIndex++;
+          renderCalendar(currentMonthIndex);
+        }
+      });
+      
+      // ESC 키로 모달 닫기
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeModal();
+        }
+      });
+    </script>
+
+  </aside>
+</div>
+
+<!-- 공감 바텀 시트 -->
+<div class="empathy-sheet-overlay" id="empathySheetOverlay" onclick="closeEmpathySheet()">
+  <div class="empathy-sheet" onclick="event.stopPropagation()">
+    <!-- 헤더: 감정적 안도감 -->
+    <div class="sheet-header">
+      <button class="sheet-close" onclick="closeEmpathySheet()">✕</button>
+      <div class="empathy-count">
+        <div class="facepile">
+          <span class="face-avatar">👩</span>
+          <span class="face-avatar">👩</span>
+          <span class="face-avatar">👩</span>
+        </div>
+        <div class="empathy-text">
+          <strong>지금 1,421명의 엄마가</strong> 고개를 끄덕였어요
+        </div>
+        <div class="empathy-realtime">방금 3명이 이 이야기에 공감했어요</div>
+      </div>
+    </div>
+
+    <!-- 숙 콘텐츠: 핵심 스토리 -->
+    <div class="sheet-content">
+      {% if curation_featured %}
+      <div class="story-card">
+        <div class="story-title">{{ curation_featured.title }}</div>
+        <div class="story-excerpt">
+          {{ curation_featured.content|truncatewords:50|default:"어린이집 등원 전쟁, 선생님 품에 안겨서 자지러지게 우는데, 뒤도 안 돌아보고 나와야 하는 그 순간이 매일 지옥 같아요..." }}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- 마이크로 인터랙션: 감정 칩 -->
+    <div class="sheet-emotions">
+      <div class="emotions-title">지금 나의 마음을 표현해보세요</div>
+      <div class="emotions-chips">
+        <button class="emotion-chip" data-emotion="comfort" onclick="selectEmotion(this)">
+          <span class="chip-emoji">😭</span>
+          <span class="chip-text">토닥토닥</span>
+          <span class="chip-count">342</span>
+        </button>
+        <button class="emotion-chip" data-emotion="metoo" onclick="selectEmotion(this)">
+          <span class="chip-emoji">🙋</span>
+          <span class="chip-text">저도 지금 그래요</span>
+          <span class="chip-count">289</span>
+        </button>
+        <button class="emotion-chip" data-emotion="time" onclick="selectEmotion(this)">
+          <span class="chip-emoji">⏰</span>
+          <span class="chip-text">시간이 해결해 줘요</span>
+          <span class="chip-count">156</span>
+        </button>
+        <button class="emotion-chip" data-emotion="notfault" onclick="selectEmotion(this)">
+          <span class="chip-emoji">🤗</span>
+          <span class="chip-text">엄마 잘못 아니에요</span>
+          <span class="chip-count">421</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 하단 액션: 베스트 댓글 미리보기 -->
+    <div class="sheet-action">
+      <div class="best-comment-preview">
+        <div class="comment-badge">베스트 댓글</div>
+        <div class="comment-bubble">
+          {% if best_comment %}
+          <div class="comment-author">{{ best_comment.author.username|default:"익명" }}</div>
+          <div class="comment-text">{{ best_comment.content|truncatewords:20 }}</div>
+          {% else %}
+          <div class="comment-author">육아맘99</div>
+          <div class="comment-text">저도 딱 3월에 그랬어요. 근데 2주만 딱 눈 딱 감고 버티니까...</div>
+          {% endif %}
+        </div>
+        {% if curation_featured %}
+        <a href="{% if curation_featured.post_type == 'free' %}{% url 'board:free_detail' curation_featured.pk %}{% elif curation_featured.post_type == 'hotdeal' %}{% url 'board:hotdeal_detail' curation_featured.pk %}{% else %}{% url 'board:parenting_detail' curation_featured.pk %}{% endif %}" class="comment-more">👉 이 댓글 더 읽어보기</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openEmpathySheet(e) {
+  e.preventDefault();
+  const overlay = document.getElementById('empathySheetOverlay');
+  overlay.classList.add('is-active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEmpathySheet() {
+  const overlay = document.getElementById('empathySheetOverlay');
+  overlay.classList.remove('is-active');
+  document.body.style.overflow = '';
+}
+
+function selectEmotion(button) {
+  button.classList.toggle('selected');
+  
+  // 애니메이션: 튀어오르기
+  button.style.transform = 'scale(1.15)';
+  setTimeout(() => {
+    button.style.transform = '';
+  }, 200);
+  
+  // 카운트 증가
+  if (button.classList.contains('selected')) {
+    const countEl = button.querySelector('.chip-count');
+    const currentCount = parseInt(countEl.textContent);
+    countEl.textContent = currentCount + 1;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  /* 0. 첫 방문 선언 오버레이 (오늘 하루 안보기 기능 포함) */
+  const overlay = document.getElementById('missionOverlay');
+  const overlayBtn = document.getElementById('missionOverlayClose');
+  const hideTodayBtn = document.getElementById('missionHideToday');
+  const closeBtn = document.getElementById('missionClose');
+
+  if (overlay && overlayBtn) {
+    const closeOverlay = () => {
+      overlay.classList.remove('is-active');
+      document.body.classList.remove('no-scroll');
+    };
+
+    // 24시간 숨김 체크
+    const HIDE_KEY = 'missionOverlayHideUntil';
+    const hideUntil = localStorage.getItem(HIDE_KEY);
+    const now = Date.now();
+
+    // 숨김 기간이 남아있으면 오버레이 표시 안함
+    if (hideUntil && now < parseInt(hideUntil, 10)) {
+      overlay.classList.remove('is-active');
+      document.body.classList.remove('no-scroll');
+    } else {
+      // 숨김 기간이 만료되었거나 없으면 표시
+      overlay.classList.add('is-active');
+      document.body.classList.add('no-scroll');
+      // 만료된 경우 localStorage 정리
+      if (hideUntil) localStorage.removeItem(HIDE_KEY);
+    }
+
+    // 내 경험 공유하기 버튼
+    overlayBtn.addEventListener('click', closeOverlay);
+
+    // 오늘 하루 안보기 버튼 (24시간 숨김)
+    if (hideTodayBtn) {
+      hideTodayBtn.addEventListener('click', () => {
+        const hideUntilTime = Date.now() + (24 * 60 * 60 * 1000); // 24시간 후
+        localStorage.setItem(HIDE_KEY, hideUntilTime.toString());
+        closeOverlay();
+      });
+    }
+
+    // 닫기 버튼
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeOverlay);
+    }
+
+    // 오버레이 바깥 클릭 시 닫기
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeOverlay();
+    });
+  }
+
+  /* 1. 배너 슬라이더 로직 */
+  const track = document.querySelector('.banner-track');
+  const items = document.querySelectorAll('.banner-item');
+  const prevBtn = document.getElementById('btnPrev');
+  const nextBtn = document.getElementById('btnNext');
+  
+  if (track && items.length > 0) {
+      let currentSlide = 0;
+      const totalSlides = items.length;
+
+      function updateSlidePosition() {
+          const offset = -currentSlide * 100;
+          track.style.transform = `translateX(${offset}%)`;
+      }
+
+      function moveNext() {
+          currentSlide = (currentSlide + 1) % totalSlides;
+          updateSlidePosition();
+      }
+
+      function movePrev() {
+          currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+          updateSlidePosition();
+      }
+
+      if (nextBtn) nextBtn.addEventListener('click', moveNext);
+      if (prevBtn) prevBtn.addEventListener('click', movePrev);
+      
+      setInterval(moveNext, 5000);
+  }
+
+  /* 2. 퀘스트 & 등급 애니메이션 로직 */
+  const questArea = document.getElementById("quest-card-area");
+  const toast = document.getElementById("point-toast");
+
+  if (questArea && toast) {
+    function animateNumber(el, to, duration = 450) {
+        if (!el) return;
+        const from = parseInt(el.textContent || "0", 10);
+        const target = Number(to);
+        if (Number.isNaN(target)) return;
+        const start = performance.now();
+        function tick(now) {
+            const t = Math.min(1, (now - start) / duration);
+            const value = Math.round(from + (target - from) * t);
+            el.textContent = value;
+            if (t < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+    }
+
+    function replayClass(el, className) {
+        if (!el) return;
+        el.classList.remove(className);
+        void el.offsetWidth;
+        el.classList.add(className);
+    }
+
+    function showToast({ text, bg = "#111", isLevelUp = false }) {
+        const toastEl = document.getElementById("point-toast");
+        if (!toastEl) return;
+        
+        toastEl.textContent = text;
+        toastEl.style.color = bg;
+        
+        // 페이드 아웃 효과
+        setTimeout(() => {
+            toastEl.style.transition = "opacity 0.5s";
+            toastEl.style.opacity = "0";
+        }, 2000);
+    }
+
+    questArea.addEventListener("submit", async (e) => {
+        const form = e.target;
+        if (!form.dataset || form.dataset.questAction !== "complete") return;
+        e.preventDefault();
+
+        const btn = form.querySelector("button");
+        if (btn) btn.disabled = true;
+
+        const csrf = form.querySelector("[name=csrfmiddlewaretoken]")?.value;
+        if (!csrf) return;
+
+        try {
+            const res = await fetch(form.action, {
+                method: "POST",
+                headers: { "X-CSRFToken": csrf, "X-Requested-With": "XMLHttpRequest" },
+            });
+            const data = await res.json();
+
+            if (data.status !== "ok") return;
+
+            questArea.innerHTML = `
+                <div class="quest-card" style="margin:12px 0; padding:15px; border:1px solid #eee; border-radius:12px; background:#fff; text-align:center;">
+                    <div style="font-weight:700; font-size:16px;">오늘 미션 클리어!</div>
+                    <div style="margin-top:6px; color:#888; font-size:14px;">내일 새로운 목표로 만나요</div>
+                </div>`;
+
+            const pointEl = document.getElementById("point-value");
+            const barEl = document.getElementById("grade-bar-fill");
+            const remainingEl = document.getElementById("grade-remaining-text");
+
+            if (typeof data.point === "number") animateNumber(pointEl, data.point);
+            if (data.progress_percent !== undefined) {
+                if(barEl) barEl.style.width = `${data.progress_percent}%`;
+            }
+            if (data.remaining_text && remainingEl) remainingEl.innerHTML = data.remaining_text;
+
+            const isBonus = data.streak && [3,7,14].includes(data.streak);
+            showToast({ text: isBonus ? `🔥 +10P` : "+3P", bg: "#ff6b6b" });
+
+            if (data.leveled_up) {
+                const nameEl = document.getElementById("user-grade-name");
+                const chip = document.getElementById("user-grade-chip");
+                if (nameEl) nameEl.textContent = data.new_label;
+                if (chip) replayClass(chip, "is-levelup");
+                
+                const currentLabelEl = document.getElementById("current-grade-label");
+                if (currentLabelEl) currentLabelEl.textContent = data.new_label;
+                
+                alert(`축하합니다! ${data.new_label} 등급이 되셨어요! 🎉`);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    });
+  }
+  
+  // 실시간 인기글 탭 기능
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const tabPanes = document.querySelectorAll('.tab-pane');
+  
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const tabName = button.getAttribute('data-tab');
+      
+      // 모든 탭 버튼에서 active 클래스 제거
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      // 모든 탭 콘텐츠에서 active 클래스 제거
+      tabPanes.forEach(pane => pane.classList.remove('active'));
+      
+      // 클릭된 버튼에 active 클래스 추가
+      button.classList.add('active');
+      // 해당 탭 콘텐츠에 active 클래스 추가
+      const activePane = document.getElementById(tabName);
+      if (activePane) {
+        activePane.classList.add('active');
+      }
+    });
+  });
+});
+
+// 오늘의 한 줄 작성자 목록 팝업
+function openQuickPostsModal() {
+  document.getElementById('quickPostsModal').style.display = 'flex';
+  loadQuickPosts();
+}
+
+function closeQuickPostsModal() {
+  document.getElementById('quickPostsModal').style.display = 'none';
+}
+
+function loadQuickPosts() {
+  fetch('{% url "main:today_quick_posts" %}')
+    .then(response => response.json())
+    .then(data => {
+      const modalBody = document.getElementById('quickPostsModalBody');
+      if (data.posts.length === 0) {
+        modalBody.innerHTML = '<p style="text-align:center; color:#999; padding:40px;">아직 작성된 한 줄이 없어요.</p>';
+      } else {
+        let html = '<div class="quick-posts-list">';
+        data.posts.forEach(post => {
+          html += `
+            <div class="quick-post-item">
+              <div class="quick-post-header">
+                <span class="quick-post-author">${post.author}</span>
+                <span class="quick-post-time">${post.created_at}</span>
+              </div>
+              <div class="quick-post-content">${post.content}</div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        modalBody.innerHTML = html;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      document.getElementById('quickPostsModalBody').innerHTML = '<p style="text-align:center; color:#999;">불러오는 중 오류가 발생했습니다.</p>';
+    });
+}
+
+// 실시간 카운트 업데이트
+function updateQuickPostsCount() {
+  fetch('{% url "main:today_quick_posts" %}')
+    .then(response => response.json())
+    .then(data => {
+      const countEl = document.getElementById('quick-posts-count');
+      if(countEl) {
+        countEl.textContent = data.count;
+      }
+    })
+    .catch(() => {});
+}
+
+// 페이지 로드 시 카운트 업데이트
+document.addEventListener('DOMContentLoaded', updateQuickPostsCount);
+
+// 엄마들의 경험담 데이터
+const reviewsData = [
+  {
+    name: '박지은',
+    meta: '25개월 아이 엄마',
+    text: '"저희 아이는 밥을 정말 안 먹었는데, 이 방법을 따라하니까 달라졌어요. 특히 \'엄마가 먹을게\' 하고 내 앞에서 먹으니까 자기도 먹겠대요. 강요하지 않는 게 핵심인 것 같습니다."'
+  },
+  {
+    name: '김민지',
+    meta: '32개월 아이 엄마',
+    text: '"채소는 손도 안 대던 우리 아이가 이제 자기가 고르는 채소는 먹네요. 아이가 선택권을 가지니까 거부감이 줄었어요. 부모 입장에서 덜 스트레스 받으니 더 좋습니다."'
+  },
+  {
+    name: '이서현',
+    meta: '28개월 아이 엄마',
+    text: '"식사 시간을 20분으로 정하니까 아이도 집중을 잘 해요. 길어지면 아이가 놀기 시작했거든요. 정해진 시간 안에 먹는 습관이 생기니까 우리 가족 모두가 편해졌어요."'
+  },
+  {
+    name: '최예은',
+    meta: '30개월 아이 엄마',
+    text: '"아이가 먹기 싫으면 강제로 입 벌리는 건 절대 하지 않는다는 게 정말 효과 있었어요. 며칠 후면 또 시도하더니 어느 날부턴 먹더라고요. 아이 리듬을 존중하는 게 정답인 것 같습니다."'
+  },
+  {
+    name: '박소연',
+    meta: '26개월 아이 엄마',
+    text: '"편식 때문에 저만 스트레스 받고 있다는 생각이 들었어요. 아이는 아직 배우는 중이라는 걸 깨달으니 한결 편해졌어요. 지금은 아이가 먹는 음식이 얼마나 다양해졌는지 놀랍습니다!"'
+  }
+];
+
+let currentReviewIndex = 0;
+
+function updateReview() {
+  const reviewContainer = document.getElementById('reviewContainer');
+  const review = reviewsData[currentReviewIndex];
+  
+  // 애니메이션 리셋
+  reviewContainer.style.animation = 'none';
+  
+  // 약간의 지연 후 동시에 시작되도록
+  setTimeout(() => {
+    reviewContainer.innerHTML = `
+      <div class="review-header">
+        <span class="review-avatar">👩</span>
+        <div>
+          <div class="review-name">${review.name}</div>
+          <div class="review-meta">${review.meta}</div>
+        </div>
+      </div>
+      <p class="review-text">${review.text}</p>
+    `;
+    
+    // 강제 리플로우 후 애니메이션 다시 시작
+    void reviewContainer.offsetWidth;
+    reviewContainer.style.animation = '';
+  }, 10);
+  
+  currentReviewIndex = (currentReviewIndex + 1) % reviewsData.length;
+}
+
+function startReviewRotation() {
+  // 초기값 로드
+  updateReview();
+  // 3초마다 업데이트
+  setInterval(updateReview, 3000);
+}
+
+// 큐레이션 모달 함수
+function openCurationModal() {
+  const overlay = document.getElementById('curationModalOverlay');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  // 모달을 열 때 리뷰 회전 시작
+  if (!window.reviewRotationStarted) {
+    startReviewRotation();
+    window.reviewRotationStarted = true;
+  }
+}
+
+function closeCurationModal() {
+  const overlay = document.getElementById('curationModalOverlay');
+  overlay.classList.remove('active');
+  document.body.style.overflow = 'auto';
+}
+
+function goToFullContent() {
+  closeCurationModal();
+  // 전체 방법 보기 페이지로 이동 (요리 게시판)
+  window.location.href = '{% url "recipes:recipe_list" %}';
+}
+
+function goToMoreCases() {
+  closeCurationModal();
+  // 다른 편식 사례 더 보기 페이지로 이동
+  window.location.href = '{% url "board:parenting_list" %}';
+}
+
+// ESC 키로 모달 닫기
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    closeCurationModal();
+  }
+});
+</script>
+
+<!-- 큐레이션 모달 팝업 (Bottom Sheet) -->
+<div class="curation-modal-overlay" id="curationModalOverlay">
+  <div class="curation-modal" onclick="event.stopPropagation()">
+    <!-- 상단: 제목 + 한 줄 설명 -->
+    <div class="curation-modal-header">
+      <button class="modal-close-btn" onclick="closeCurationModal()">✕</button>
+      <h2 class="modal-title">아이 편식, 이렇게 접근했어요</h2>
+      <p class="modal-subtitle">강요하지 않고 아이 반응을 바꾼 방법</p>
+    </div>
+
+    <!-- 스크롤 가능한 콘텐츠 -->
+    <div class="curation-modal-content">
+      <!-- 핵심 요약 3가지 -->
+      <div class="summary-section">
+        <h3 class="section-title">🎯 핵심 3가지</h3>
+        <div class="summary-items">
+          <div class="summary-item">
+            <div class="summary-number">1</div>
+            <div class="summary-text">
+              <strong>먹어! 강요하지 않기</strong>
+              <p>아이가 거부할 때 강압적으로 먹이면 더 거부감이 생겨요. 아이 속도대로 천천히 진행하세요.</p>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <div class="summary-number">2</div>
+            <div class="summary-text">
+              <strong>식사 시간 20분 제한</strong>
+              <p>너무 길어지면 아이가 지루해해요. 편한 분위기에서 20분 내외로 식사를 마무리하는 게 좋습니다.</p>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <div class="summary-number">3</div>
+            <div class="summary-text">
+              <strong>아이가 고른 음식 존중</strong>
+              <p>음식을 거부하면 대신 다른 선택지를 제시하세요. 아이가 선택권을 가지면 긍정적 변화가 생깁니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 실제 엄마 짧은 후기 (자동 전환) -->
+      <div class="review-section">
+        <h3 class="section-title">💬 엄마들의 경험담</h3>
+        <div id="reviewContainer" class="review-card review-fade">
+          <!-- 동적으로 로드됨 -->
+        </div>
+      </div>
+
+      <!-- 전문가 한 줄 코멘트 -->
+      <div class="expert-section">
+        <h3 class="section-title">👨‍⚕️ 전문가 조언</h3>
+        <div class="expert-card">
+          <div class="expert-badge">영양사</div>
+          <p class="expert-text">
+            편식은 아이의 정상적인 발달 과정입니다. 부모의 불안함이 아이에게 전해지면 더 악화될 수 있으니, 여유로운 마음으로 다양한 음식을 자연스럽게 노출시키는 것이 중요합니다.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 CTA 버튼 -->
+    <div class="curation-modal-footer">
+      <button class="footer-btn btn-primary" onclick="goToFullContent()">
+        전체 방법 보기
+      </button>
+      <button class="footer-btn btn-secondary" onclick="goToMoreCases()">
+        다른 편식 사례 더 보기
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 오늘의 한 줄 작성자 목록 팝업 -->
+<div id="quickPostsModal" class="quick-posts-modal" onclick="if(event.target === this) closeQuickPostsModal()">
+  <div class="quick-posts-modal-content">
+    <div class="quick-posts-modal-header">
+      <h3>🎤 오늘의 한 줄 작성자</h3>
+      <button class="quick-posts-modal-close" onclick="closeQuickPostsModal()">&times;</button>
+    </div>
+    <div id="quickPostsModalBody" class="quick-posts-modal-body">
+      <p style="text-align:center; color:#999; padding:40px;">불러오는 중...</p>
+    </div>
+  </div>
+</div>
+
+<style>
+.quick-posts-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.quick-posts-modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+.quick-posts-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #eee;
+}
+
+.quick-posts-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.quick-posts-modal-close {
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-posts-modal-close:hover {
+  color: #333;
+}
+
+.quick-posts-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.quick-posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quick-post-item {
+  background: #f9f9f9;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.quick-post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.quick-post-author {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.quick-post-time {
+  font-size: 13px;
+  color: #999;
+}
+
+.quick-post-content {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.qp-social-proof:hover {
+  text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 추천 배너 섹션 - 반응형 디자인 */
+@media (max-width: 768px) {
+  .featured-story-section {
+    margin-top: 40px !important;
+    padding: 40px 0 !important;
+  }
+
+  .featured-story-section h3 {
+    font-size: 22px !important;
+  }
+
+  .featured-story-section > div > div:nth-child(2) {
+    flex-direction: column !important;
+    min-height: auto !important;
+  }
+
+  .featured-story-section > div > div:nth-child(2) > div:first-child {
+    flex: 0 0 200px !important;
+    min-height: 200px !important;
+  }
+
+  .featured-story-section > div > div:nth-child(2) > div:last-child {
+    flex: 0 0 auto !important;
+    padding: 28px 24px !important;
+  }
+
+  .featured-story-section h4 {
+    font-size: 20px !important;
+  }
+
+  .featured-story-section p {
+    font-size: 14px !important;
+  }
+
+  .featured-story-section a {
+    font-size: 14px !important;
+    padding: 12px 24px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .featured-story-section {
+    margin-top: 30px !important;
+    padding: 30px 0 !important;
+    background: linear-gradient(135deg, #fff8f5 0%, #fff0ea 100%) !important;
+  }
+
+  .featured-story-section > div {
+    padding: 0 16px !important;
+  }
+
+  .featured-story-section h3 {
+    font-size: 20px !important;
+  }
+
+  .featured-story-section > div > div:nth-child(2) {
+    border-radius: 16px !important;
+  }
+
+  .featured-story-section > div > div:nth-child(2) > div:first-child {
+    flex: 0 0 160px !important;
+    min-height: 160px !important;
+  }
+
+  .featured-story-section > div > div:nth-child(2) > div:last-child {
+    padding: 20px 18px !important;
+  }
+
+  .featured-story-section h4 {
+    font-size: 18px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .featured-story-section > div > div:nth-child(3) {
+    font-size: 12px !important;
+    margin-top: 20px !important;
+  }
+}
+
+/* 큐레이션 모달 스타일 */
+.curation-modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+.curation-modal-overlay.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.curation-modal {
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  background: white;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  animation: scaleIn 0.3s ease;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.curation-modal-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  position: relative;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background: #e8e8e8;
+  color: #333;
+}
+
+.modal-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1f2633;
+  margin: 0 0 8px 0;
+  line-height: 1.35;
+}
+
+.modal-subtitle {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+  font-weight: 500;
+}
+
+.curation-modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 20px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2633;
+  margin: 24px 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 핵심 요약 섹션 */
+.summary-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.summary-item {
+  display: flex;
+  gap: 12px;
+  background: #fff8f5;
+  padding: 16px;
+  border-radius: 12px;
+  border-left: 4px solid #ff8a72;
+}
+
+.summary-number {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  background: linear-gradient(135deg, #ff8a72 0%, #ff6b6b 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.summary-text strong {
+  display: block;
+  font-size: 14px;
+  color: #1f2633;
+  margin-bottom: 6px;
+}
+
+.summary-text p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* 리뷰 섹션 */
+.review-card {
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.review-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: #fff3f0;
+}
+
+.review-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f2633;
+}
+
+.review-meta {
+  font-size: 12px;
+  color: #999;
+}
+
+.review-text {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+  font-style: italic;
+}
+
+/* 리뷰 페이드 애니메이션 */
+.review-fade {
+  animation: fadeInOut 5.5s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  5%, 85% {
+    opacity: 1;
+  }
+  95%, 100% {
+    opacity: 0;
+  }
+}
+
+/* 전문가 섹션 */
+.expert-card {
+  background: linear-gradient(135deg, #fff8f5 0%, #fff0ea 100%);
+  padding: 16px;
+  border-radius: 12px;
+  border-left: 4px solid #ff8a72;
+}
+
+.expert-badge {
+  display: inline-block;
+  background: #ff8a72;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.expert-text {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 하단 CTA 버튼 */
+.curation-modal-footer {
+  padding: 16px 20px 24px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-btn {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #ff8a72 0%, #ff6b6b 100%);
+  color: white;
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(255, 107, 107, 0.4);
+}
+
+.btn-secondary {
+  background: #f5f5f5;
+  color: #1f2633;
+  border: 1px solid #e8e8e8;
+}
+
+.btn-secondary:hover {
+  background: #eeeeee;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .curation-modal {
+    max-width: 100%;
+    height: 90vh;
+  }
+
+  .modal-title {
+    font-size: 20px;
+  }
+
+  .section-title {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .curation-modal {
+    height: 92vh;
+  }
+
+  .curation-modal-header {
+    padding: 20px 16px;
+  }
+
+  .modal-title {
+    font-size: 18px;
+    margin-right: 32px;
+  }
+
+  .curation-modal-content {
+    padding: 16px;
+  }
+
+  .summary-item {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .curation-modal-footer {
+    padding: 12px 16px 20px;
+  }
+
+  .footer-btn {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+</style>
+
+<script>
+/* 배너 슬라이더 로직 */
+let banner2Index = 0;
+
+function banner2Move() {
+  const track = document.getElementById("banner2Track");
+  track.style.transform = `translateX(-${banner2Index * 100}%)`;
+}
+
+function banner2Prev() {
+  banner2Index = (banner2Index + 3) % 4;
+  banner2Move();
+}
+
+function banner2Next() {
+  banner2Index = (banner2Index + 1) % 4;
+  banner2Move();
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if mode == 'create' %}레시피 작성{% else %}레시피 수정{% endif %} - 맘스로그{% endblock %}
+
+{% block content %}
+<style>
+.recipe-form-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.form-header {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #ff6b6b;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: .2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+select.form-control {
+    cursor: pointer;
+}
+
+textarea.form-control {
+    resize: vertical;
+    font-family: inherit;
+}
+
+.image-upload-section {
+    margin-bottom: 25px;
+}
+
+.image-preview-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.image-preview-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #eee;
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.image-delete-checkbox {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+}
+
+.existing-image-label {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.file-input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.file-input-wrapper input[type="file"] {
+    display: none;
+}
+
+.file-input-label {
+    display: block;
+    padding: 12px;
+    background: #f8f9fa;
+    border: 2px dashed #ddd;
+    border-radius: 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.file-input-label:hover {
+    background: #e9ecef;
+    border-color: #ff6b6b;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: .2s;
+}
+
+.btn-primary {
+    background: #ff6b6b;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #ff5252;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.help-text {
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+    .recipe-form-container {
+        padding: 15px;
+        margin: 15px;
+    }
+    
+    .form-header {
+        font-size: 20px;
+    }
+    
+    .image-preview-container {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+}
+</style>
+
+<div class="recipe-form-container">
+    <h1 class="form-header">
+        {% if mode == 'create' %}레시피 작성{% else %}레시피 수정{% endif %}
+    </h1>
+    
+    <form method="post" enctype="multipart/form-data" id="recipeForm">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="error-message" style="margin-bottom: 20px; padding: 12px; background: #f8d7da; border-radius: 6px;">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+        
+        <!-- 카테고리 -->
+        <div class="form-group">
+            <label class="form-label">{{ form.category.label }}</label>
+            {{ form.category }}
+            {% if form.category.errors %}
+            <div class="error-message">{{ form.category.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- 제목 -->
+        <div class="form-group">
+            <label class="form-label">{{ form.title.label }}</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+            <div class="error-message">{{ form.title.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- 내용 -->
+        <div class="form-group">
+            <label class="form-label">{{ form.content.label }}</label>
+            {{ form.content }}
+            <div class="help-text">재료와 조리법을 자세히 작성해주세요.</div>
+            {% if form.content.errors %}
+            <div class="error-message">{{ form.content.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- 이미지 업로드 -->
+        <div class="image-upload-section">
+            <label class="form-label">레시피 이미지 (최대 10개)</label>
+            
+            <!-- 기존 이미지 (수정 모드일 때) -->
+            {% if mode == 'update' and images %}
+            <div class="image-preview-container">
+                {% for image in images %}
+                <div class="image-preview-item">
+                    <img src="{{ image.image.url }}" alt="이미지 {{ image.order }}">
+                    <label class="image-delete-checkbox">
+                        <input type="checkbox" name="delete_images" value="{{ image.id }}">
+                        삭제
+                    </label>
+                    <span class="existing-image-label">기존 이미지</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <!-- 새 이미지 업로드 -->
+            <div class="file-input-wrapper" style="margin-top: 15px;">
+                <input type="file" name="images" id="imageInput" accept="image/*" multiple>
+                <label for="imageInput" class="file-input-label">
+                    📷 이미지 선택 (최대 10개)
+                </label>
+            </div>
+            
+            <!-- 새 이미지 미리보기 -->
+            <div id="newImagePreview" class="image-preview-container" style="margin-top: 15px;"></div>
+            
+            <div class="help-text">PNG, JPG, GIF 형식의 이미지를 업로드할 수 있습니다.</div>
+        </div>
+        
+        <!-- 버튼 -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                {% if mode == 'create' %}작성 완료{% else %}수정 완료{% endif %}
+            </button>
+            <a href="{% if mode == 'update' %}{% url 'recipes:recipe_detail' post.pk %}{% else %}{% url 'recipes:recipe_list' %}{% endif %}" class="btn btn-secondary">취소</a>
+        </div>
+    </form>
+</div>
+
+<script>
+// 이미지 미리보기
+document.getElementById('imageInput').addEventListener('change', function(e) {
+    const previewContainer = document.getElementById('newImagePreview');
+    previewContainer.innerHTML = '';
+    
+    const files = Array.from(e.target.files);
+    
+    if (files.length > 10) {
+        alert('이미지는 최대 10개까지 선택할 수 있습니다.');
+        e.target.value = '';
+        return;
+    }
+    
+    files.forEach((file, index) => {
+        const reader = new FileReader();
+        
+        reader.onload = function(event) {
+            const div = document.createElement('div');
+            div.className = 'image-preview-item';
+            
+            const img = document.createElement('img');
+            img.src = event.target.result;
+            
+            const label = document.createElement('span');
+            label.className = 'existing-image-label';
+            label.textContent = `새 이미지 ${index + 1}`;
+            
+            div.appendChild(img);
+            div.appendChild(label);
+            previewContainer.appendChild(div);
+        };
+        
+        reader.readAsDataURL(file);
+    });
+});
+</script>
+{% endblock %}

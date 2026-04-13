@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card">
+    <h2>이메일 인증이 필요해요</h2>
+
+    <p><b>{{ email }}</b> 로 인증 메일을 보냈어요.</p>
+    <p>
+      개발환경에서는 메일이 실제로 가지 않고,
+      <b>runserver 터미널에 링크가 출력</b>돼요.
+    </p>
+    <p>그 링크를 복사해서 브라우저에 붙여넣으면 인증 완료!</p>
+
+    <div style="margin-top: 16px;">
+      <a href="{% url 'accounts:login' %}">로그인 페이지로</a>
+      &nbsp;|&nbsp;
+      <a href="{% url 'accounts:resend_verification_email' %}">
+        인증메일 재발송
+      </a>
+    </div>
+  </div>
+{% endblock %}

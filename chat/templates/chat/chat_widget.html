@@ -1,0 +1,448 @@
+{% load static %}
+<!-- Chat Popup Widget (Ajax-based) -->
+<style>
+  /* FAB 위치를 위로 올려 챗봇 토글과 겹치지 않게 조정 + 우측 정렬(챗봇과 동일 30px) */
+  .chatpop-fab { position: fixed; right: 30px; bottom: 120px; width: 65px; height: 65px; border-radius: 50%;
+    display:flex; align-items:center; justify-content:center; color:#fff; background: linear-gradient(135deg, #FF9A9E 0%, #FAD0C4 50%, #FFD1FF 100%);
+    box-shadow: 0 10px 24px rgba(255, 154, 158, 0.6); z-index: 9998; border:0; cursor:pointer; transition: all 0.3s; }
+  .chatpop-fab:hover { transform: scale(1.1); box-shadow: 0 12px 28px rgba(255, 154, 158, 0.7); }
+  /* 모달도 충분히 위로 올려 겹침 방지 + 우측 정렬(챗봇과 동일 30px) */
+  .chatpop-modal { position: fixed; right: 30px; bottom: 190px; width: 420px; height: 640px; background: #fff;
+    border-radius: 20px; border: 1px solid #eee; box-shadow: 0 20px 40px rgba(0,0,0,.15); z-index: 10000; overflow: hidden; display:none; }
+  .chatpop-header { height: 52px; display:flex; align-items:center; justify-content:space-between; padding: 0 12px; border-bottom: 2px solid rgba(255, 154, 158, 0.5); background: linear-gradient(to right, rgba(255,154,158,0.08), rgba(250,208,196,0.08)); }
+  .chatpop-title { font-weight: 800; color:#2d3436; }
+  .chatpop-actions { display:flex; gap:8px; }
+  .chatpop-actions button { background:#f7f7f9; border:1px solid #ededf2; color:#444; padding:6px 10px; border-radius:10px; cursor:pointer; transition: all 0.2s; }
+  .chatpop-actions button:hover { background: linear-gradient(135deg, #FF9A9E 0%, #FAD0C4 100%); color:#fff; border-color:#FF9A9E; }
+  .chatpop-body { height: calc(100% - 52px); display:flex; }
+  .chatpop-sidebar { width: 180px; border-right:1px solid #eee; padding:0; overflow:hidden; background: linear-gradient(to bottom, rgba(255,154,158,0.05), rgba(250,208,196,0.03)); display:flex; flex-direction:column; }
+  .chatpop-tabs { display:flex; border-bottom:1px solid #eee; }
+  .chatpop-tab { flex:1; padding:10px; text-align:center; font-size:11px; font-weight:600; color:#999; cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; background:#fff; }
+  .chatpop-tab.active { color:#FF9A9E; border-bottom-color:#FF9A9E; background:rgba(255,154,158,0.05); }
+  .chatpop-sidebar-header { font-size:12px; color:#666; margin:10px 10px 6px 10px; font-weight:600; }
+  .chatpop-list { display:flex; flex-direction:column; gap:8px; padding:0 10px 10px 10px; overflow:auto; flex:1; }
+  .chatpop-item { border:1px solid #eee; border-radius:10px; padding:10px; cursor:pointer; transition: all 0.2s; background:#fff; position:relative; overflow:hidden; }
+  .chatpop-item:hover { border-color:#FF9A9E; background:rgba(255,154,158,0.08); }
+  .chatpop-item.active { border-color:#FF9A9E; background:linear-gradient(135deg, rgba(255,154,158,0.2) 0%, rgba(250,208,196,0.12) 100%); box-shadow: 0 2px 8px rgba(255,154,158,0.2); }
+  .chatpop-item-title { font-weight:600; color:#333; font-size:13px; margin-bottom:4px; }
+  .chatpop-item-count { font-size:11px; color:#999; display:flex; align-items:center; gap:4px; }
+  .chatpop-item-count-badge { background: linear-gradient(135deg, #FF9A9E 0%, #FAD0C4 50%, #FFD1FF 100%); color:#fff; padding:2px 6px; border-radius:8px; font-weight:600; font-size:10px; }
+  .chatpop-room { flex:1; display:flex; flex-direction:column; }
+  .chatpop-messages { flex:1; overflow:auto; padding:10px; display:flex; flex-direction:column; gap:8px; background:#fff; }
+  .chatpop-msg { max-width:78%; padding:10px 12px; border-radius:14px; font-size:14px; line-height:1.5; box-shadow: 0 1px 4px rgba(0,0,0,.06); word-break: break-word; }
+  .chatpop-msg.own { align-self:flex-end; background: linear-gradient(135deg,#ff9a9e 0%,#ff6b6b 100%); color:#fff; border-bottom-right-radius:6px; }
+  .chatpop-msg.other { align-self:flex-start; background:#f0f2f5; color:#333; border-bottom-left-radius:6px; font-weight:500; }
+  .chatpop-msg.system { align-self:center; background:rgba(255,154,158,0.12); color:#FF6B82; border-radius:14px; font-size:12px; max-width:90%; text-align:center; padding:8px 10px; font-weight:600; }
+  .chatpop-msg-info { font-size:11px; color:#999; margin-top:4px; text-align:right; }
+  .chatpop-msg.other .chatpop-msg-info { text-align:left; }
+  .chatpop-inputbar { border-top:1px solid #eee; padding:8px; display:flex; gap:8px; background:linear-gradient(to top, rgba(255,154,158,0.05), rgba(250,208,196,0.03)); }
+  .chatpop-inputbar input { flex:1; border:1px solid #e5e7eb; border-radius:18px; padding:10px 12px; outline:none; font-size:14px; transition: all 0.2s; }
+  .chatpop-inputbar input:focus { border-color:#FF9A9E; box-shadow: 0 0 0 3px rgba(255,154,158,0.15); }
+  .chatpop-inputbar button { width:44px; height:44px; border-radius:50%; border:0; cursor:pointer; color:#fff; background: linear-gradient(135deg, #FF9A9E 0%, #FAD0C4 50%, #FFD1FF 100%); transition: all 0.2s; box-shadow: 0 2px 8px rgba(255,154,158,0.3); }
+  .chatpop-inputbar button:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(255,154,158,0.4); }
+  .chatpop-inputbar button:disabled { opacity:0.5; cursor:not-allowed; transform:scale(1); }
+  .chatpop-empty { height:100%; display:flex; align-items:center; justify-content:center; color:#999; font-size:14px; }
+  /* 전체화면 토글: 뷰포트 90%로 조금 작게, 모서리 유지 */
+  .chatpop-modal.is-fullscreen { right: 5vw; bottom: 5vh; width: 90vw; height: 90vh; border-radius: 16px; }
+  @media (max-width: 520px) {
+    .chatpop-modal { width: 94vw; height: 72vh; right: 3vw; bottom: 18vh; border-radius: 16px; }
+    .chatpop-sidebar { display:none; }
+    .chatpop-modal.is-fullscreen { width: 100vw; height: 100vh; right: 0; bottom: 0; left: 0; top: 0; border-radius: 0; }
+  }
+</style>
+
+<button id="chatpopFab" class="chatpop-fab" title="실시간 채팅" aria-label="실시간 채팅">
+  <span class="material-icons-round" style="font-size:28px;">chat_bubble</span>
+</button>
+<div id="chatpopModal" class="chatpop-modal" role="dialog" aria-modal="true" aria-labelledby="chatpopTitle">
+  <div class="chatpop-header">
+    <div id="chatpopTitle" class="chatpop-title">
+      실시간 채팅 <span id="totalMembersCount" style="font-size:12px; color:#FF9A9E; font-weight:600;"></span>
+    </div>
+    <div class="chatpop-actions">
+      <span id="chatpopReset" class="material-icons-round" style="cursor:pointer; color:#666; transition:color 0.2s;" onmouseover="this.style.color='#FF9A9E'" onmouseout="this.style.color='#666'" title="글 초기화">restart_alt</span>
+      <span id="chatpopToFull" class="material-icons-round" aria-pressed="false" style="cursor:pointer; color:#666; transition:color 0.2s;" onmouseover="this.style.color='#FF9A9E'" onmouseout="this.style.color='#666'" title="전체화면">fullscreen</span>
+      <span id="chatpopClose" class="material-icons-round" style="cursor:pointer; color:#666; transition:color 0.2s;" onmouseover="this.style.color='#FF9A9E'" onmouseout="this.style.color='#666'" title="닫기">close</span>
+    </div>
+  </div>
+  <div class="chatpop-body">
+    <aside class="chatpop-sidebar">
+      <div class="chatpop-tabs">
+        <div class="chatpop-tab active" data-tab="joined">참여중</div>
+        <div class="chatpop-tab" data-tab="all">전체</div>
+      </div>
+      <div style="flex:1; overflow:auto;">
+        <div id="chatpopTabJoined" class="chatpop-tab-content">
+          <div id="chatpopJoined" class="chatpop-list"></div>
+        </div>
+        <div id="chatpopTabAll" class="chatpop-tab-content" style="display:none;">
+          <div id="chatpopAll" class="chatpop-list"></div>
+        </div>
+      </div>
+    </aside>
+    <section class="chatpop-room">
+      <div id="chatpopMessages" class="chatpop-messages"><div class="chatpop-empty">채팅방을 선택하세요</div></div>
+      <form id="chatpopForm" class="chatpop-inputbar">
+        <input id="chatpopInput" type="text" placeholder="메시지를 입력하세요" autocomplete="off" />
+        <button id="chatpopSend" type="submit">➤</button>
+      </form>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  const isAuthenticated = {{ user.is_authenticated|yesno:'true,false' }};
+  const loginUrl = '{% url "accounts:login" %}';
+  const fab = document.getElementById('chatpopFab');
+  const modal = document.getElementById('chatpopModal');
+  const closeBtn = document.getElementById('chatpopClose');
+  const resetBtn = document.getElementById('chatpopReset');
+  const toFullBtn = document.getElementById('chatpopToFull');
+  const listJoined = document.getElementById('chatpopJoined');
+  const messagesEl = document.getElementById('chatpopMessages');
+  const form = document.getElementById('chatpopForm');
+  const input = document.getElementById('chatpopInput');
+  const sendBtn = document.getElementById('chatpopSend');
+
+  let currentTab = 'joined';
+  let allRooms = [];
+  let currentRoomId = null;
+  let pollTimer = null;
+  let lastMessageId = 0;
+  
+  // 탭 전환 기능
+  document.querySelectorAll('.chatpop-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.chatpop-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentTab = tab.dataset.tab;
+      document.getElementById('chatpopTabJoined').style.display = currentTab === 'joined' ? 'block' : 'none';
+      document.getElementById('chatpopTabAll').style.display = currentTab === 'all' ? 'block' : 'none';
+    });
+  });
+
+  function getCookie(name){
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function openModal(){
+    if(!isAuthenticated){ window.location.href = loginUrl; return; }
+    modal.style.display = 'block';
+    localStorage.setItem('chatpop.open','1');
+    loadRooms();
+  }
+  function closeModal(){
+    modal.style.display = 'none';
+    localStorage.removeItem('chatpop.open');
+    if(pollTimer !== null && typeof pollTimer !== 'undefined'){ 
+      clearInterval(pollTimer); 
+      pollTimer = null; 
+    }
+  }
+  function stopPolling(){ 
+    if(pollTimer !== null && typeof pollTimer !== 'undefined'){ 
+      clearInterval(pollTimer); 
+      pollTimer = null; 
+    } 
+  }
+  function scrollToBottom(){ messagesEl.scrollTop = messagesEl.scrollHeight; }
+
+  function resetInput(){
+    input.value = '';
+    input.focus();
+  }
+
+  function resetMessages(){
+    stopPolling();
+    messagesEl.innerHTML = '<div class="chatpop-empty">채팅을 시작하세요</div>';
+    lastMessageId = 0;
+  }
+
+  function renderRooms(target, rooms){
+    target.innerHTML = '';
+    rooms.forEach((r, idx) => {
+      const hsl = `hsl(${(idx * 45) % 360}, 70%, 60%)`;
+      const div = document.createElement('div');
+      div.className = 'chatpop-item' + (r.id === currentRoomId ? ' active' : '');
+      div.style.borderLeftWidth = '4px';
+      div.style.borderLeftColor = hsl;
+      div.innerHTML = `<div class="chatpop-item-title">${r.title}</div><div class="chatpop-item-count"><span>👥</span><span class="chatpop-item-count-badge">${r.member_count || 0}</span></div>`;
+      div.title = r.description || '';
+      div.addEventListener('click', () => selectRoom(r.id));
+      target.appendChild(div);
+    });
+  }
+
+  function loadRooms(){
+    fetch('/chat/api/rooms/')
+      .then(r => r.json())
+      .then(data => {
+        const joined = data.joined_rooms || [];
+        allRooms = data.rooms || [];
+        
+        // 참여중 목록 렌더
+        const listJoined = document.getElementById('chatpopJoined');
+        listJoined.innerHTML = '';
+        let totalMembers = 0;
+        joined.forEach((r, idx) => {
+          const hsl = `hsl(${(idx * 45) % 360}, 70%, 60%)`;
+          const div = document.createElement('div');
+          div.className = 'chatpop-item' + (r.id === currentRoomId ? ' active' : '');
+          div.dataset.roomId = r.id;
+          div.style.borderLeftWidth = '4px';
+          div.style.borderLeftColor = hsl;
+          div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="flex:1; cursor:pointer;" class="chatpop-room-info">
+                <div class="chatpop-item-title">${r.title}</div>
+              </div>
+              <button class="chatpop-leave-btn" data-room-id="${r.id}" style="background:#ff6b6b; color:#fff; border:0; padding:4px 8px; border-radius:6px; font-size:10px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">나가기</button>
+            </div>
+          `;
+          div.title = r.description || '';
+          const roomInfo = div.querySelector('.chatpop-room-info');
+          roomInfo.addEventListener('click', () => selectRoom(r.id));
+          const leaveBtn = div.querySelector('.chatpop-leave-btn');
+          leaveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            leaveRoom(r.id);
+          });
+          listJoined.appendChild(div);
+          totalMembers += (r.member_count || 0);
+        });
+        
+        // 헤더에 총 참여자 수 표시
+        const totalCountEl = document.getElementById('totalMembersCount');
+        if(totalCountEl && totalMembers > 0) {
+          totalCountEl.textContent = `(${totalMembers}명 참여중)`;
+        } else if(totalCountEl) {
+          totalCountEl.textContent = '';
+        }
+        
+        // 전체 목록 렌더
+        const listAll = document.getElementById('chatpopAll');
+        listAll.innerHTML = '';
+        allRooms.forEach((r, idx) => {
+          const hsl = `hsl(${(idx * 45) % 360}, 70%, 60%)`;
+          const div = document.createElement('div');
+          div.className = 'chatpop-item' + (r.id === currentRoomId ? ' active' : '');
+          div.dataset.roomId = r.id;
+          div.style.borderLeftWidth = '4px';
+          div.style.borderLeftColor = hsl;
+          div.innerHTML = `<div class="chatpop-item-title">${r.title}</div>`;
+          div.title = r.description || '';
+          div.addEventListener('click', () => selectRoom(r.id));
+          listAll.appendChild(div);
+        });
+        
+        // 마지막 방 자동 열기 (참여중인 방에 한정)
+        const saved = parseInt(localStorage.getItem('chatpop.roomId') || '0', 10);
+        const savedIsJoined = joined.some(r => r.id === saved);
+        if(saved && savedIsJoined){
+          selectRoom(saved);
+        } else if(joined.length > 0) {
+          selectRoom(joined[0].id);
+        } else {
+          // 참여 중인 방이 없을 때 안내 유지
+          messagesEl.innerHTML = '<div class="chatpop-empty">참여 중인 채팅방이 없습니다.</div>';
+        }
+      })
+      .catch(()=>{});
+  }
+
+  function ensureJoin(roomId){
+    return fetch(`/chat/api/rooms/${roomId}/join/`, { method:'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } })
+      .then(r => r.json());
+  }
+
+  function renderMessage(msg){
+    const el = document.createElement('div');
+    if(msg.is_system){
+      el.className = 'chatpop-msg system';
+      el.innerHTML = `<div>${msg.content}</div>`;
+    } else {
+      el.className = 'chatpop-msg ' + (msg.is_own ? 'own' : 'other');
+      const userName = msg.is_own ? '' : `<div style="font-weight:600; font-size:12px; margin-bottom:4px; color:#FF6B82;">${msg.user_nickname || msg.user}</div>`;
+      el.innerHTML = userName + `<div>${msg.content}</div><div class="chatpop-msg-info">${msg.created_at}</div>`;
+    }
+    messagesEl.appendChild(el);
+  }
+
+  function loadMessages(initial){
+    if(!currentRoomId) return;
+    fetch(`/chat/room/${currentRoomId}/fetch/?last_message_id=${initial?0:lastMessageId}`)
+      .then(r => r.json())
+      .then(data => {
+        if(Array.isArray(data.messages)){
+          data.messages.forEach(m => { 
+            renderMessage(m);
+            lastMessageId = m.id; 
+          });
+          scrollToBottom();
+        }
+      })
+      .catch(()=>{});
+  }
+
+  function startPolling(){ stopPolling(); pollTimer = setInterval(() => loadMessages(false), 2000); }
+
+  function leaveRoom(roomId){
+    if(!confirm('이 채팅방에서 나가시겠습니까?')) return;
+    fetch(`/chat/api/rooms/${roomId}/leave/`, {method:'POST', headers: {'X-CSRFToken': getCookie('csrftoken')}})
+      .then(r => r.json())
+      .then(data => {
+        if(data.success){
+          // 현재 보고 있던 방이면 완전히 초기화
+          if(currentRoomId === roomId){
+            // 폴링 먼저 중지
+            if(pollTimer !== null && typeof pollTimer !== 'undefined'){ 
+              clearInterval(pollTimer); 
+              pollTimer = null; 
+            }
+            // 상태 초기화
+            currentRoomId = null;
+            lastMessageId = 0;
+            messagesEl.innerHTML = '<div class="chatpop-empty">채팅방을 선택하세요</div>';
+          }
+          // 목록 새로고침
+          loadRooms();
+        } else {
+          alert(data.error || '나가기 실패');
+        }
+      })
+      .catch(() => alert('나가기 오류'));
+  }
+
+  function selectRoom(roomId){
+    if(currentRoomId === roomId) return;
+    currentRoomId = roomId;
+    localStorage.setItem('chatpop.roomId', String(roomId));
+    lastMessageId = 0;
+    messagesEl.innerHTML = '';
+    ensureJoin(roomId).then(() => {
+      // 채팅방 목록 새로고침 (참여중 탭에 추가되도록)
+      loadRooms();
+      
+      // 입장 시 이전 메시지들을 한 번 훑어서 lastMessageId를 최신으로 업데이트 (표시X)
+      loadMessages(true);
+      
+      // 그 후 폴링 시작
+      startPolling();
+      
+      // 입장 시스템 메시지 (한 번만 표시)
+      const joinKey = `chatJoin_${roomId}`;
+      const hasJoined = sessionStorage.getItem(joinKey);
+      
+      if (!hasJoined) {
+        fetch(`/chat/api/rooms/${roomId}/member-info/`, {headers: {'X-CSRFToken': getCookie('csrftoken')}})
+          .then(r => r.json())
+          .then(data => {
+            const nickname = data.user_nickname || data.user || '익명';
+            const systemMsg = {
+              is_system: true, 
+              content: `${nickname}님이 입장하셨습니다. 인사를 건내주세요.`, 
+              created_at: new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'})
+            };
+            renderMessage(systemMsg);
+            scrollToBottom();
+            
+            // 세션에 입장 기록 저장
+            sessionStorage.setItem(joinKey, 'true');
+            
+            // 5초 후 입장 메시지 자동 삭제
+            setTimeout(() => {
+              const messages = messagesEl.querySelectorAll('.chatpop-msg.system');
+              if(messages.length > 0) {
+                const lastSystemMsg = messages[messages.length - 1];
+                if(lastSystemMsg.textContent.includes('입장하셨습니다')) {
+                  lastSystemMsg.style.opacity = '0';
+                  lastSystemMsg.style.transition = 'opacity 0.3s ease';
+                  setTimeout(() => lastSystemMsg.remove(), 300);
+                }
+              }
+            }, 5000);
+          })
+          .catch(() => {});
+      }
+    });
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!currentRoomId) return;
+    const content = input.value.trim();
+    if(!content) return;
+    
+    // 폴링 시작 (다시 메시지 로드)
+    if(pollTimer === null) {
+      loadMessages(false);
+      startPolling();
+    }
+    
+    sendBtn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('content', content);
+    formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+    fetch(`/chat/room/${currentRoomId}/send/`, { method:'POST', body: formData })
+      .then(r => r.json())
+      .then(data => { if(data.success){ input.value = ''; loadMessages(false); } else { alert(data.error||'전송 실패'); } })
+      .catch(() => alert('전송 오류'))
+      .finally(() => { sendBtn.disabled = false; input.focus(); });
+  });
+
+  // 전체화면 토글 (내부 확장)
+  function toggleFullscreen(){
+    const isFs = modal.classList.toggle('is-fullscreen');
+    toFullBtn.setAttribute('aria-pressed', isFs ? 'true' : 'false');
+    // 전체화면 진입 시 최근 메시지 보이도록 스크롤 보정
+    setTimeout(scrollToBottom, 60);
+  }
+  
+  // 초기화 함수
+  function resetChatMessages() {
+    if(!currentRoomId) {
+      alert('채팅방을 선택해주세요');
+      return;
+    }
+    if(!confirm('현재 채팅방의 모든 메시지를 삭제하시겠습니까?')) return;
+    
+    fetch(`/chat/room/${currentRoomId}/clear/`, {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCookie('csrftoken')}
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.success) {
+        resetMessages();
+        alert('메시지가 모두 삭제되었습니다');
+      } else {
+        alert(data.error || '삭제 실패');
+      }
+    })
+    .catch(() => alert('삭제 오류'));
+  }
+  
+  toFullBtn.addEventListener('click', toggleFullscreen);
+  fab.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  resetBtn.addEventListener('click', resetChatMessages);
+
+
+  // 저장된 상태 복구: 사용자가 한 번 열면 페이지 이동해도 유지
+  if(localStorage.getItem('chatpop.open') === '1'){ openModal(); }
+})();
+</script>

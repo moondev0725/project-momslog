@@ -1,0 +1,57 @@
+{% extends "accounts/mypage/base.html" %}
+{% load static %}
+
+{% block mypage_content %}
+<h2 class="mypage-h2">회원 탈퇴</h2>
+
+<div class="danger-box">
+  <div class="danger-box__title">탈퇴 전 꼭 확인해 주세요</div>
+  <ul class="danger-box__list">
+    <li>탈퇴하면 계정 정보는 복구할 수 없어요.</li>
+    <li>작성한 게시글/댓글 등은 정책에 따라 삭제되거나 익명 처리될 수 있어요.</li>
+    <li>진행 중인 인증/포인트/등급 정보도 함께 삭제돼요.</li>
+    <li>탈퇴 후 동일 아이디로는 15일간 재가입이 제한됩니다.</li>
+  </ul>
+</div>
+
+<form method="post" id="deleteForm" class="mypage-form form--limit" novalidate>
+  {% csrf_token %}
+
+  <!-- 현재 비밀번호 -->
+  <div class="field">
+    <label class="field__label" for="deletePassword">현재 비밀번호</label>
+
+    <div class="pwbox">
+      <input type="password" id="deletePassword" name="old_password" class="field__input input--lg"
+             autocomplete="current-password" placeholder="현재 비밀번호를 입력해 주세요">
+      <button type="button" class="pwbox__btn toggle-eye" data-toggle-target="deletePassword">표시</button>
+    </div>
+
+    <div id="deletePwMsg" class="field__msg msg-muted"></div>
+  </div>
+
+  <!-- 동의 체크 -->
+  <div class="field field--check">
+    <label class="checkline">
+      <input type="checkbox" id="deleteAgree" name="agree" value="1">
+      <span>위 내용을 확인했고, 회원 탈퇴에 동의합니다. (필수)</span>
+    </label>
+  </div>
+
+  <div class="danger-row">
+    <div class="danger-row__text">
+      <div class="danger-row__title">정말 탈퇴할까요?</div>
+      <div class="danger-row__desc">비밀번호 확인 + 동의 체크 후 버튼이 활성화돼요.</div>
+    </div>
+
+    <button type="submit" id="deleteSubmitBtn" class="btn btn--primary" disabled>회원 탈퇴</button>
+  </div>
+</form>
+
+<script>
+  window.MYPAGE_DELETE_CONFIG = {
+    checkOldPasswordUrl: "{% url 'accounts:mypage_password_check' %}",
+  };
+</script>
+<script src="{% static 'js/mypage_delete.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 50px auto; padding: 20px;">
+    <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center;">
+        <h2 style="color: #333; margin-bottom: 20px; font-weight: 800;">정말 삭제하시겠습니까?</h2>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; text-align: left;">
+            <p><strong>제목:</strong> {{ post.title }}</p>
+            <p><strong>작성자:</strong> {{ post.author.nickname|default:post.author.username }}</p>
+            <p><strong>작성일:</strong> {{ post.created_at|date:"Y-m-d H:i" }}</p>
+            <p style="color: #888; font-size: 14px; margin-top: 10px;"> 삭제 후에는 복구할 수 없습니다.</p>
+        </div>
+        
+        <form method="post" style="display: inline-block;">
+            {% csrf_token %}
+            <button type="submit" style="background: #ff6b6b; color: white; padding: 12px 30px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-right: 10px;">
+                삭제하기
+            </button>
+            <a href="{% url 'board:hotdeal_detail' post.pk %}" style="background: #ddd; color: #333; padding: 12px 30px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block;">
+                취소
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

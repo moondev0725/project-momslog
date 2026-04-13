@@ -1,0 +1,893 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}관리자 대시보드{% endblock %}
+
+{% block content %}
+<style>
+.dashboard-wrap {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 10px 15px 40px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.dashboard-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+}
+
+.filter-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-form select,
+.filter-form input,
+.filter-form button {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.filter-form button {
+    background: #ff6b6b;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.kpi-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.kpi-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #f1f1f1;
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+}
+
+.kpi-label {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.kpi-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ff6b6b;
+}
+
+.kpi-change {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+}
+
+.section {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #f1f1f1;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.table th,
+.table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.table th {
+    text-align: left;
+    color: #666;
+    background: #fafafa;
+}
+
+.badge-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-pending { background: #fff3cd; color: #856404; }
+.badge-progress { background: #d1ecf1; color: #0c5460; }
+.badge-done { background: #d4edda; color: #155724; }
+
+.distribution {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.distribution-item {
+    flex: 1 1 120px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header { flex-direction: column; align-items: flex-start; }
+    .filter-form { width: 100%; }
+    .filter-form select, .filter-form input, .filter-form button { flex: 1; width: 100%; }
+}
+
+/* 모달 기본 스타일 */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+}
+
+.modal-window {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+    width: min(960px, 92vw);
+    max-height: 82vh;
+    overflow: auto;
+    padding: 0;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: #888;
+    padding: 4px 6px;
+}
+
+.modal-body {
+    padding: 18px 20px 22px;
+}
+
+/* 관리자 액션 버튼 스타일 */
+.btn-action {
+    background: #ff6b6b;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .12s ease, transform .12s ease;
+}
+
+.btn-action:hover { background: #ff5a5a; transform: translateY(-1px); }
+.btn-action:active { transform: translateY(0); }
+
+.btn-ghost {
+    background: #f4f4f5;
+    color: #444;
+    border: 1px solid #e1e1e1;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .12s ease, border-color .12s ease, transform .12s ease;
+}
+
+.btn-ghost:hover { background: #e9e9eb; border-color: #d6d6d6; transform: translateY(-1px); }
+.btn-ghost:active { transform: translateY(0); }
+</style>
+
+<script>
+// 새로고침 시 브라우저가 이전 스크롤 위치로 복원하지 않도록 설정
+if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filter-form');
+    if (filterForm) {
+        filterForm.addEventListener('submit', function() {
+            // 제출 시 화면이 아래로 내려가는 것을 방지하고 최상단으로 이동
+            window.scrollTo({ top: 0, behavior: 'auto' });
+        });
+    }
+
+    // KPI 모달 트리거 (오늘 신규 가입자)
+    document.querySelectorAll('.kpi-modal-trigger').forEach(function(trigger) {
+        trigger.addEventListener('click', function(e) {
+            e.preventDefault();
+            const modalId = trigger.getAttribute('data-modal');
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = 'flex';
+        });
+    });
+
+    // 모달 닫기 버튼
+    document.querySelectorAll('.modal-close').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const modalId = btn.getAttribute('data-close');
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = 'none';
+        });
+    });
+
+    // 오버레이 영역 클릭 시 닫기
+    document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) overlay.style.display = 'none';
+        });
+    });
+});
+</script>
+
+<div class="dashboard-wrap">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">관리자 통계</h1>
+        <form id="filter-form" method="get" class="filter-form">
+            <select name="range">
+                <option value="today" {% if range_param == 'today' %}selected{% endif %}>오늘</option>
+                <option value="7" {% if range_param == '7' %}selected{% endif %}>최근 7일</option>
+                <option value="30" {% if range_param == '30' %}selected{% endif %}>최근 30일</option>
+                <option value="custom" {% if range_param == 'custom' %}selected{% endif %}>직접 설정</option>
+            </select>
+            <input type="date" name="start" value="{% if start_date %}{{ start_date|date:'Y-m-d' }}{% endif %}">
+            <input type="date" name="end" value="{% if end_date %}{{ end_date|date:'Y-m-d' }}{% endif %}">
+            <button type="submit">적용</button>
+        </form>
+    </div>
+
+    <div class="kpi-grid">
+        <a href="#" class="kpi-link kpi-modal-trigger" data-modal="today-signups-modal" title="오늘 가입자 목록 보기">
+            <div class="kpi-card">
+                <div class="kpi-label">오늘 신규 가입자</div>
+                <div class="kpi-value">{{ kpi.new_signups_today|intcomma }}</div>
+                <div class="kpi-change">
+                    {% if kpi.new_signups_change is not None %}
+                        전일 대비 {{ kpi.new_signups_change|floatformat:1 }}%
+                    {% else %}
+                        전일 대비 -
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        <div class="kpi-card kpi-modal-trigger" data-modal="range-signups-modal" style="cursor:pointer;">
+            <div class="kpi-label">기간 내 가입자</div>
+            <div class="kpi-value">{{ kpi.active_signups|intcomma }}</div>
+            <div class="kpi-change">
+                {% if kpi.active_signups_change is not None %}
+                    전기간 대비 {{ kpi.active_signups_change|floatformat:1 }}%
+                {% else %}
+                    전기간 대비 -
+                {% endif %}
+            </div>
+        </div>
+        <div class="kpi-card kpi-modal-trigger" data-modal="free-posts-today-modal" style="cursor:pointer;">
+            <div class="kpi-label">오늘 자유게시판</div>
+            <div class="kpi-value">{{ kpi.free_posts_today|intcomma }}</div>
+        </div>
+        <div class="kpi-card kpi-modal-trigger" data-modal="recipe-posts-today-modal" style="cursor:pointer;">
+            <div class="kpi-label">오늘 요리레시피</div>
+            <div class="kpi-value">{{ kpi.recipe_posts_today|intcomma }}</div>
+        </div>
+        <div class="kpi-card kpi-modal-trigger" data-modal="total-posts-range-modal" style="cursor:pointer;">
+            <div class="kpi-label">기간 내 총 게시글(자유+레시피)</div>
+            <div class="kpi-value">{{ kpi.total_posts_range|intcomma }}</div>
+            <div class="kpi-change">
+                {% if kpi.total_posts_change is not None %}
+                    전기간 대비 {{ kpi.total_posts_change|floatformat:1 }}%
+                {% else %}
+                    전기간 대비 -
+                {% endif %}
+            </div>
+        </div>
+        <div class="kpi-card kpi-modal-trigger" data-modal="hotdeal-status-modal" style="cursor:pointer;">
+            <div class="kpi-label">미처리/처리중/완료 (벼룩시장)</div>
+            <div class="kpi-value">{{ kpi.pending_count }} / {{ kpi.in_progress_count }} / {{ kpi.done_count }}</div>
+            <div class="kpi-change">
+                {% if kpi.done_change is not None %}
+                    완료 전기간 대비 {{ kpi.done_change|floatformat:1 }}%
+                {% else %}
+                    완료 전기간 대비 -
+                {% endif %}
+            </div>
+        </div>
+        <div class="kpi-card kpi-modal-trigger" data-modal="flea-reports-today-modal" style="cursor:pointer;">
+            <div class="kpi-label">벼룩시장 신고 (오늘)</div>
+            <div class="kpi-value">{{ kpi.reports_today|intcomma }}</div>
+            <div class="kpi-change">
+                기간 신고 {{ kpi.reports_range|intcomma }}건 / {% if kpi.reports_change is not None %}전기간 대비 {{ kpi.reports_change|floatformat:1 }}%{% else %}전기간 대비 -{% endif %}
+            </div>
+            <div class="kpi-change">대기 {{ kpi.reports_pending|intcomma }} · 처리 {{ kpi.reports_resolved|intcomma }}</div>
+        </div>
+    </div>
+
+    <!-- 오늘 가입자 목록 모달 -->
+    <div id="today-signups-modal" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span class="modal-title">오늘 가입자 목록</span>
+                <button class="modal-close" data-close="today-signups-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th style="width:160px;">아이디</th>
+                            <th style="width:180px;">닉네임</th>
+                            <th>이메일</th>
+                            <th style="width:170px;">가입시각</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in signups_today_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.nickname|default:'-' }}</td>
+                            <td>{{ user.email|default:'-' }}</td>
+                            <td>{{ user.date_joined|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5">오늘 가입한 사용자가 없습니다.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 기간 내 가입자 모달 -->
+    <div id="range-signups-modal" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span class="modal-title">기간 내 가입자 목록</span>
+                <button class="modal-close" data-close="range-signups-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th style="width:160px;">아이디</th>
+                            <th style="width:180px;">닉네임</th>
+                            <th>이메일</th>
+                            <th style="width:170px;">가입시각</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% if signups_range_list %}
+                        {% for user in signups_range_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.nickname|default:'-' }}</td>
+                            <td>{{ user.email|default:'-' }}</td>
+                            <td>{{ user.date_joined|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5">총 {{ kpi.active_signups|intcomma }}명 (상세 목록이 아직 준비되지 않았습니다.)</td>
+                        </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 벼룩시장 상태 모달 -->
+    <div id="hotdeal-status-modal" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span class="modal-title">벼룩시장 상태 (미처리/처리중/완료)</span>
+                <button class="modal-close" data-close="hotdeal-status-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th style="width:200px;">상품/제목</th>
+                            <th style="width:120px;">상태</th>
+                            <th style="width:160px;">작성자</th>
+                            <th style="width:170px;">작성일</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% if hotdeal_list %}
+                        {% for deal in hotdeal_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ deal.title }}</td>
+                            <td>
+                                {% if deal.status == 'pending' %}
+                                    <span class="badge-status badge-pending">미처리</span>
+                                {% elif deal.status == 'in_progress' %}
+                                    <span class="badge-status badge-progress">처리중</span>
+                                {% elif deal.status == 'done' %}
+                                    <span class="badge-status badge-done">완료</span>
+                                {% else %}
+                                    {{ deal.get_status_display|default:deal.status }}
+                                {% endif %}
+                            </td>
+                            <td>{% if deal.author %}{{ deal.author.nickname|default:deal.author.username }}{% else %}-{% endif %}</td>
+                            <td>{{ deal.created_at|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5">총 미처리 {{ kpi.pending_count|intcomma }} / 처리중 {{ kpi.in_progress_count|intcomma }} / 완료 {{ kpi.done_count|intcomma }} (벼룩시장 상세 목록이 아직 준비되지 않았습니다.)</td>
+                        </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 오늘 자유게시판 모달 -->
+    <div id="free-posts-today-modal" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span class="modal-title">오늘 자유게시판</span>
+                <button class="modal-close" data-close="free-posts-today-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th>제목</th>
+                            <th style="width:140px;">작성자</th>
+                            <th style="width:150px;">카테고리</th>
+                            <th style="width:170px;">작성일</th>
+                            <th style="width:70px;">조회</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% if free_posts_today_list %}
+                        {% for post in free_posts_today_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><a href="{% url 'board:free_detail' post.pk %}" style="color:#ff6b6b;">{{ post.title }}</a></td>
+                            <td>{{ post.author.nickname|default:post.author.username }}</td>
+                            <td>{{ post.get_category_display }}</td>
+                            <td>{{ post.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ post.views|intcomma }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="6">오늘 작성된 자유게시판 글이 없습니다.</td></tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 오늘 요리레시피 모달 -->
+    <div id="recipe-posts-today-modal" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span class="modal-title">오늘 요리레시피</span>
+                <button class="modal-close" data-close="recipe-posts-today-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th>제목</th>
+                            <th style="width:140px;">작성자</th>
+                            <th style="width:150px;">카테고리</th>
+                            <th style="width:170px;">작성일</th>
+                            <th style="width:70px;">조회</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% if recipe_posts_today_list %}
+                        {% for post in recipe_posts_today_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><a href="{% url 'recipes:recipe_detail' post.pk %}" style="color:#ff6b6b;">{{ post.title }}</a></td>
+                            <td>{{ post.author.nickname|default:post.author.username }}</td>
+                            <td>{{ post.get_category_display_name }}</td>
+                            <td>{{ post.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ post.views|intcomma }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="6">오늘 작성된 요리레시피 글이 없습니다.</td></tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 기간 내 총 게시글(자유+레시피) 모달 -->
+    <div id="total-posts-range-modal" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span class="modal-title">기간 내 총 게시글 (자유+레시피)</span>
+                <button class="modal-close" data-close="total-posts-range-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th>제목</th>
+                            <th style="width:140px;">작성자</th>
+                            <th style="width:150px;">게시판</th>
+                            <th style="width:170px;">작성일</th>
+                            <th style="width:70px;">조회</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% if total_posts_range_list %}
+                        {% for post in total_posts_range_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                {% if post.board_type == 'free' %}
+                                    <a href="{% url 'board:free_detail' post.pk %}" style="color:#ff6b6b;">{{ post.title }}</a>
+                                {% elif post.board_type == 'recipe' %}
+                                    <a href="{% url 'recipes:recipe_detail' post.pk %}" style="color:#ff6b6b;">{{ post.title }}</a>
+                                {% else %}
+                                    {{ post.title }}
+                                {% endif %}
+                            </td>
+                            <td>{{ post.author.nickname|default:post.author.username }}</td>
+                            <td>
+                                {% if post.board_type == 'free' %}자유게시판{% elif post.board_type == 'recipe' %}요리레시피{% else %}-{% endif %}
+                            </td>
+                            <td>{{ post.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ post.views|intcomma }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="6">선택한 기간 동안의 게시글이 없습니다.</td></tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 벼룩시장 신고 (오늘) 모달 -->
+    <div id="flea-reports-today-modal" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span class="modal-title">벼룩시장 신고 (오늘)</span>
+                <button class="modal-close" data-close="flea-reports-today-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th>상품</th>
+                            <th style="width:140px;">신고자</th>
+                            <th style="width:180px;">사유</th>
+                            <th style="width:120px;">상태</th>
+                            <th style="width:170px;">신고일</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% if flea_reports_today_list %}
+                        {% for report in flea_reports_today_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><a href="{% url 'board:flea_detail' report.flea_item.pk %}" style="color:#ff6b6b;">{{ report.flea_item.title }}</a></td>
+                            <td>{% if report.reporter %}{{ report.reporter.nickname|default:report.reporter.username }}{% else %}-{% endif %}</td>
+                            <td>{{ report.get_reason_display }}</td>
+                            <td>
+                                {% if report.status == 'pending' %}
+                                    <span class="badge-status badge-pending">접수</span>
+                                {% elif report.status == 'in_progress' %}
+                                    <span class="badge-status badge-progress">확인중</span>
+                                {% else %}
+                                    <span class="badge-status badge-done">처리완료</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ report.created_at|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="6">오늘 접수된 신고가 없습니다.</td></tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="new-signups" class="section" style="display:none;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th style="width:160px;">아이디</th>
+                    <th style="width:180px;">닉네임</th>
+                    <th>이메일</th>
+                    <th style="width:170px;">가입시각</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for user in signups_today_list %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.nickname|default:'-' }}</td>
+                    <td>{{ user.email|default:'-' }}</td>
+                    <td>{{ user.date_joined|date:"Y-m-d H:i" }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5">오늘 가입한 사용자가 없습니다.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">상태 분포 (벼룩시장)</div>
+        <div class="distribution">
+            {% for item in charts.status_distribution %}
+            <div class="distribution-item">
+                <div style="font-weight:600; color:#333;">{{ item.label }}</div>
+                <div style="font-size:22px; color:#ff6b6b; font-weight:700;">{{ item.value|intcomma }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">일자별 추이</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px;">
+            <div>
+                <h4 style="margin:0 0 8px;">가입자</h4>
+                <table class="table">
+                    <thead><tr><th>날짜</th><th>건수</th></tr></thead>
+                    <tbody>
+                    {% for row in charts.signups_daily %}
+                        <tr><td>{{ row.day|date:"Y-m-d" }}</td><td>{{ row.count|intcomma }}</td></tr>
+                    {% empty %}
+                        <tr><td colspan="2">데이터 없음</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% with stats=charts.maxmin.signups %}
+                <div style="font-size:12px; color:#888; margin-top:6px;">최고 {{ stats.max|default:'-' }} / 최저 {{ stats.min|default:'-' }}</div>
+                {% endwith %}
+            </div>
+            <div>
+                <h4 style="margin:0 0 8px;">자유게시판</h4>
+                <table class="table">
+                    <thead><tr><th>날짜</th><th>건수</th></tr></thead>
+                    <tbody>
+                    {% for row in charts.free_daily %}
+                        <tr><td>{{ row.day|date:"Y-m-d" }}</td><td>{{ row.count|intcomma }}</td></tr>
+                    {% empty %}
+                        <tr><td colspan="2">데이터 없음</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% with stats=charts.maxmin.free %}
+                <div style="font-size:12px; color:#888; margin-top:6px;">최고 {{ stats.max|default:'-' }} / 최저 {{ stats.min|default:'-' }}</div>
+                {% endwith %}
+            </div>
+            <div>
+                <h4 style="margin:0 0 8px;">요리레시피</h4>
+                <table class="table">
+                    <thead><tr><th>날짜</th><th>건수</th></tr></thead>
+                    <tbody>
+                    {% for row in charts.recipe_daily %}
+                        <tr><td>{{ row.day|date:"Y-m-d" }}</td><td>{{ row.count|intcomma }}</td></tr>
+                    {% empty %}
+                        <tr><td colspan="2">데이터 없음</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% with stats=charts.maxmin.recipe %}
+                <div style="font-size:12px; color:#888; margin-top:6px;">최고 {{ stats.max|default:'-' }} / 최저 {{ stats.min|default:'-' }}</div>
+                {% endwith %}
+            </div>
+            <div>
+                <h4 style="margin:0 0 8px;">완료(핫딜)</h4>
+                <table class="table">
+                    <thead><tr><th>날짜</th><th>건수</th></tr></thead>
+                    <tbody>
+                    {% for row in charts.done_daily %}
+                        <tr><td>{{ row.day|date:"Y-m-d" }}</td><td>{{ row.count|intcomma }}</td></tr>
+                    {% empty %}
+                        <tr><td colspan="2">데이터 없음</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% with stats=charts.maxmin.done %}
+                <div style="font-size:12px; color:#888; margin-top:6px;">최고 {{ stats.max|default:'-' }} / 최저 {{ stats.min|default:'-' }}</div>
+                {% endwith %}
+            </div>
+            <div>
+                <h4 style="margin:0 0 8px;">신고(벼룩시장)</h4>
+                <table class="table">
+                    <thead><tr><th>날짜</th><th>건수</th></tr></thead>
+                    <tbody>
+                    {% for row in charts.report_daily %}
+                        <tr><td>{{ row.day|date:"Y-m-d" }}</td><td>{{ row.count|intcomma }}</td></tr>
+                    {% empty %}
+                        <tr><td colspan="2">데이터 없음</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% with stats=charts.maxmin.report %}
+                <div style="font-size:12px; color:#888; margin-top:6px;">최고 {{ stats.max|default:'-' }} / 최저 {{ stats.min|default:'-' }}</div>
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">최신 자유게시판 (20건)</div>
+        <table class="table">
+            <thead>
+                <tr><th>제목</th><th>작성자</th><th>카테고리</th><th>작성일</th><th>조회</th></tr>
+            </thead>
+            <tbody>
+                {% for post in latest_free %}
+                <tr>
+                    <td><a href="{% url 'board:free_detail' post.pk %}" style="color:#ff6b6b;">{{ post.title }}</a></td>
+                    <td>{{ post.author.nickname|default:post.author.username }}</td>
+                    <td>{{ post.get_category_display }}</td>
+                    <td>{{ post.created_at|date:"Y-m-d H:i" }}</td>
+                    <td>{{ post.views|intcomma }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">데이터 없음</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">최신 요리레시피 (20건)</div>
+        <table class="table">
+            <thead>
+                <tr><th>제목</th><th>작성자</th><th>카테고리</th><th>작성일</th><th>조회</th></tr>
+            </thead>
+            <tbody>
+                {% for post in latest_recipe %}
+                <tr>
+                    <td><a href="{% url 'recipes:recipe_detail' post.pk %}" style="color:#ff6b6b;">{{ post.title }}</a></td>
+                    <td>{{ post.author.nickname|default:post.author.username }}</td>
+                    <td>{{ post.get_category_display_name }}</td>
+                    <td>{{ post.created_at|date:"Y-m-d H:i" }}</td>
+                    <td>{{ post.views|intcomma }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">데이터 없음</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">최신 신고 (벼룩시장, 20건)</div>
+        <table class="table">
+            <thead>
+                <tr><th>상품</th><th>신고자</th><th>사유</th><th>상태</th><th>신고일</th></tr>
+            </thead>
+            <tbody>
+                {% for report in latest_reports %}
+                <tr>
+                    <td><a href="{% url 'board:flea_detail' report.flea_item.pk %}" style="color:#ff6b6b;">{{ report.flea_item.title }}</a></td>
+                    <td>{% if report.reporter %}{{ report.reporter.nickname|default:report.reporter.username }}{% else %}-{% endif %}</td>
+                    <td>{{ report.get_reason_display }}</td>
+                    <td>
+                        {% if report.status == 'pending' %}
+                        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                            <span class="badge-status badge-pending">접수</span>
+                                    <form method="post" action="{% url 'accounts:update_flea_report_status' report.id 'in_progress' %}" style="margin:0;">
+                                {% csrf_token %}
+                                        <button type="submit" class="btn-action">확인중</button>
+                            </form>
+                                    <form method="post" action="{% url 'accounts:update_flea_report_status' report.id 'resolved' %}" style="margin:0;">
+                                {% csrf_token %}
+                                        <button type="submit" class="btn-action">처리완료</button>
+                            </form>
+                        </div>
+                        {% elif report.status == 'in_progress' %}
+                        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                            <span class="badge-status badge-progress">확인중</span>
+                                    <form method="post" action="{% url 'accounts:update_flea_report_status' report.id 'pending' %}" style="margin:0;">
+                                {% csrf_token %}
+                                        <button type="submit" class="btn-ghost">접수</button>
+                            </form>
+                                    <form method="post" action="{% url 'accounts:update_flea_report_status' report.id 'resolved' %}" style="margin:0;">
+                                {% csrf_token %}
+                                        <button type="submit" class="btn-action">처리완료</button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <span class="badge-status badge-done">처리완료</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ report.created_at|date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">데이터 없음</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

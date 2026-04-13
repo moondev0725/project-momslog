@@ -1,0 +1,275 @@
+/* 
+═══════════════════════════════════════════════════════════════════════
+mobile.css - 모바일 최적화 스타일
+═══════════════════════════════════════════════════════════════════════
+작성일: 2026-01-02
+기능: 모바일 화면에서 완벽한 사용자 경험 제공
+*/
+/* 전역 모바일 최적화 */
+* {
+    box-sizing: border-box;
+}
+
+img, video, iframe {
+    max-width: 100%;
+    height: auto;
+}
+/* 태블릿 (1024px 이하) */
+@media (max-width: 1024px) {
+    .container {
+        width: 95%;
+        padding: 0 15px;
+    }
+
+    .search-bar {
+        width: 350px;
+    }
+
+    .main-nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .main-nav li {
+        padding: 10px 15px;
+    }
+}
+
+/* 모바일 (768px 이하) */
+@media (max-width: 768px) {
+    /* 헤더 모바일 최적화 */
+    .header-top .container {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px 10px;
+    }
+
+    .logo img {
+        height: 40px;
+    }
+
+    .search-bar {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .top-links {
+        font-size: 13px;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .top-links span,
+    .top-links a {
+        display: inline-block;
+    }
+
+    /* 네비게이션 모바일 최적화 */
+    .main-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .main-nav ul {
+        display: flex;
+        flex-wrap: nowrap;
+        min-width: max-content;
+        padding: 0 10px;
+    }
+
+    .main-nav li {
+        padding: 12px 15px;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    /* 드롭다운 메뉴 모바일 최적화 */
+    .dropdown-menu {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: auto;
+        width: 100% !important;
+        max-width: 100%;
+        border-radius: 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* 콘텐츠 영역 */
+    .main-content {
+        padding: 20px 10px;
+        width: 100%;
+        overflow-x: hidden;
+    }
+    
+    /* 모든 컨테이너 크기 제한 */
+    .container, [class*="container"], [style*="max-width"] {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+        overflow-x: hidden;
+    }
+    
+    /* 텍스트 오버플로우 방지 */
+    p, div, span, td, th {
+        word-wrap: break-word;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* 게시판 테이블 */
+    table {
+        font-size: 14px;
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table th,
+    table td {
+        padding: 10px 8px !important;
+        font-size: 13px;
+    }
+    
+    /* 테이블 제목 셀 */
+    table td.subject,
+    table td[style*="text-align: left"] {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* 버튼 크기 조정 */
+    button,
+    .btn,
+    a[class*="btn"],
+    input[type="submit"] {
+        min-height: 44px;
+        padding: 12px 20px;
+        font-size: 14px;
+        display: inline-block;
+        text-align: center;
+        cursor: pointer;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+    }
+
+    /* 입력 필드 */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea,
+    select {
+        font-size: 16px; /* iOS 확대 방지 */
+        min-height: 44px;
+    }
+
+    /* 다크모드 버튼 */
+    .dark-mode-toggle {
+        padding: 8px 12px;
+    }
+}
+
+/* 작은 모바일 (480px 이하) */
+@media (max-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+    
+    .logo img {
+        height: 35px;
+    }
+
+    .search-bar {
+        padding: 4px 4px 4px 15px;
+    }
+
+    .search-bar input {
+        font-size: 14px;
+    }
+
+    .search-bar button {
+        width: 38px;
+        height: 38px;
+    }
+
+    .main-nav li {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    /* 게시판 목록 */
+    table {
+        font-size: 13px;
+    }
+    
+    table th,
+    table td {
+        padding: 8px 5px !important;
+        font-size: 12px;
+    }
+
+    table th:nth-child(3),
+    table td:nth-child(3),
+    table th:nth-child(5),
+    table td:nth-child(5) {
+        display: none; /* 작성자, 조회수 숨김 */
+    }
+    
+    /* 컨테이너 패딩 축소 */
+    .container,
+    [class*="container"],
+    [style*="max-width"] {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    /* 푸터 */
+    footer {
+        font-size: 12px;
+        padding: 15px 0;
+    }
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) and (pointer: coarse) {
+    /* 터치 영역 최소 44x44px 보장 */
+    a, button, input, select {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* 호버 효과 제거 */
+    .main-nav li:hover {
+        background: transparent;
+    }
+
+    /* 탭 시 하이라이트 제거 */
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+/* 가로 모드 모바일 (최대 높이 500px) */
+@media (max-height: 500px) and (orientation: landscape) {
+    .header-top {
+        padding: 8px 0;
+    }
+
+    .logo img {
+        height: 30px;
+    }
+
+    .main-nav li {
+        padding: 8px 12px;
+    }
+
+    .dropdown-menu {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+}

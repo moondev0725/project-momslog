@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+{# 26-01-02 슬기 추가: 핫딜공유 작성/수정 폼 페이지 #}
+{% block content %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .form-box {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .form-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    
+    .form-group textarea {
+        min-height: 300px;
+        resize: vertical;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    
+    .btn-submit {
+        background: #ff6b6b;
+        color: white;
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-box">
+        <h2 class="form-title">{% if post %}핫딜 수정{% else %}핫딜 등록{% endif %}</h2>
+        
+        {% if error %}
+        <div style="background:#f8d7da; color:#721c24; padding:12px; border-radius:8px; margin-bottom:20px; border:1px solid #f5c6cb;">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        {% if post %}
+        <form method="post" action="{% url 'board:hotdeal_update' post.pk %}">
+        {% else %}
+        <form method="post" action="/board/hotdeal/write/">
+        {% endif %}
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="category">카테고리 *</label>
+                <select id="category" name="category" required>
+                    <option value="all" {% if post and post.category == 'all' %}selected{% endif %}>전체보기</option>
+                    <option value="baby" {% if post and post.category == 'baby' %}selected{% endif %}>육아용품 핫딜</option>
+                    <option value="life" {% if post and post.category == 'life' %}selected{% endif %}>생활용품 핫딜</option>
+                    <option value="event" {% if post and post.category == 'event' %}selected{% endif %}>이벤트/체험단</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="title">제목 *</label>
+                <input id="title" type="text" name="title" value="{{ post.title|default:'' }}" required placeholder="핫딜 제목을 입력하세요">
+            </div>
+            
+            <div class="form-group">
+                <label for="price">가격</label>
+                <input id="price" type="text" name="price" value="{{ post.price|default:'' }}" placeholder="예: 29,900원 / 무료배송">
+            </div>
+            
+            <div class="form-group">
+                <label for="link">상품 링크</label>
+                <input id="link" type="url" name="link" value="{{ post.link|default:'' }}" placeholder="https://...">
+            </div>
+            
+            <div class="form-group">
+                <label for="content">내용 *</label>
+                <textarea id="content" name="content" required placeholder="핫딜 정보를 상세히 작성해주세요">{{ post.content|default:'' }}</textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-submit">{% if post %}수정하기{% else %}등록하기{% endif %}</button>
+                <a href="{% if post %}{% url 'board:hotdeal_detail' post.pk %}{% else %}{% url 'board:hotdeal_list' %}{% endif %}" class="btn btn-cancel">취소</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

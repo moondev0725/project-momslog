@@ -1,0 +1,798 @@
+/* Copied from 혜은 마음수정 static/css/mindcheck-modal.css */
+/* === Mind Modal: CENTER GUARANTEED === */
+.mind-modal{
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: none;              /* 기본 숨김 */
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.mind-modal.is-open{ display:flex; }
+
+.mind-modal__backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(17,17,17,0.45);
+  backdrop-filter: blur(2px);
+}
+.mind-modal__dialog{
+  width: 720px;        /* 질문 화면 기본 폭 */
+  max-width: 92vw;
+}
+
+.mind-modal__close{
+  position:absolute;
+  right:12px;
+  top:10px;
+  width:36px;
+  height:36px;
+  border-radius:18px;
+  border:none;
+  background:#f5f5f5;
+  cursor:pointer;
+  font-size:22px;
+  line-height:1;
+  color:#333;
+}
+
+.mind-modal__badge{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#fff1ee;
+  color:#c24d3f;
+  font-weight:800;
+  font-size:12px;
+  margin-bottom:10px;
+}
+.mind-modal__title{
+  margin:0 0 6px;
+  font-size:18px;
+  font-weight:900;
+  color:#2d2d2d;
+  letter-spacing:-0.3px;
+}
+.mind-modal__sub{ margin:0 0 14px; font-size:13px; color:#777; }
+
+.mind-modal__options{ display:grid; gap:10px; margin-top:6px; }
+
+.mind-chip{
+  width:100%;
+  text-align:left;
+  padding:12px 12px;
+  border-radius:14px;
+  border:1px solid #eee;
+  background:#fafafa;
+  cursor:pointer;
+  font-weight:800;
+  color:#2d2d2d;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+.mind-chip:hover{
+  background:#ffefe9;
+  border-color:#ffd3c8;
+  transform: translateY(-1px);
+}
+
+.mind-modal__footer{ display:flex; justify-content:flex-end; margin-top:14px; }
+.mind-modal__ghost{
+  border:none;
+  background:transparent;
+  color:#777;
+  font-weight:800;
+  cursor:pointer;
+  padding:8px 10px;
+  border-radius:10px;
+}
+.mind-modal__ghost:hover{ background:#f5f5f5; }
+
+body.mind-lock{ overflow:hidden; }
+
+
+
+/* === Mind Modal FINAL (강제 중앙) === */
+#mindModal.mind-modal{
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 999999 !important;
+  display: none !important;         /* 기본: 숨김 */
+  align-items: center !important;   /* 중앙정렬 */
+  justify-content: center !important;
+  padding: 24px !important;
+}
+
+#mindModal.mind-modal.is-open{
+  display: flex !important;         /* 열릴 때만 보임 */
+}
+
+#mindModal .mind-modal__backdrop{
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(17,17,17,0.45) !important;
+  backdrop-filter: blur(2px) !important;
+}
+
+#mindModal .mind-modal__dialog{
+  position: relative !important;
+  z-index: 1 !important;
+  width: 720px;  /* ✅ 가운데 네모 */
+  background: #fff !important;
+  border-radius: 18px !important;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.18) !important;
+  padding: 22px 20px 18px !important;
+  animation: mindPop 180ms ease-out !important;
+  max-width: 92vw;
+}
+
+/* ✅ 결과 모드일 때 폭 강제 축소 */
+#mindModal.is-result .mind-modal__dialog{
+  width: 520px !important;   /* 🔥 무조건 먹게 */
+  max-width: 92vw !important;
+}
+
+
+
+@keyframes mindPop{
+  from{ transform: translateY(8px) scale(0.98); opacity: 0; }
+  to  { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+
+#mindModal .mind-modal__badge{
+  display: inline-block !important;
+  padding: 6px 10px !important;
+  border-radius: 999px !important;
+  background: #fff1ee !important;
+  color: #c24d3f !important;
+  font-weight: 800 !important;
+  font-size: 12px !important;
+  margin-bottom: 10px !important;
+}
+
+#mindModal .mind-modal__title{
+  margin: 0 0 6px !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: #2d2d2d !important;
+  letter-spacing: -0.3px !important;
+}
+
+#mindModal .mind-modal__sub{
+  margin: 0 0 14px !important;
+  font-size: 13px !important;
+  color: #777 !important;
+}
+
+#mindModal .mind-modal__options{
+  display: grid !important;
+  gap: 10px !important;
+  margin-top: 6px !important;
+}
+
+#mindModal .mind-chip{
+  width: 100% !important;
+  text-align: left !important;
+  padding: 12px 12px !important;
+  border-radius: 14px !important;
+  border: 1px solid #eee !important;
+  background: #fafafa !important;
+  cursor: pointer !important;
+  font-weight: 800 !important;
+  color: #2d2d2d !important;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease !important;
+}
+
+#mindModal .mind-chip:hover{
+  background: #ffefe9 !important;
+  border-color: #ffd3c8 !important;
+  transform: translateY(-1px) !important;
+}
+
+#mindModal .mind-modal__footer{
+  display: flex !important;
+  justify-content: flex-end !important;
+  margin-top: 14px !important;
+}
+
+#mindModal .mind-modal__ghost{
+  border: none !important;
+  background: transparent !important;
+  color: #777 !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  padding: 8px 10px !important;
+  border-radius: 10px !important;
+}
+
+#mindModal .mind-modal__ghost:hover{
+  background: #f5f5f5 !important;
+}
+
+body.mind-lock{ overflow: hidden !important; }
+
+
+/* 기본(질문) 폭 */
+#mindModal .mind-modal__dialog{
+  width: 720px;
+  max-width: 92vw;
+}
+
+/* ✅ 결과 화면일 때만 폭 축소 */
+#mindModal.is-result .mind-modal__dialog{
+  width: 520px !important;
+  max-width: 92vw !important;
+}
+
+
+/* ===== 결과 모달 스킨 ===== */
+#mindModal .mind-result-skin{
+  overflow: hidden;
+  border-radius: 22px;
+  background: #fff;
+}
+
+/* 결과 상단(그라데이션 영역) */
+#mindModal .mind-result-hero{
+  position: relative;
+  padding: 26px 22px 22px;
+  background: linear-gradient(180deg, rgba(255,214,234,0.75) 0%, rgba(255,206,214,0.35) 45%, rgba(255,200,183,0.28) 100%);
+}
+
+/* 큰 둥근 링(무드) */
+#mindModal .mind-result-hero__ring{
+  position: absolute;
+  left: 50%;
+  top: 26px;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%,
+    rgba(255,190,140,0.25) 0%,
+    rgba(255,190,140,0.12) 45%,
+    rgba(255,190,140,0.00) 70%);
+  pointer-events: none;
+}
+
+/* 이모지 원형 배지 */
+#mindModal .mind-result-emojiBubble{
+  position: relative;
+  z-index: 2;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 28px;
+  background: rgba(255,255,255,0.75);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+  border: 1px solid rgba(255,255,255,0.8);
+}
+
+/* 타이틀 */
+#mindModal .mind-result-titleLine{
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin-bottom: 6px;
+}
+#mindModal .mind-result-titleMain{
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.6px;
+  color: #2d2d2d;
+}
+
+/* 점수 라인 */
+#mindModal .mind-result-scoreLine{
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  font-size: 16px;
+  color: #444;
+}
+#mindModal .mind-result-scoreLabel{
+  margin-right: 6px;
+  color: #666;
+}
+#mindModal .mind-result-scoreSlash{
+  margin: 0 4px;
+  color: #999;
+}
+
+/* 아래 카드 영역 */
+#mindModal .mind-result-card{
+  padding: 18px 22px 22px;
+  background: rgba(255,255,255,0.82);
+}
+
+/* 문장 스타일 */
+#mindModal .mind-result-sub{
+  font-size: 16px;
+  font-weight: 800;
+  color: #2d2d2d;
+  margin: 0 0 8px;
+}
+#mindModal .mind-result-msg{
+  font-size: 15px;
+  color: #555;
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+
+/* 진행바 */
+#mindModal .mind-result-bar{
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.06);
+  overflow: hidden;
+  margin: 0 0 16px;
+}
+#mindModal .mind-result-bar__fill{
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffbfae 0%, #ff8f8f 40%, #ffa66b 100%);
+}
+
+/* CTA 버튼 */
+#mindModal .mind-result-cta{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(90deg, #ffa86b 0%, #ff7f7f 55%, #ff9cc6 100%);
+  box-shadow: 0 12px 26px rgba(255,127,127,0.28);
+}
+#mindModal .mind-result-cta:hover{
+  filter: brightness(0.98);
+}
+#mindModal .mind-result-cta__arrow{
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ✅ 결과 화면일 때 폭 줄이기(원하면 숫자 조절) */
+#mindModal.is-result .mind-modal__dialog{
+  width: 520px !important;
+  max-width: 92vw !important;
+}
+
+/* ✅ 결과 화면은 여백 덜 딱딱하게 */
+#mindModal.is-result .mind-modal__options{
+  padding: 0 !important;
+}
+
+
+
+
+/* ========================= ✅ 결과 모달 테마 상태별 색상 자동 변경 + 배경색 변경 ========================= */
+
+/* 기본(안정) 테마 */
+#mindModal{
+  --mh-hero-top: rgba(255,214,234,0.75);
+  --mh-hero-mid: rgba(255,206,214,0.35);
+  --mh-hero-bot: rgba(255,200,183,0.28);
+
+  --mh-ring-1: rgba(255,190,140,0.25);
+  --mh-ring-2: rgba(255,190,140,0.12);
+
+  --mh-cta-1: #ffa86b;
+  --mh-cta-2: #ff7f7f;
+  --mh-cta-3: #ff9cc6;
+
+  --mh-cta-shadow: rgba(255,127,127,0.28);
+
+  /* ✅ 추가: 배경색 변수 */
+  --mh-bg: #fff6f2; /* 안정(기본) */
+}
+
+/* ✅ 추가: 결과 스킨 배경(전체 배경 느낌) */
+#mindModal .mind-result-skin{
+  background: var(--mh-bg);
+}
+
+/* 상단 그라데이션 */
+#mindModal .mind-result-hero{
+  background: linear-gradient(
+    180deg,
+    var(--mh-hero-top) 0%,
+    var(--mh-hero-mid) 45%,
+    var(--mh-hero-bot) 100%
+  );
+}
+
+/* 둥근 무드 링 */
+#mindModal .mind-result-hero__ring{
+  background: radial-gradient(circle at 50% 50%,
+    var(--mh-ring-1) 0%,
+    var(--mh-ring-2) 45%,
+    rgba(0,0,0,0) 70%);
+}
+
+/* CTA 버튼 */
+#mindModal .mind-result-cta{
+  background: linear-gradient(
+    90deg,
+    var(--mh-cta-1) 0%,
+    var(--mh-cta-2) 55%,
+    var(--mh-cta-3) 100%
+  );
+  box-shadow: 0 12px 26px var(--mh-cta-shadow);
+}
+
+/* =========================
+   ✅ 상태별 테마 + 배경색
+   data-mood: very-anxious / anxious / stable / happy / very-happy
+   ========================= */
+
+/* 매우 불안 */
+#mindModal[data-mood="very-anxious"]{
+  --mh-hero-top: rgba(210,225,255,0.80);
+  --mh-hero-mid: rgba(210,225,255,0.35);
+  --mh-hero-bot: rgba(235,240,255,0.35);
+
+  --mh-ring-1: rgba(140,170,255,0.22);
+  --mh-ring-2: rgba(140,170,255,0.10);
+
+  --mh-cta-1: #6f8dff;
+  --mh-cta-2: #7aa6ff;
+  --mh-cta-3: #9bc1ff;
+
+  --mh-cta-shadow: rgba(120,150,255,0.25);
+
+  /* ✅ 배경색 */
+  --mh-bg: #eef3ff;
+}
+
+/* 약간 불안 */
+#mindModal[data-mood="anxious"]{
+  --mh-hero-top: rgba(221,214,255,0.78);
+  --mh-hero-mid: rgba(228,220,255,0.35);
+  --mh-hero-bot: rgba(245,240,255,0.35);
+
+  --mh-ring-1: rgba(170,140,255,0.20);
+  --mh-ring-2: rgba(170,140,255,0.10);
+
+  --mh-cta-1: #8f72ff;
+  --mh-cta-2: #a48cff;
+  --mh-cta-3: #c1b0ff;
+
+  --mh-cta-shadow: rgba(160,130,255,0.24);
+
+  /* ✅ 배경색 */
+  --mh-bg: #f2efff;
+}
+
+/* 안정 */
+#mindModal[data-mood="stable"]{
+  /* 기본 테마 그대로 사용 */
+  --mh-bg: #fff6f2;
+}
+
+/* 약간 행복 */
+#mindModal[data-mood="happy"]{
+  --mh-hero-top: rgba(255,231,186,0.78);
+  --mh-hero-mid: rgba(255,220,180,0.35);
+  --mh-hero-bot: rgba(255,235,210,0.32);
+
+  --mh-ring-1: rgba(255,170,120,0.22);
+  --mh-ring-2: rgba(255,170,120,0.10);
+
+  --mh-cta-1: #ff9a62;
+  --mh-cta-2: #ff7f7f;
+  --mh-cta-3: #ffb36b;
+
+  --mh-cta-shadow: rgba(255,150,100,0.25);
+
+  /* ✅ 배경색 */
+  --mh-bg: #fff2da;
+}
+
+/* 매우 행복 */
+#mindModal[data-mood="very-happy"]{
+  --mh-hero-top: rgba(255,210,228,0.82);
+  --mh-hero-mid: rgba(255,205,185,0.38);
+  --mh-hero-bot: rgba(255,230,200,0.30);
+
+  --mh-ring-1: rgba(255,140,180,0.24);
+  --mh-ring-2: rgba(255,140,180,0.10);
+
+  --mh-cta-1: #ff3e7e;
+  --mh-cta-2: #ff7f7f;
+  --mh-cta-3: #ffa66b;
+
+  --mh-cta-shadow: rgba(255,110,150,0.28);
+
+  /* ✅ 배경색 */
+  --mh-bg: #ffe9f2;
+}
+
+
+
+/* 마음체크 결과 모달. 엄마들의 이야기 보러가기 버튼 */
+/* 결과 CTA 영역 */
+#mindModal .mind-result-actions {
+  padding: 18px 24px 8px;
+}
+
+/* 엄마들 이야기 보러가기 - 메인 CTA */
+#mindModal .mind-result-cta {
+  width: 100%;                 /* ✅ 가로 전체 */
+  height: 56px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 10px;        /* ✅ 길게 늘어진 알약 모양 */
+
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+
+  color: #fff;
+  cursor: pointer;
+
+  background: linear-gradient(
+    90deg,
+    var(--mh-cta-1) 0%,
+    var(--mh-cta-2) 55%,
+    var(--mh-cta-3) 100%
+  );
+
+  box-shadow: 0 14px 30px var(--mh-cta-shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* hover 효과 (과하지 않게) */
+#mindModal .mind-result-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 36px var(--mh-cta-shadow);
+}
+
+
+.mind-result-actions-row {
+  display: flex;
+  gap: 12px;
+}
+
+.mind-result-cta {
+  flex: 1;
+}
+
+.mind-result-close {
+  width: 88px;
+}
+
+
+/* 마음체크 모달 닫기 버튼 */
+/* ✅ 결과화면 '닫기' 버튼을 질문화면 '나중에 할게요' 느낌으로 통일 ========================================================= */
+#mindModal .mind-result-close{
+  height: 56px;
+  padding: 0 28px;            /* 글자 길이에 따라 자연스럽게 */
+  border: none;
+  border-radius: 10px;
+
+  background: linear-gradient(180deg, #ff9b9b 0%, #ff6b6b 100%);
+  color: #fff;
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(255, 107, 107, 0.28);
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+
+#mindModal .mind-result-close:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 14px 28px rgba(255, 107, 107, 0.32);
+}
+
+#mindModal .mind-result-close:active{
+  transform: translateY(0px);
+  filter: brightness(0.99);
+}
+
+#mindModal .mind-result-actions-row{
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+}
+
+
+
+
+
+/*================================================================================================================*/
+/* =========================
+   ✅ 질문 화면 하단 버튼 (사각형 느낌)
+   ========================= */
+
+#mindModal #mindFooterQuestions{
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 18px 24px;
+}
+
+/* 공통 버튼 */
+#mindModal #mindFooterQuestions .mind-modal__ghost{
+  width: 150px;
+  height: 48px;
+
+  border-radius: 10px;          /* ✅ 사각형 느낌 핵심 */
+  border: none;
+
+  background: linear-gradient(
+    180deg,
+    #ff8f8f 0%,
+    #ff6b6b 100%
+  );
+
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.25);
+
+  transition: background 0.15s ease,
+              box-shadow 0.15s ease,
+              transform 0.1s ease;
+}
+
+/* hover */
+#mindModal #mindFooterQuestions .mind-modal__ghost:hover{
+  background: linear-gradient(
+    180deg,
+    #ff7f7f 0%,
+    #ff5f5f 100%
+  );
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.32);
+  transform: translateY(-1px);
+}
+
+/* active */
+#mindModal #mindFooterQuestions .mind-modal__ghost:active{
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.22);
+}
+
+
+/* =========================
+   ✅ 질문 화면 하단 버튼: 사각형(둥근사각) 강제 FIX
+   - 다른 999px(알약) CSS가 덮어써도 이게 이김
+   ========================= */
+#mindModal #mindFooterQuestions{
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  padding: 18px 24px !important;
+}
+
+#mindModal #mindFooterQuestions .mind-modal__ghost{
+  width: 150px !important;
+  height: 48px !important;
+
+  /* ✅ 여기 핵심: 알약(999px) 덮어쓰기 방지 */
+  border-radius: 10px !important;
+
+  border: none !important;
+
+  background: linear-gradient(180deg, #ff8f8f 0%, #ff6b6b 100%) !important;
+  color: #fff !important;
+
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.2px !important;
+
+  cursor: pointer !important;
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.25) !important;
+
+  transition: background 0.15s ease,
+              box-shadow 0.15s ease,
+              transform 0.1s ease !important;
+}
+
+#mindModal #mindFooterQuestions .mind-modal__ghost:hover{
+  background: linear-gradient(180deg, #ff7f7f 0%, #ff5f5f 100%) !important;
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.32) !important;
+  transform: translateY(-1px) !important;
+}
+
+#mindModal #mindFooterQuestions .mind-modal__ghost:active{
+  transform: translateY(0) !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.22) !important;
+}
+
+
+/* ✅ 질문 footer 버튼(사각형) 전용 */
+#mindModal #mindFooterQuestions{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  padding:18px 24px;
+}
+
+#mindModal #mindFooterQuestions .mind-q-btn{
+  width:150px;
+  height:48px;
+  border-radius:10px;         /* ✅ 사각형 느낌 */
+  border:none;
+
+  background: linear-gradient(180deg, #ff8f8f 0%, #ff6b6b 100%);
+  color:#fff;
+
+  font-size:0.95rem;
+  font-weight:700;
+  letter-spacing:-0.2px;
+
+  cursor:pointer;
+  box-shadow:0 6px 16px rgba(255,107,107,0.25);
+  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+
+#mindModal #mindFooterQuestions .mind-q-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 20px rgba(255,107,107,0.30);
+  filter:brightness(1.03);
+}
+
+#mindModal #mindFooterQuestions .mind-q-btn:active{
+  transform:translateY(0);
+  box-shadow:0 5px 12px rgba(255,107,107,0.22);
+}
+
+/* ✅ 결과 footer 버튼 정렬 */
+#mindModal .mind-result-actions-row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:flex-end;
+}
+
+/* ✅ 결과 footer의 X 닫기 버튼(원래 상단 닫기 느낌) */
+#mindModal .mind-close-icon{
+  width:48px;
+  height:48px;
+  border-radius:12px;
+  border:none;
+  background:#f5f5f5;
+  color:#333;
+  font-size:28px;
+  line-height:1;
+  cursor:pointer;
+}
+#mindModal .mind-close-icon:hover{ background:#ededed; }
+
+
+/* =========================
+   ✅ footer 표시 규칙 강제
+   - 질문 화면: Questions만 보이기
+   - 결과 화면: Result만 보이기
+   ========================= */
+
+/* 기본(질문 화면) */
+#mindModal #mindFooterQuestions { display: flex !important; }
+#mindModal #mindFooterResult    { display: none !important; }
+
+/* 결과 화면일 때 */
+#mindModal.is-result #mindFooterQuestions { display: none !important; }
+#mindModal.is-result #mindFooterResult    { display: block !important; }

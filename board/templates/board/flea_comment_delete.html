@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+<!-- 25-12-29 슬기 수정: 댓글 삭제 확인 페이지 생성 -->
+{% block content %}
+<div class="login-container" style="max-width:640px;">
+    <h3>댓글 삭제</h3>
+    <p style="color:#495057;">정말 이 댓글을 삭제할까요? 이 작업은 되돌릴 수 없습니다.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn-login-submit" style="width:120px;">삭제</button>
+        <a href="{% url 'board:flea_detail' item.pk %}" style="margin-left:10px;">취소</a>
+    </form>
+</div>
+{% endblock %}

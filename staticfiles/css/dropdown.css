@@ -1,0 +1,88 @@
+/* 네비게이션 드롭다운 메뉴 스타일 */
+
+/* [스타일 수정] 클릭 방식에 맞춘 CSS */
+.main-nav .container > ul {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-wrap: nowrap;
+    gap: 5px;
+    overflow: visible;
+}
+
+.main-nav .container > ul > li {
+    position: relative; /* 기준점 */
+    display: inline-block;
+    padding: 10px 12px;
+    cursor: pointer; /* 클릭 가능하다는 표시 */
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 13px;
+}
+
+/* 드롭다운 메뉴 박스 (평소에는 숨김) */
+.dropdown-menu {
+    display: none !important; /* ★ 기본 숨김 - 강제 */
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    min-width: 150px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    border: 1px solid #ffe3e3;
+    border-radius: 10px;
+    padding: 10px 0;
+    z-index: 9999;
+    flex-direction: column;
+    text-align: center;
+}
+
+/* ★ 자바스크립트가 이 클래스를 붙여주면 보임 */
+.dropdown-menu.show {
+    display: block !important;
+}
+
+/* ★ 마우스 호버 시 드롭다운 표시 */
+.has-sub:hover .dropdown-menu {
+    display: block !important;
+}
+
+.dropdown-menu li {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.dropdown-menu li a {
+    display: block;
+    padding: 12px 10px;
+    color: #555;
+    text-decoration: none;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.dropdown-menu li a:hover {
+    background-color: #fff0f0;
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+/* 클릭 가능한 메뉴 옆에 화살표 표시 */
+.has-sub > a::after {
+    content: ' ▾';
+    font-size: 10px;
+    color: #aaa;
+    margin-left: 5px;
+}
+
+/* 활성화된 메뉴 색상 변경 */
+.has-sub.active > a {
+    color: #ff6b6b;
+    font-weight: bold;
+}

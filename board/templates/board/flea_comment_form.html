@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+<!-- 25-12-29 슬기 수정: 댓글 수정 폼 페이지 생성 -->
+{% block content %}
+<div class="login-container" style="max-width:720px;">
+    <h2>댓글 {% if mode == 'edit' %}수정{% else %}작성{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>제목</label>
+            {{ form.title }}
+        </div>
+        <div class="form-group">
+            <label>내용</label>
+            {{ form.content }}
+        </div>
+        <div class="form-group" style="display:flex; align-items:center; gap:6px;">
+            {{ form.is_secret }}<label style="margin:0; font-size:14px;">비밀글로 작성</label>
+        </div>
+        <div class="form-group">
+            <label>비밀글 비밀번호</label>
+            {{ form.password }}
+        </div>
+        <div style="margin-top:12px; display:flex; gap:10px;">
+            <button type="submit" class="btn-login-submit" style="width:120px;">저장</button>
+            <a href="{% url 'board:flea_detail' item.pk %}" style="align-self:center;">취소</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

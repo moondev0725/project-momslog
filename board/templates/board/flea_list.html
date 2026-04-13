@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/flea_list.css' %}?v=20260115_01">
+<link rel="stylesheet" href="{% static 'css/local_market.css' %}?v=20260111_03">
+
+{# 안전망: 정적 CSS가 404여도 기본 레이아웃이 무너지지 않도록 최소 스타일을 인라인으로 둔다. #}
+<style>
+  .local-market-layout{max-width:1100px;margin:0 auto;padding:24px 16px;display:grid;grid-template-columns:460px 1fr;gap:22px}
+  .lm-left{align-self:start;position:sticky;top:90px}
+  .lm-card{background:#fff;border-radius:16px;box-shadow:0 10px 28px rgba(0,0,0,.08);overflow:hidden}
+  .lm-title{padding:10px 12px 8px;border-bottom:1px solid #f0f0f0}
+  .lm-title h3{margin:0;font-size:16px;font-weight:900;color:#333}
+  .lm-sub{margin:4px 0 0;font-size:12px;color:#666}
+  .lm-controls{padding:12px}
+  .lm-search-row{display:flex;gap:6px}
+  .lm-search-row input{flex:1;height:42px;padding:0 12px;border:1px solid #ddd;border-radius:10px}
+  .lm-search-row button{height:42px;padding:0 18px;border:none;background:#f64d5c;color:#fff;border-radius:10px;font-weight:700}
+  .lm-quick-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
+  .lm-quick{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e5e5e5;border-radius:12px;background:#fff;font-weight:800;color:#2d2d2d;box-shadow:0 6px 14px rgba(0,0,0,.04)}
+  .lm-quick-icon{width:26px;height:26px;border-radius:10px;background:#f5f7fb;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,.06)}
+  .lm-quick-icon--station{background:#ffe9e6}
+  .lm-quick-icon--store{background:#eaf3ff}
+  .lm-quick-icon--cafe{background:#fff5e5}
+  .lm-quick-icon--parking{background:#eaf0ff}
+  .lm-quick-label{font-size:13px;font-weight:800;color:#2d2d2d}
+  .lm-myloc-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .lm-myloc{padding:12px;border:1px solid #d5d8dd;border-radius:10px;background:#fff;font-weight:800;color:#2d2d2d;box-shadow:0 6px 14px rgba(0,0,0,.05)}
+  .lm-map{height:360px;border-top:1px solid #f0f0f0}
+  .lm-result{max-height:180px;overflow:auto;border-top:1px solid #f0f0f0}
+  .flea-header{display:flex;align-items:center;gap:24px;margin-bottom:12px}
+  .flea-header h2{margin:0}
+  .flea-header form{flex:1;margin:0}
+  .flea-header-form-div{display:flex;gap:8px;align-items:center;height:44px}
+  .flea-header input[type=text]{flex:1;height:100%;padding:0 16px;border:1px solid #dee2e6;border-radius:8px}
+  .market-btn{display:inline-block;padding:10px 18px;border-radius:8px;font-weight:700;border:1px solid #ced4da;background:#fff}
+  .btn-search{background:#343a40;color:#fff;border-color:#343a40}
+  .btn-write{background:#fff;color:#343a40;border:1px solid #ced4da}
+  .flea-table{width:100%;border-collapse:collapse;margin-top:8px}
+  .flea-table th,.flea-table td{padding:10px 8px;border-bottom:1px solid #e9ecef;font-size:15px;vertical-align:middle}
+  .col-img{width:120px}
+  .flea-table-thumb{width:110px;height:110px;object-fit:cover;border-radius:10px;border:1px solid #eee}
+  .flea-table-thumb.placeholder{display:flex;align-items:center;justify-content:center;background:#f8f9fa;color:#868e96;height:110px}
+  .flea-table-link{color:#111;font-weight:700}
+  .flea-table-badge{margin-left:8px;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:700}
+  .badge-selling{background:#e7f5ff;color:#1971c2}
+  .badge-reserved{background:#fff3bf;color:#d39e00}
+  .badge-sold{background:#f8d7da;color:#721c24}
+  .badge-share{background:#d1ecf1;color:#0c5460}
+  .pagination-container{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:12px}
+  .pagination-btn{min-width:32px;text-align:center;padding:6px 10px;border:1px solid #ced4da;border-radius:6px;color:#495057;text-decoration:none}
+  .pagination-btn.active{background:#343a40;color:#fff;border-color:#343a40}
+  .pagination-btn.disabled{opacity:.4;pointer-events:none}
+</style>
+
+<div class="local-market-layout">
+
+  <!-- =======================
+       LEFT: 지도 패널
+  ======================== -->
+  <aside class="lm-left">
+    <div class="lm-card">
+      <div class="lm-title">
+        <h3>
+          동네마켓 거래지도
+          <span class="lm-badge">만남장소</span>
+        </h3>
+        <p id="lm_current_addr" class="lm-sub">현재 위치를 불러오는 중...</p>
+
+        {# ✅ (삭제) 거래할 때 안전한 공공장소... 문구 #}
+      </div>
+
+      <div class="lm-controls">
+        <div class="lm-search-row">
+          <input
+            type="text"
+            id="lm_keyword"
+            placeholder="만남/거래 장소 검색 (예: ○○역, CU, 스타벅스, 주민센터)"
+            autocomplete="off">
+          <button type="button" id="lm_btn_search">찾기</button>
+        </div>
+
+        <div class="lm-quick-row">
+          <button type="button" class="lm-quick" data-q="지하철역">
+            <span class="lm-quick-label">🚉 역/정류장</span>
+          </button>
+          <button type="button" class="lm-quick" data-q="편의점">
+            <span class="lm-quick-label">🏪 편의점</span>
+          </button>
+          <button type="button" class="lm-quick" data-q="카페">
+            <span class="lm-quick-label">☕ 카페</span>
+          </button>
+          <button type="button" class="lm-quick" data-q="주차장">
+            <span class="lm-quick-label">🅿️ 주차장</span>
+          </button>
+        </div>
+
+        {# ✅ (삭제) 💡 검색 팁 문구 #}
+
+        <div class="lm-myloc-row">
+          <button type="button" id="lm_btn_myaddr" class="lm-myloc">내 주소</button>
+          <button type="button" id="lm_btn_myloc" class="lm-myloc">내 위치</button>
+        </div>
+      </div>
+
+      <div id="lm_map" class="lm-map"></div>
+
+      <div id="lm_result" class="lm-result">
+        <div class="lm-empty">검색 결과가 여기에 표시돼요.</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =======================
+       RIGHT: 마켓 검색/목록
+  ======================== -->
+  <main class="lm-right">
+
+    <div class="flea-container">
+
+      <div class="flea-header">
+        <h2 class="market-title">마켓검색</h2>
+
+        <form method="get">
+          <div class="flea-header-form-div">
+            <input
+              type="text"
+              name="search"
+              value="{{ search_query }}"
+              placeholder="제목, 내용, 작성자로 검색...">
+              {% if clat and clng %}
+                <input type="hidden" name="clat" value="{{ clat }}">
+                <input type="hidden" name="clng" value="{{ clng }}">
+                <input type="hidden" name="r" value="{{ r }}">
+              {% endif %}
+
+            <button type="submit" class="market-btn btn-search">검색</button>
+          </div>
+        </form>
+
+        {% if user.is_authenticated %}
+          <a href="{% url 'board:flea_create' %}" class="market-btn btn-write">
+            상품 작성
+          </a>
+        {% endif %}
+      </div>
+
+      {% if search_query %}
+        <p class="search-result-info">
+          "<strong>{{ search_query }}</strong>" 검색 결과:
+          <strong>{{ items.count }}</strong>건
+        </p>
+      {% endif %}
+
+      {% if items %}
+      <table class="flea-table">
+        <thead>
+          <tr>
+            <th class="col-img">사진</th>
+            <th>제목</th>
+            <th class="col-price">가격</th>
+            <th>작성자</th>
+            {# ✅ 작성일 삭제 #}
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr
+            class="flea-row {% if item.status == 'sold' %}is-sold{% endif %}"
+            data-href="{% url 'board:flea_detail' item.pk %}">
+
+            <td class="col-img">
+              <a href="{% url 'board:flea_detail' item.pk %}">
+                {% if item.image %}
+                  <img src="{{ item.image.url }}" class="flea-table-thumb">
+                {% else %}
+                  <div class="flea-table-thumb placeholder">
+                    {% if item.status == 'sold' %}SOLD OUT{% else %}이미지 없음{% endif %}
+                  </div>
+                {% endif %}
+              </a>
+            </td>
+            <td>
+              <a href="{% url 'board:flea_detail' item.pk %}" class="flea-table-link">
+                {{ item.title }}
+              </a>
+              {% if item.status == 'selling' %}
+                <span class="flea-table-badge badge-selling">판매중</span>
+              {% elif item.status == 'reserved' %}
+                <span class="flea-table-badge badge-reserved">예약중</span>
+              {% elif item.status == 'sold' %}
+                <span class="flea-table-badge badge-sold">판매완료</span>
+              {% elif item.status == 'share' %}
+                <span class="flea-table-badge badge-share">나눔</span>
+              {% endif %}
+            </td>
+            <td class="col-price">{{ item.price|intcomma }}원</td>
+            <td class="col-author">{{ item.author.nickname|default:item.author.username }}</td>
+            {# ✅ 작성일 td 삭제 #}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <p class="no-results">등록된 상품이 없습니다.</p>
+      {% endif %}
+
+    {% if items.has_other_pages %}
+    <div class="pagination-container">
+        {% if items.number > 1 %}
+            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if clat and clng %}&clat={{ clat }}&clng={{ clng }}&r={{ r }}{% endif %}" class="pagination-btn">«</a>
+        {% else %}
+            <span class="pagination-btn disabled">«</span>
+        {% endif %}
+
+        {% if items.has_previous %}
+            <a href="?page={{ items.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if clat and clng %}&clat={{ clat }}&clng={{ clng }}&r={{ r }}{% endif %}" class="pagination-btn">‹</a>
+        {% else %}
+            <span class="pagination-btn disabled">‹</span>
+        {% endif %}
+
+        {% for p in page_numbers %}
+            {% if p == current_page %}
+            <span class="pagination-btn active">{{ p }}</span>
+            {% else %}
+            <a href="?page={{ p }}{% if search_query %}&search={{ search_query }}{% endif %}{% if clat and clng %}&clat={{ clat }}&clng={{ clng }}&r={{ r }}{% endif %}" class="pagination-btn">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if items.has_next %}
+            <a href="?page={{ items.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if clat and clng %}&clat={{ clat }}&clng={{ clng }}&r={{ r }}{% endif %}" class="pagination-btn">›</a>
+        {% else %}
+            <span class="pagination-btn disabled">›</span>
+        {% endif %}
+
+        {% if items.number < total_pages %}
+            <a href="?page={{ total_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if clat and clng %}&clat={{ clat }}&clng={{ clng }}&r={{ r }}{% endif %}" class="pagination-btn">»</a>
+        {% else %}
+            <span class="pagination-btn disabled">»</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    </div>
+  </main>
+{% if user.is_authenticated %}
+<div class="wishlist-panel" id="wishlistPanel">
+  <div class="wishlist-header">
+    <div>
+      <div class="wishlist-title">내 찜목록</div>
+      <div class="wishlist-sub">
+        {% if liked_items %}
+          {{ liked_items.count }}개
+        {% else %}
+          0개
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="wishlist-body" id="wishlistBody">
+    {% if liked_items and liked_items.exists %}
+      {% for li in liked_items|slice:':5' %}
+      <a href="{% url 'board:flea_detail' li.pk %}" class="wishlist-item">
+        {% if li.image %}
+          <img src="{{ li.image.url }}" alt="{{ li.title }}" class="wishlist-thumb">
+        {% else %}
+          <div class="wishlist-thumb">이미지 없음</div>
+        {% endif %}
+        <div class="wishlist-meta">
+          <div class="wishlist-item-title">{{ li.title }}</div>
+          <div class="wishlist-item-price">{{ li.price|intcomma }}원</div>
+          <div class="wishlist-item-author">{{ li.author.nickname|default:li.author.username }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    {% else %}
+      <div class="wishlist-empty">찜한 상품이 없습니다.</div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ✅ 카카오 지도 SDK -->
+<script
+  type="text/javascript"
+  src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=470ebeffb625c90dc8a8d990366b63b2&libraries=services&autoload=false">
+</script>
+
+<script>
+  window.LOCAL_MARKET_CONFIG = {
+    defaultAddress: "{{ user_default_address|escapejs }}",
+    defaultAddressDetail: "{{ user_default_address_detail|escapejs }}",
+    fleaPinsApi: "{% url 'board:flea_geo_items' %}",
+  };
+</script>
+
+<script src="{% static 'js/local_market_map.js' %}"></script>
+<script>
+  // ✅ 테이블 행 전체 클릭 시 상세페이지로 이동
+  document.addEventListener("click", function (e) {
+    const row = e.target.closest("tr.flea-row");
+    if (!row) return;
+
+    // ✅ 링크/버튼/입력 요소를 직접 클릭한 경우엔 기본 동작(링크 이동) 우선
+    const interactive = e.target.closest("a, button, input, label, select, textarea");
+    if (interactive) return;
+
+    const href = row.dataset.href;
+    if (href) window.location.href = href;
+  });
+</script>
+
+{% endblock %}

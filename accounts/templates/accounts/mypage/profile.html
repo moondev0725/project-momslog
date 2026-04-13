@@ -1,0 +1,125 @@
+{% extends "accounts/mypage/base.html" %}
+{% load static %}
+
+{% block mypage_content %}
+<h2 class="mypage-h2">개인정보</h2>
+<form method="post" id="profileForm">
+
+  {% csrf_token %}
+
+  <!-- 아이디 -->
+  <div class="field">
+    <label class="field__label">아이디</label>
+    <input class="field__input input--lg" type="text" value="{{ user.username }}" readonly>
+    <div class="field__help">아이디는 변경할 수 없습니다.</div>
+  </div>
+
+  <!-- 이메일 -->
+  <div class="field">
+    <label class="field__label">이메일</label>
+
+    <!-- ✅ 버튼이 인풋 끝선(빨간선) 안으로 들어오도록 row--limit 추가 -->
+    <div class="row row--tight row--limit">
+      <input
+        type="email"
+        name="email"
+        id="email"
+        class="field__input input--lg"
+        value="{{ user.email }}"
+        autocomplete="email"
+      />
+      <button type="button" class="btn" id="emailSendBtn">인증번호 발송</button>
+    </div>
+
+    <!-- ✅ 발송 후에만 보이게: 기본은 숨김 -->
+    <div class="row row--gap row--limit is-hidden" id="emailVerifyArea">
+      <input
+        type="text"
+        id="emailCode"
+        class="field__input input--lg"
+        placeholder="인증번호 6자리"
+        inputmode="numeric"
+      />
+      <button type="button" class="btn btn--sub" id="emailVerifyBtn">인증 확인</button>
+    </div>
+
+    <!-- ✅ 메시지는 input 스타일 쓰면 안 됨 -->
+    <div class="field__msg" id="emailMsg"></div>
+  </div>
+
+  <!-- 닉네임 -->
+  <div class="field">
+    <label class="field__label">닉네임</label>
+    <input
+      type="text"
+      name="nickname"
+      id="nickname"
+      class="field__input input--lg"
+      value="{{ user.nickname }}"
+      data-initial="{{ user.nickname }}"
+    />
+    <div class="field__msg" id="nicknameMsg"></div>
+  </div>
+
+  <!-- 기본 정보 -->
+  <div class="grid">
+    <div class="field">
+      <label class="field__label">가입일</label>
+      <input class="field__input input--lg" type="text" value="{{ user.date_joined|date:'Y-m-d' }}" readonly>
+    </div>
+
+    <div class="field">
+      <label class="field__label">최근 접속</label>
+      <input class="field__input input--lg" type="text" value="{{ user.last_login|date:'Y-m-d H:i' }}" readonly>
+    </div>
+  </div>
+
+  <!-- 주소 -->
+  {% if user.address is not None %}
+  <div class="field">
+    <label class="field__label">주소</label>
+
+    <!-- ✅ 버튼이 인풋 끝선(빨간선) 안으로 들어오도록 row--limit 추가 -->
+    <div class="row row--gap row--limit">
+      <input class="field__input input--lg"
+             type="text"
+             name="address"
+             id="address"
+             value="{{ user.address|default_if_none:'' }}"
+             readonly
+             placeholder="주소 검색 버튼을 눌러 선택해 주세요">
+      <button type="button" class="btn" id="addrSearchBtn">주소 검색</button>
+    </div>
+
+    <!-- 상세주소 -->
+    <div class="field field--sub">
+      <label class="field__label" for="addressDetail">상세주소</label>
+      <input class="field__input input--lg"
+             type="text"
+             name="address_detail"
+             id="addressDetail"
+             value="{{ user.address_detail|default_if_none:'' }}"
+             placeholder="예) 101동 1203호, OO빌라 201호">
+      <div class="field__help">주소는 검색으로 선택, 상세주소는 직접 입력해 주세요.</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="actions actions--limit">
+    <button type="submit" class="btn btn--primary" id="saveBtn">저장하기</button>
+  </div>
+</form>
+
+<script>
+  window.MYPAGE_PROFILE_CONFIG = {
+    checkNicknameUrl: "{% url 'accounts:mypage_check_nickname' %}",
+    sendEmailCodeUrl: "{% url 'accounts:mypage_send_email_code' %}",
+    verifyEmailCodeUrl: "{% url 'accounts:mypage_verify_email_code' %}",
+    initialEmail: "{{ user.email|escapejs }}",
+    initialNickname: "{{ user.nickname|escapejs }}",
+  };
+</script>
+
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script src="{% static 'js/mypage_profile.js' %}"></script>
+{% endblock %}

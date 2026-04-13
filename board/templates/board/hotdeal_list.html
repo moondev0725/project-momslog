@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+{% load static %}
+{# 26-01-06 표준화: 요리레시피 스타일로 리뉴얼 #}
+{% block content %}
+<style>
+    .hotdeal-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .hotdeal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #ff6b6b;
+    }
+
+    .hotdeal-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .hotdeal-create-btn {
+        padding: 10px 20px;
+        background: #ff6b6b;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: .2s;
+        margin-left: auto;
+    }
+
+    .hotdeal-create-btn:hover {
+        background: #ff5252;
+    }
+
+    .category-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .category-tab {
+        padding: 8px 16px;
+        background: #f8f9fa;
+        color: #666;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: .2s;
+    }
+
+    .category-tab.active {
+        background: #ff6b6b;
+        color: white;
+    }
+
+    .category-tab:hover {
+        background: #ffdede;
+    }
+
+    .search-box {
+        margin-bottom: 20px;
+    }
+
+    .search-box form {
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-box input {
+        flex: 1;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .search-box button {
+        padding: 10px 24px;
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .search-box button:hover {
+        background: #ff5252;
+    }
+
+    .hotdeal-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .hotdeal-table thead {
+        background: #f8f9fa;
+    }
+
+    .hotdeal-table th {
+        padding: 15px;
+        text-align: center;
+        font-weight: bold;
+        border-bottom: 2px solid #dee2e6;
+        font-size: 14px;
+    }
+
+    .hotdeal-table td {
+        padding: 15px;
+        border-bottom: 1px solid #dee2e6;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .hotdeal-table tbody tr:hover {
+        background: #fff8f8;
+    }
+
+    .hotdeal-title {
+        text-align: left;
+    }
+
+    .hotdeal-title a {
+        color: #333;
+        text-decoration: none;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .hotdeal-title a:hover {
+        color: #ff6b6b;
+    }
+
+    .price-tag {
+        color: #ff6b6b;
+        font-weight: bold;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+    .pagination-container {
+        text-align: center;
+        margin-top: 40px;
+        margin-bottom: 30px;
+    }
+
+    .pagination-btn {
+        display: inline-block;
+        margin: 0 5px;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        color: #333;
+        text-decoration: none;
+        font-size: 14px;
+        transition: .2s;
+        min-width: 36px;
+        text-align: center;
+    }
+
+    .pagination-btn:hover {
+        border-color: #ff6b6b;
+        color: #ff6b6b;
+        background: #fff5f5;
+    }
+
+    .pagination-btn.active {
+        background: #495057;
+        color: white;
+        border-color: #495057;
+    }
+
+    .pagination-btn.disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+        .hotdeal-container {
+            padding: 15px;
+        }
+
+        .hotdeal-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .hotdeal-create-btn {
+            margin-left: 0;
+            margin-top: 10px;
+        }
+
+        .category-tabs {
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .category-tab {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .hotdeal-table thead {
+            display: none;
+        }
+
+        .hotdeal-table tbody tr {
+            display: block;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .hotdeal-table tbody td {
+            display: block;
+            padding: 8px 0;
+            border: none;
+            text-align: left !important;
+            white-space: normal;
+        }
+
+        .hotdeal-table tbody td:before {
+            content: attr(data-label);
+            font-weight: 600;
+            margin-right: 10px;
+            color: #666;
+        }
+
+        .hotdeal-title {
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 8px;
+        }
+    }
+</style>
+
+<div class="hotdeal-container">
+    <div class="hotdeal-header">
+        <h2>🎁 핫딜공유</h2>
+        <a href="{% url 'board:hotdeal_create' %}" class="hotdeal-create-btn">핫딜 작성</a>
+    </div>
+    
+    <div class="category-tabs">
+        <a href="{% url 'board:hotdeal_list' %}" class="category-tab {% if category == 'all' %}active{% endif %}">전체</a>
+        <a href="?category=baby" class="category-tab {% if category == 'baby' %}active{% endif %}">육아용품 핫딜</a>
+        <a href="?category=life" class="category-tab {% if category == 'life' %}active{% endif %}">생활용품 핫딜</a>
+        <a href="?category=event" class="category-tab {% if category == 'event' %}active{% endif %}">이벤트/체험단</a>
+    </div>
+
+    <div class="search-box">
+        <form method="get">
+            <input type="text" name="search" placeholder="핫딜 검색" value="{{ search_query|default:'' }}">
+            <button type="submit">검색</button>
+        </form>
+    </div>
+
+    {% if posts %}
+    <table class="hotdeal-table">
+        <thead>
+            <tr>
+                <th style="width: 35%;">제목</th>
+                <th style="width: 15%;">가격</th>
+                <th style="width: 15%;">작성자</th>
+                <th style="width: 12%;">조회</th>
+                <th style="width: 15%;">작성일</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in posts %}
+            <tr>
+                <td class="hotdeal-title" data-label="제목">
+                    <a href="{% url 'board:hotdeal_detail' post.pk %}">{{ post.title }}</a>
+                </td>
+                <td class="price-tag" data-label="가격">{{ post.price|default:"문의" }}</td>
+                <td data-label="작성자">{{ post.author.nickname }}</td>
+                <td data-label="조회">{{ post.views }}</td>
+                <td data-label="작성일">{{ post.created_at|date:"Y.m.d" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-results">
+        <p>등록된 핫딜이 없습니다.</p>
+    </div>
+    {% endif %}
+
+    <!-- 페이지네이션 -->
+    {% if posts.has_other_pages %}
+    <div class="pagination-container">
+        {% if posts.has_previous %}
+            <a href="?page=1&category={{ category }}&search={{ search_query }}" class="pagination-btn">«</a>
+            <a href="?page={{ posts.previous_page_number }}&category={{ category }}&search={{ search_query }}" class="pagination-btn">‹</a>
+        {% else %}
+            <span class="pagination-btn disabled">«</span>
+            <span class="pagination-btn disabled">‹</span>
+        {% endif %}
+
+        {% for page_num in posts.paginator.page_range %}
+            {% if posts.number == page_num %}
+                <span class="pagination-btn active">{{ page_num }}</span>
+            {% else %}
+                <a href="?page={{ page_num }}&category={{ category }}&search={{ search_query }}" class="pagination-btn">{{ page_num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if posts.has_next %}
+            <a href="?page={{ posts.next_page_number }}&category={{ category }}&search={{ search_query }}" class="pagination-btn">›</a>
+            <a href="?page={{ posts.paginator.num_pages }}&category={{ category }}&search={{ search_query }}" class="pagination-btn">»</a>
+        {% else %}
+            <span class="pagination-btn disabled">›</span>
+            <span class="pagination-btn disabled">»</span>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

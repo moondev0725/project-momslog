@@ -1,0 +1,26 @@
+<div class="reply-card" data-reply-id="{{ reply.id }}" data-comment-id="{{ parent_id }}">
+  <div class="comment-meta">
+    <span class="comment-author">{{ reply.author.nickname|default:reply.author.username }}</span>
+    <span>{{ reply.created_at|date:"Y.m.d H:i" }}</span>
+
+    {% if user == reply.author %}
+    <div class="comment-actions">
+      <button type="button"
+              class="btn-danger-soft reply-edit-btn"
+              data-reply-id="{{ reply.id }}"
+              data-comment-id="{{ parent_id }}"
+              style="padding:6px 10px; font-size:12px;">수정</button>
+
+      <form method="post"
+            action="{% url 'recipes:reply_delete' post.pk parent_id reply.id %}"
+            class="reply-delete-form"
+            style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn-danger-soft" style="padding:6px 10px; font-size:12px;">삭제</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="comment-content">{{ reply.content }}</div>
+</div>

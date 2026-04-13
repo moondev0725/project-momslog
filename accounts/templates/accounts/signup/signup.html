@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/signup.css' %}">
+<script src="{% static 'js/signup.js' %}" defer></script>
+
+<!-- ✅ Daum 주소 API -->
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+<!-- ✅ signup.js로 전달할 값 (전역 변수) -->
+<script>
+  window.SIGNUP_CONFIG = {
+    hasServerErrors: {% if form.errors %}true{% else %}false{% endif %},
+    checkIdUrl: "{% url 'accounts:check_id' %}",
+    checkNicknameUrl: "{% url 'accounts:check_nickname' %}",
+    checkEmailUrl: "{% url 'accounts:check_email' %}",
+    sendEmailCodeUrl: "{% url 'accounts:send_email_code' %}",
+    verifyEmailCodeUrl: "{% url 'accounts:verify_email_code' %}",
+  };
+</script>
+
+<div class="login-container" style="max-width: 600px;">
+  <h2>회원가입</h2>
+
+  <form method="POST" action="{% url 'accounts:signup' %}" id="signupForm" novalidate>
+    {% csrf_token %}
+
+    <!-- ✅ 아이디 (자동 중복확인) -->
+    <div class="form-group">
+      <label>아이디 <span class="text-danger">*</span></label>
+      <input
+        type="text"
+        name="username"
+        id="username"
+        placeholder="아이디 입력"
+        required
+        value="{{ form.username.value|default_if_none:'' }}"
+        {% if form.username.errors %}data-has-error="1"{% endif %}
+      >
+      <small id="id_check_msg" class="help-msg"></small>
+
+      <div class="rule-box">
+        <div class="rule-title">아이디 규칙</div>
+        <div id="id_rule_len" class="rule-item">• 6~20자</div>
+        <div id="id_rule_char" class="rule-item">• 영문/숫자만 사용 가능</div>
+        <div id="id_rule_mix" class="rule-item">• 영문과 숫자를 모두 포함해야 함</div>
+      </div>
+
+      {% if form.username.errors %}
+      <div class="field-error">{{ form.username.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ✅ 이름 -->
+    <div class="form-group">
+      <label>이름 <span class="text-danger">*</span></label>
+      <input
+        type="text"
+        name="real_name"
+        id="real_name"
+        placeholder="실명 입력"
+        required
+        value="{{ form.real_name.value|default_if_none:'' }}"
+        {% if form.real_name.errors %}data-has-error="1"{% endif %}
+      >
+      {% if form.real_name.errors %}
+      <div class="field-error">{{ form.real_name.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ✅ 닉네임 (자동 중복확인) -->
+    <div class="form-group">
+      <label>닉네임 <span class="text-danger">*</span></label>
+      <input
+        type="text"
+        name="nickname"
+        id="nickname"
+        placeholder="활동명 입력"
+        required
+        value="{{ form.nickname.value|default_if_none:'' }}"
+        {% if form.nickname.errors %}data-has-error="1"{% endif %}
+      >
+      <small id="nickname_check_msg" class="help-msg"></small>
+
+      {% if form.nickname.errors %}
+      <div class="field-error">{{ form.nickname.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ✅ 비밀번호 -->
+    <div class="form-group">
+      <label>비밀번호 <span class="text-danger">*</span></label>
+
+      <div class="input-with-toggle">
+        <input
+          type="password"
+          name="password1"
+          id="password1"
+          placeholder="비밀번호 입력"
+          required
+          {% if form.password1.errors %}data-has-error="1"{% endif %}
+        >
+        <button type="button" class="toggle-eye" data-toggle-target="password1" aria-label="비밀번호 보기">보기</button>
+      </div>
+
+      <div class="rule-box">
+        <div class="rule-title">비밀번호 조건</div>
+        <div id="pw_rule_len" class="rule-item">• 최소 8자 이상이어야 합니다.</div>
+        <div id="pw_rule_mix" class="rule-item">• 영어 + 숫자 + 특수기호를 모두 포함해야 합니다.</div>
+        <div class="rule-sub">
+          (안전한 비밀번호를 위해 권장되는 기준이며, 최종 검증은 서버에서 처리됩니다.)
+        </div>
+      </div>
+
+      <small id="pw_strength_msg" class="help-msg"></small>
+
+      {% if form.password1.errors %}
+      <div class="field-error">{{ form.password1.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ✅ 비밀번호 확인 -->
+    <div class="form-group">
+      <label>비밀번호 확인 <span class="text-danger">*</span></label>
+
+      <div class="input-with-toggle">
+        <input
+          type="password"
+          name="password2"
+          id="password2"
+          placeholder="비밀번호 재입력"
+          required
+          {% if form.password2.errors %}data-has-error="1"{% endif %}
+        >
+        <button type="button" class="toggle-eye" data-toggle-target="password2" aria-label="비밀번호 확인 보기">보기</button>
+      </div>
+
+      <small id="pw_match_msg" class="help-msg"></small>
+
+      {% if form.password2.errors %}
+      <div class="field-error">{{ form.password2.errors.0 }}</div>
+      {% endif %}
+
+      {% if form.non_field_errors %}
+      <div class="field-error">{{ form.non_field_errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ✅ 주민등록번호 -->
+    <div class="form-group">
+      <label>주민등록번호 <span class="text-danger">*</span></label>
+
+      <div class="split-row">
+        <input type="text" id="jumin1" placeholder="앞 6자리" inputmode="numeric" maxlength="6" class="split-input">
+        <span class="split-dash">-</span>
+
+        <div class="input-with-toggle split-input">
+          <input type="password" id="jumin2" placeholder="뒤 7자리" inputmode="numeric" maxlength="7">
+          <button type="button" class="toggle-eye" data-toggle-target="jumin2" aria-label="주민번호 뒷자리 보기">보기</button>
+        </div>
+      </div>
+
+      <input type="hidden" name="jumin" id="jumin" value="{{ form.jumin.value|default_if_none:'' }}"
+        {% if form.jumin.errors %}data-has-error="1"{% endif %}>
+
+      {% if form.jumin.errors %}
+      <div class="field-error">{{ form.jumin.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ✅ 주소 -->
+    <div class="form-group">
+      <label>주소 <span class="text-danger">*</span></label>
+
+      <div class="inline-row">
+        <input type="text" id="address_main" placeholder="주소 검색" readonly required style="flex:1;">
+        <button type="button" id="btnAddressSearch" class="btn-check">검색</button>
+      </div>
+
+      <!-- ✅✅✅ 여기만 수정: name="address_detail" 추가 + 라벨 느낌 placeholder -->
+      <input
+        type="text"
+        id="address_detail"
+        name="address_detail"
+        placeholder="상세주소 입력 (예: 101동 1203호)"
+        required
+        style="margin-top: 8px;"
+        value="{{ form.address_detail.value|default_if_none:'' }}"
+      >
+
+      <!-- ✅ 기존 address 저장 hidden (그대로 유지) -->
+      <input type="hidden" name="address" id="hidden_real_address" value="{{ form.address.value|default_if_none:'' }}"
+        {% if form.address.errors %}data-has-error="1"{% endif %}>
+
+      {% if form.address.errors %}
+      <div class="field-error">{{ form.address.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ✅ 휴대폰 -->
+    <div class="form-group">
+      <label>휴대폰 번호 <span class="text-danger">*</span></label>
+
+      <div class="split-row">
+        <input type="text" id="phone1" placeholder="010" inputmode="numeric" maxlength="3" class="split-input">
+        <span class="split-dash">-</span>
+        <input type="text" id="phone2" placeholder="0000" inputmode="numeric" maxlength="4" class="split-input">
+        <span class="split-dash">-</span>
+        <input type="text" id="phone3" placeholder="0000" inputmode="numeric" maxlength="4" class="split-input">
+      </div>
+
+      <input type="hidden" name="phone" id="phone" value="{{ form.phone.value|default_if_none:'' }}"
+        {% if form.phone.errors %}data-has-error="1"{% endif %}>
+
+      {% if form.phone.errors %}
+      <div class="field-error">{{ form.phone.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ✅ 이메일 -->
+    <div class="form-group">
+      <label>이메일 <span class="text-danger">*</span></label>
+
+      <div class="inline-row">
+        <input
+          type="email"
+          name="email"
+          id="email"
+          placeholder="example@naver.com"
+          required
+          value="{{ form.email.value|default_if_none:'' }}"
+          {% if form.email.errors %}data-has-error="1"{% endif %}
+          style="flex:1;"
+        >
+        <button type="button" id="btnSendCode" class="btn-check">인증번호 보내기</button>
+      </div>
+
+      <small id="email_check_msg" class="help-msg"></small>
+
+      {% if form.email.errors %}
+      <div class="field-error">{{ form.email.errors.0 }}</div>
+      {% endif %}
+
+      <div id="emailCodeWrap" class="email-code-wrap">
+        <div class="inline-row">
+          <input type="text" id="emailCode" placeholder="인증번호 6자리" inputmode="numeric" maxlength="6" style="flex:1;">
+          <button type="button" id="btnVerifyCode" class="btn-check">인증하기</button>
+        </div>
+      </div>
+
+      <div id="emailVerifyStatus" class="help-msg" style="margin-top:8px;"></div>
+    </div>
+
+    <!-- ✅ 성별 -->
+    <div class="form-group">
+      <label style="display:block; margin-bottom: 10px;">성별 <span class="text-danger">*</span></label>
+
+      <div class="child-toggle">
+        <label class="chip-ui">
+          <input type="radio" name="gender" value="M" {% if form.gender.value == 'M' %}checked{% endif %}>
+          <span>남자</span>
+        </label>
+
+        <label class="chip-ui">
+          <input type="radio" name="gender" value="F" {% if form.gender.value == 'F' or not form.gender.value %}checked{% endif %}>
+          <span>여자</span>
+        </label>
+      </div>
+
+      {% if form.gender.errors %}
+      <div class="field-error">{{ form.gender.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ✅ 자녀 정보 -->
+    <div class="form-group">
+      <label style="display:block; margin-bottom: 10px;">자녀 정보 <span class="text-danger">*</span></label>
+
+      <div class="child-toggle">
+        <label class="chip-ui">
+          <input type="radio" name="has_children_ui" value="0" checked>
+          <span>자녀 없음</span>
+        </label>
+
+        <label class="chip-ui">
+          <input type="radio" name="has_children_ui" value="1">
+          <span>자녀 있음</span>
+        </label>
+      </div>
+
+      <input type="hidden" name="has_children" id="has_children" value="0">
+
+      <div id="childrenStageBox" style="display:none;">
+        <div class="stage-grid">
+          <label class="chip-ui"><input type="checkbox" name="children_stages" value="kindergarten"><span>유치원</span></label>
+          <label class="chip-ui"><input type="checkbox" name="children_stages" value="elementary"><span>초등학생</span></label>
+          <label class="chip-ui"><input type="checkbox" name="children_stages" value="middle"><span>중학생</span></label>
+          <label class="chip-ui"><input type="checkbox" name="children_stages" value="high"><span>고등학생</span></label>
+          <label class="chip-ui"><input type="checkbox" name="children_stages" value="adult"><span>성인</span></label>
+          <label class="chip-ui"><input type="checkbox" name="children_stages" value="other"><span>기타</span></label>
+        </div>
+
+        <small id="children_stages_msg"></small>
+      </div>
+    </div>
+
+    <!-- ✅ 약관 동의 -->
+    <div class="form-group" style="margin-top: 30px;">
+      <label class="terms-label">
+        <input type="checkbox" name="terms_agreed" id="agree_terms">
+        <span>[필수] 이용약관 및 개인정보 처리방침에 동의합니다.</span>
+      </label>
+    </div>
+
+    <button type="submit" class="btn-login-submit" id="submitBtn" disabled>가입하기</button>
+  </form>
+
+  <div class="login-links">
+    <a href="{% url 'accounts:login' %}">이미 계정이 있으신가요? 로그인</a>
+  </div>
+</div>
+
+{% endblock %}

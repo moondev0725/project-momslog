@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* ==================== 실시간 반응 피드 페이지 스타일 ==================== */
+  .realtime-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* 상단 고정 영역 */
+  .realtime-header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 16px 0;
+    margin-bottom: 20px;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  }
+
+  .realtime-header-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1f2937;
+    margin: 0 0 12px 0;
+  }
+
+  .realtime-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: #f3f4f6;
+    border-radius: 6px;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .refresh-time {
+    color: #9ca3af;
+    font-size: 12px;
+  }
+
+  /* 피드 컨테이너 */
+  .realtime-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* 카드 스타일 (메인 섹션과 동일) */
+  .feed-card {
+    position: relative;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    display: grid;
+    gap: 6px;
+    min-height: 110px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.15s ease;
+  }
+
+  .feed-card:hover {
+    box-shadow: 0 8px 22px rgba(0,0,0,0.04);
+    transform: translateY(-1px);
+  }
+
+  .feed-card.level-top {
+    border-color: #ef4444;
+  }
+
+  .feed-card.level-mid {
+    border-color: #cbd5e1;
+  }
+
+  .feed-card.level-base {
+    border-color: #e5e7eb;
+  }
+
+  .feed-card .title {
+    font-weight: 700;
+    font-size: 14px;
+    color: #1f2937;
+    line-height: 1.35;
+    max-height: 2.7em;
+    overflow: hidden;
+  }
+
+  .feed-card .sub {
+    color: #9ca3af;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .feed-card .meta-line {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .feed-card .metric {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .feed-card .status {
+    color: #ef4444;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* 로딩 상태 */
+  .loading-indicator {
+    text-align: center;
+    padding: 30px 20px;
+    color: #9ca3af;
+    font-size: 14px;
+  }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #6b7280;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 8px 0 0;
+    vertical-align: middle;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* 빈 상태 */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9ca3af;
+  }
+
+  .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .empty-state-text {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* 무한 스크롤 트리거 */
+  .scroll-trigger {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 모바일 최적화 */
+  @media (max-width: 640px) {
+    .realtime-container {
+      padding: 12px;
+    }
+
+    .realtime-header {
+      padding: 12px 0;
+      margin-bottom: 16px;
+    }
+
+    .realtime-header-title {
+      font-size: 18px;
+    }
+
+    .feed-card {
+      padding: 10px;
+      min-height: 100px;
+    }
+
+    .feed-card .title {
+      font-size: 13px;
+    }
+  }
+</style>
+
+<div class="realtime-container">
+  <!-- 상단 고정 영역 -->
+  <div class="realtime-header">
+    <h1 class="realtime-header-title">지금 이야기 흐름</h1>
+    <div class="realtime-status">
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>최근 1시간 기준</span>
+      </div>
+      <span>실시간 반응 순 정렬 중</span>
+      <span class="refresh-time" id="last-refresh">방금 전</span>
+    </div>
+  </div>
+
+  <!-- 피드 영역 -->
+  <div class="realtime-feed" id="feed-container">
+    {% for post in posts %}
+      {% with views=post.views|default:0 comments=post.comment_count|default:0 score=post.popularity_score|default:0 %}
+        {% if comments >= 10 %}
+          {% with status_label="방금 댓글 달림" %}
+          <a class="feed-card {% if comments >= 20 or score >= 80 %}level-top{% elif comments >= 8 or score >= 50 %}level-mid{% else %}level-base{% endif %}" href="{% if post.post_type == 'free' %}{% url 'board:free_detail' post.pk %}{% elif post.post_type == 'hotdeal' %}{% url 'board:hotdeal_detail' post.pk %}{% else %}{% url 'board:parenting_detail' post.pk %}{% endif %}">
+            <div class="status">{{ status_label }}</div>
+            <div class="sub">{% if post.post_type == 'free' %}자유톡{% elif post.post_type == 'hotdeal' %}핫딜{% else %}육아정보{% endif %}</div>
+            <div class="title">{{ post.title }}</div>
+            <div class="meta-line">
+              <span class="metric comments">{{ comments }}</span>
+              <span class="metric views">{{ views }}</span>
+              <span class="metric time">{{ post.created_at|date:"m.d H:i" }}</span>
+            </div>
+          </a>
+          {% endwith %}
+        {% elif views >= 20 %}
+          {% with status_label="지금 읽는 중" %}
+          <a class="feed-card {% if comments >= 20 or score >= 80 %}level-top{% elif comments >= 8 or score >= 50 %}level-mid{% else %}level-base{% endif %}" href="{% if post.post_type == 'free' %}{% url 'board:free_detail' post.pk %}{% elif post.post_type == 'hotdeal' %}{% url 'board:hotdeal_detail' post.pk %}{% else %}{% url 'board:parenting_detail' post.pk %}{% endif %}">
+            <div class="status">{{ status_label }}</div>
+            <div class="sub">{% if post.post_type == 'free' %}자유톡{% elif post.post_type == 'hotdeal' %}핫딜{% else %}육아정보{% endif %}</div>
+            <div class="title">{{ post.title }}</div>
+            <div class="meta-line">
+              <span class="metric comments">{{ comments }}</span>
+              <span class="metric views">{{ views }}</span>
+              <span class="metric time">{{ post.created_at|date:"m.d H:i" }}</span>
+            </div>
+          </a>
+          {% endwith %}
+        {% else %}
+          {% with status_label="방금 올라옴" %}
+          <a class="feed-card {% if comments >= 20 or score >= 80 %}level-top{% elif comments >= 8 or score >= 50 %}level-mid{% else %}level-base{% endif %}" href="{% if post.post_type == 'free' %}{% url 'board:free_detail' post.pk %}{% elif post.post_type == 'hotdeal' %}{% url 'board:hotdeal_detail' post.pk %}{% else %}{% url 'board:parenting_detail' post.pk %}{% endif %}">
+            <div class="status">{{ status_label }}</div>
+            <div class="sub">{% if post.post_type == 'free' %}자유톡{% elif post.post_type == 'hotdeal' %}핫딜{% else %}육아정보{% endif %}</div>
+            <div class="title">{{ post.title }}</div>
+            <div class="meta-line">
+              <span class="metric comments">{{ comments }}</span>
+              <span class="metric views">{{ views }}</span>
+              <span class="metric time">{{ post.created_at|date:"m.d H:i" }}</span>
+            </div>
+          </a>
+          {% endwith %}
+        {% endif %}
+      {% endwith %}
+    {% empty %}
+      <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <div class="empty-state-text">지금 반응 중인 글이 없습니다.</div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- 무한 스크롤 트리거 -->
+  <div class="scroll-trigger" id="scroll-trigger">
+    {% if has_next %}
+      <div class="loading-indicator" style="display: none;">
+        <span class="loading-spinner"></span>
+        <span>더 불러오는 중...</span>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let currentPage = {{ page }};
+  let isLoading = false;
+  let hasMore = {{ has_next|lower }};
+
+  // 시간 업데이트
+  function updateRefreshTime() {
+    const element = document.getElementById('last-refresh');
+    if (element) {
+      element.textContent = '방금 전';
+    }
+  }
+
+  // 무한 스크롤 로드
+  function loadMorePosts() {
+    if (isLoading || !hasMore) return;
+
+    isLoading = true;
+    currentPage += 1;
+
+    fetch(`{% url 'main:realtime_feed' %}?page=${currentPage}`, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      const container = document.getElementById('feed-container');
+
+      data.posts.forEach(post => {
+        const card = document.createElement('a');
+        card.className = `feed-card`;
+        
+        // 레벨 결정
+        const comments = post.comments || 0;
+        const views = post.views || 0;
+        const score = post.popularity_score || 0;
+        
+        if (comments >= 20 || score >= 80) {
+          card.classList.add('level-top');
+        } else if (comments >= 8 || score >= 50) {
+          card.classList.add('level-mid');
+        } else {
+          card.classList.add('level-base');
+        }
+
+        card.href = post.url;
+        card.innerHTML = `
+          <div class="status">${post.status_label}</div>
+          <div class="sub">${post.category}</div>
+          <div class="title">${post.title}</div>
+          <div class="meta-line">
+            <span class="metric comments">${post.comments}</span>
+            <span class="metric views">${post.views}</span>
+            <span class="metric time">${post.created_at}</span>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      hasMore = data.has_next;
+      isLoading = false;
+
+      if (!hasMore) {
+        document.getElementById('scroll-trigger').innerHTML = '<div class="empty-state-text" style="color: #d1d5db;">더 이상 글이 없습니다.</div>';
+      }
+
+      updateRefreshTime();
+    })
+    .catch(error => {
+      console.error('Error loading posts:', error);
+      isLoading = false;
+    });
+  }
+
+  // Intersection Observer를 이용한 무한 스크롤
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        loadMorePosts();
+      }
+    });
+  }, {
+    rootMargin: '100px'
+  });
+
+  const trigger = document.getElementById('scroll-trigger');
+  if (trigger) {
+    observer.observe(trigger);
+  }
+
+  // 페이지 로드 시간 설정
+  updateRefreshTime();
+
+  // 30초마다 자동 갱신 (선택사항)
+  setInterval(() => {
+    updateRefreshTime();
+  }, 30000);
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,682 @@
+/* 
+═══════════════════════════════════════════════════════════════════════
+darkmode.css - 다크모드 스타일
+═══════════════════════════════════════════════════════════════════════
+작성일: 2026-01-02
+기능: 밤 중 수유하며 보는 엄마들을 위한 눈 피로 방지 다크모드
+*/
+
+/* 다크모드 토글 버튼 스타일 */
+.dark-mode-toggle {
+    background: linear-gradient(135deg, #4a5f7f 0%, #5a4a7f 100%);
+    border: none;
+    border-radius: 50px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.dark-mode-toggle:active {
+    transform: translateY(0);
+}
+
+/* 라이트모드: 달 아이콘 숨김 */
+.light-mode .dark-mode-toggle .icon-moon {
+    display: none;
+}
+
+.light-mode .dark-mode-toggle .icon-sun {
+    display: inline;
+}
+
+/* 다크모드: 태양 아이콘 숨김 */
+.dark-mode .dark-mode-toggle .icon-sun {
+    display: none;
+}
+
+.dark-mode .dark-mode-toggle .icon-moon {
+    display: inline;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   다크모드 색상 변수
+   ═══════════════════════════════════════════════════════════════════════ */
+.dark-mode {
+    --bg-primary: #0f0f13;
+    --bg-secondary: #1a1a24;
+    --bg-tertiary: #252a35;
+    --text-primary: #e0e0e6;
+    --text-secondary: #a0a0a8;
+    --border-color: #3a3f4a;
+    --shadow: rgba(0, 0, 0, 0.7);
+    --accent: #ff6b6b;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   다크모드 기본 스타일
+   ═══════════════════════════════════════════════════════════════════════ */
+.dark-mode body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* 헤더 */
+.dark-mode header {
+    background-color: var(--bg-secondary);
+    border-bottom-color: var(--border-color);
+}
+
+.dark-mode .logo img {
+    filter: brightness(0.9);
+}
+
+/* 검색바 */
+.dark-mode .search-bar {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+}
+
+.dark-mode .search-bar:focus-within {
+    background: var(--bg-secondary);
+    border-color: var(--accent);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.15);
+}
+
+.dark-mode .search-bar input {
+    color: var(--text-primary);
+}
+
+.dark-mode .search-bar input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* 네비게이션 */
+.dark-mode .main-nav {
+    background-color: var(--bg-secondary);
+    border-bottom-color: var(--border-color);
+}
+
+.dark-mode .main-nav li a {
+    color: var(--text-primary);
+}
+
+.dark-mode .main-nav li:hover,
+.dark-mode .main-nav li.active {
+    background: var(--bg-tertiary);
+}
+
+.dark-mode .dropdown-menu {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    box-shadow: 0 8px 24px var(--shadow);
+}
+
+.dark-mode .dropdown-menu li a {
+    color: var(--text-primary);
+}
+
+.dark-mode .dropdown-menu li a:hover {
+    background: var(--bg-tertiary);
+}
+
+/* 메인 콘텐츠 */
+.dark-mode .main-content {
+    background-color: var(--bg-primary);
+}
+
+/* 카드/박스 */
+.dark-mode .card,
+.dark-mode .box,
+.dark-mode .post-item,
+.dark-mode .comment-item {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+/* 테이블 */
+.dark-mode table {
+    border-color: var(--border-color);
+}
+
+.dark-mode table thead tr {
+    background: var(--bg-tertiary);
+}
+
+.dark-mode table tbody tr {
+    border-color: var(--border-color);
+}
+
+.dark-mode table tbody tr:hover {
+    background: var(--bg-tertiary);
+}
+
+.dark-mode table th,
+.dark-mode table td {
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+/* 입력 필드 */
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.dark-mode input:focus,
+.dark-mode textarea:focus,
+.dark-mode select:focus {
+    background: var(--bg-secondary);
+    border-color: var(--accent);
+}
+
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+    color: var(--text-secondary);
+}
+
+/* 버튼 */
+.dark-mode button:not(.dark-mode-toggle),
+.dark-mode .btn {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.dark-mode button:hover:not(.dark-mode-toggle),
+.dark-mode .btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
+/* 기본 버튼 클래스 추가 */
+.dark-mode .btn-primary {
+    background: linear-gradient(135deg, #4a5f7f 0%, #5a4a7f 100%);
+    border-color: transparent;
+}
+
+.dark-mode .btn-primary:hover {
+    background: linear-gradient(135deg, #5a7f9f 0%, #7a6a9f 100%);
+}
+
+.dark-mode .btn-secondary {
+    background: var(--bg-tertiary);
+    border: 1px solid #6a7f99;
+}
+
+.dark-mode .btn-secondary:hover {
+    background: #2a3245;
+    border-color: #a0c4ff;
+}
+
+.dark-mode .btn-danger {
+    background: #6d2d2d;
+    border-color: #ff6b6b;
+    color: #ff9999;
+}
+
+.dark-mode .btn-danger:hover {
+    background: #8b3a3a;
+    border-color: #ff4757;
+    color: white;
+}
+
+/* 링크 */
+.dark-mode a {
+    color: #a0c4ff;
+    transition: color 0.2s ease;
+}
+
+.dark-mode a:hover {
+    color: #c0e0ff;
+    text-decoration: underline;
+}
+
+/* 모달 */
+.dark-mode .modal,
+.dark-mode .modal-content {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+.dark-mode .modal-header {
+    background: var(--bg-tertiary);
+    border-bottom-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.dark-mode .modal-body {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.dark-mode .modal-footer {
+    background: var(--bg-tertiary);
+    border-top-color: var(--border-color);
+}
+
+.dark-mode .close {
+    color: var(--text-primary);
+}
+
+/* 푸터 */
+.dark-mode footer {
+    background: var(--bg-secondary);
+    border-top-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+/* 알림 배지 */
+.dark-mode .notification-badge {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+}
+
+/* 등급 배지 */
+.dark-mode .grade-badge {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+}
+
+/* 메시지 알림 */
+.dark-mode .msg-wrap {
+    background: var(--bg-secondary);
+}
+
+.dark-mode .msg-success {
+    background: #1e4620;
+    border-color: #2d6930;
+    color: #90ee90;
+}
+
+.dark-mode .msg-error {
+    background: #4a1e1e;
+    border-color: #6d2d2d;
+    color: #ff6b6b;
+}
+
+.dark-mode .msg-info {
+    background: #1e2a4a;
+    border-color: #2d3d6d;
+    color: #89b4fa;
+}
+
+/* 로딩 인디케이터 */
+.dark-mode .loading,
+.dark-mode .spinner {
+    border-color: var(--border-color);
+    border-top-color: var(--accent);
+}
+
+/* 스크롤바 (Webkit 브라우저) */
+.dark-mode ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.dark-mode ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: 5px;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #4a5568;
+}
+
+/* 챗봇 위젯 */
+.dark-mode .chatbot-window {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.dark-mode .chat-header {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, #1f2a38 100%);
+    border-bottom-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.dark-mode .chat-header h3 {
+    color: #e8e8e8;
+}
+
+.dark-mode .chat-body {
+    background: var(--bg-primary);
+}
+
+.dark-mode .chat-message {
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.dark-mode .chat-message.bot {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.dark-mode .chat-message.bot p {
+    color: var(--text-primary);
+}
+
+.dark-mode .chat-message.user {
+    background: linear-gradient(135deg, #4a5f7f 0%, #5a4a7f 100%);
+    color: white;
+}
+
+.dark-mode .chat-message.user p {
+    color: white;
+}
+
+.dark-mode .chat-footer {
+    background: var(--bg-secondary);
+    border-top-color: var(--border-color);
+}
+
+.dark-mode .chat-footer input {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.dark-mode .chat-footer input:focus {
+    background: #1a2535;
+    border-color: #a0c4ff;
+}
+
+.dark-mode .chat-footer button {
+    background: linear-gradient(135deg, #4a5f7f 0%, #5a4a7f 100%);
+    color: white;
+}
+
+/* 이미지 밝기 조정 (너무 밝지 않게) */
+.dark-mode img:not(.logo img):not(.chat-message img) {
+    opacity: 0.88;
+    filter: brightness(0.88) contrast(1.05);
+}
+
+/* 포스트 스타일 */
+.dark-mode .post-title {
+    color: var(--text-primary);
+}
+
+.dark-mode .post-meta {
+    color: var(--text-secondary);
+}
+
+.dark-mode .post-content {
+    color: var(--text-primary);
+}
+
+.dark-mode .post-footer {
+    border-top-color: var(--border-color);
+}
+
+/* 댓글 스타일 */
+.dark-mode .comment-author {
+    color: #a0c4ff;
+    font-weight: 500;
+}
+
+.dark-mode .comment-content {
+    color: var(--text-primary);
+}
+
+.dark-mode .comment-time {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* 미니갤러리 / 이미지 그리드 */
+.dark-mode .image-grid,
+.dark-mode .gallery {
+    background: var(--bg-secondary);
+}
+
+.dark-mode .gallery-item {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .gallery-item:hover {
+    border-color: #a0c4ff;
+    box-shadow: 0 0 15px rgba(160, 196, 255, 0.2);
+}
+
+/* 폼 레이블 */
+.dark-mode label {
+    color: var(--text-primary);
+}
+
+.dark-mode .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.dark-mode .form-group label {
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* 에러/성공 메시지 개선 */
+.dark-mode .alert {
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 1rem;
+}
+
+.dark-mode .alert-success {
+    background: #1e4620;
+    border: 1px solid #2d6930;
+    color: #90ee90;
+}
+
+.dark-mode .alert-error,
+.dark-mode .alert-danger {
+    background: #4a1e1e;
+    border: 1px solid #6d2d2d;
+    color: #ff9999;
+}
+
+.dark-mode .alert-warning {
+    background: #4a3a1e;
+    border: 1px solid #6d5a2d;
+    color: #ffd699;
+}
+
+.dark-mode .alert-info {
+    background: #1a2535;
+    border: 1px solid #2a3d55;
+    color: #a0c4ff;
+}
+
+/* 메인 배너 */
+.dark-mode .main-banner {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    box-shadow: 0 10px 30px var(--shadow);
+}
+
+.dark-mode .banner-text h2 {
+    background: linear-gradient(135deg, #e0e0e6 0%, #a0c4ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dark-mode .banner-text p {
+    color: var(--text-secondary);
+}
+
+/* 로그인/회원가입 박스 */
+.dark-mode .login-box,
+.dark-mode .signup-container,
+.dark-mode .login-container {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    box-shadow: 0 10px 25px var(--shadow);
+}
+
+.dark-mode .login-text {
+    color: var(--text-secondary);
+}
+
+.dark-mode .login-links a {
+    color: #a0c4ff;
+}
+
+.dark-mode .login-links a:hover {
+    color: #c0e0ff;
+}
+
+/* 사이드바 광고/정보 박스 */
+.dark-mode .ad-image {
+    opacity: 0.85;
+    filter: brightness(0.88);
+}
+
+.dark-mode .user-info-area {
+    color: var(--text-primary);
+}
+
+/* 게시판 목록 */
+.dark-mode .board-list,
+.dark-mode .flea-list,
+.dark-mode .recipe-list {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+.dark-mode .board-item,
+.dark-mode .flea-item,
+.dark-mode .recipe-item {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+.dark-mode .board-item:hover,
+.dark-mode .flea-item:hover,
+.dark-mode .recipe-item:hover {
+    background: var(--bg-tertiary);
+    border-color: #a0c4ff;
+}
+
+.dark-mode .board-title,
+.dark-mode .flea-title,
+.dark-mode .recipe-title {
+    color: var(--text-primary);
+}
+
+.dark-mode .board-meta,
+.dark-mode .flea-meta,
+.dark-mode .recipe-meta {
+    color: var(--text-secondary);
+}
+
+/* 페이지네이션 */
+.dark-mode .pagination {
+    background: var(--bg-secondary);
+}
+
+.dark-mode .pagination a,
+.dark-mode .pagination span {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.dark-mode .pagination a:hover {
+    background: #a0c4ff;
+    color: #0f0f13;
+    border-color: #a0c4ff;
+}
+
+.dark-mode .pagination .active {
+    background: linear-gradient(135deg, #4a5f7f 0%, #5a4a7f 100%);
+    color: white;
+    border-color: transparent;
+}
+
+/* 상단 링크 영역 */
+.dark-mode .top-links {
+    color: var(--text-secondary);
+}
+
+.dark-mode .top-links a,
+.dark-mode .top-links span {
+    color: var(--text-primary);
+}
+
+.dark-mode .top-links a:hover {
+    color: #a0c4ff;
+}
+
+/* 알림 아이콘 */
+.dark-mode .notification-icon {
+    color: var(--text-primary);
+}
+
+/* 검색 결과 */
+.dark-mode .search-result-item {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+.dark-mode .search-result-item:hover {
+    background: var(--bg-tertiary);
+}
+
+/* 컨텐츠 래퍼 */
+.dark-mode .content-wrapper {
+    background: var(--bg-primary);
+}
+
+.dark-mode .main-left,
+.dark-mode .main-right {
+    background: transparent;
+}
+
+/* 프로필 섹션 */
+.dark-mode .profile-section,
+.dark-mode .profile-card {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+.dark-mode .profile-header {
+    background: var(--bg-tertiary);
+    border-bottom-color: var(--border-color);
+}
+
+.dark-mode .profile-info {
+    color: var(--text-primary);
+}
+
+/* 부드러운 전환 효과 */
+body,
+header,
+.main-nav,
+.card,
+input,
+textarea,
+select,
+button,
+table {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

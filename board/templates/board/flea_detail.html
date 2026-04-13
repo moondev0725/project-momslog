@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+<!-- 26-01-06 표준화: 요리레시피 스타일로 리뉴얼 -->
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/flea_detail.css' %}">
+
+
+<div class="flea-detail-container">
+    <!-- ================= 헤더 ================= -->
+    <div class="flea-header-card">
+        <div class="flea-header-top">
+            <h1 class="flea-title">{{ item.title }}</h1>
+
+            <div class="status-wrap">
+                {% if user == item.author %}
+                    <button type="button"
+                            class="status-badge status-{{ item.status }} status-toggle"
+                            id="statusBadge"
+                            onclick="toggleStatusMenu(event)">
+                        {% if item.status == 'selling' %}판매중
+                        {% elif item.status == 'reserved' %}예약중
+                        {% elif item.status == 'share' %}나눔
+                        {% else %}판매완료{% endif %} <span class="status-caret">▼</span>
+                    </button>
+
+                    <div id="statusMenu" class="status-menu">
+                        <div class="status-option" onclick="changeStatus('selling', event)">판매중</div>
+                        <div class="status-option" onclick="changeStatus('reserved', event)">예약중</div>
+                        <div class="status-option" onclick="changeStatus('sold', event)">판매완료</div>
+                        <div class="status-option" onclick="changeStatus('share', event)">나눔</div>
+                    </div>
+                {% else %}
+                    <span class="status-badge status-{{ item.status }}" id="statusBadge">
+                        {% if item.status == 'selling' %}판매중
+                        {% elif item.status == 'reserved' %}예약중
+                        {% elif item.status == 'share' %}나눔
+                        {% else %}판매완료{% endif %}
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="flea-header-price">
+            <div class="price-label">판매 가격</div>
+            <div class="price-value">{{ item.price|intcomma }}원</div>
+        </div>
+
+        <div class="flea-meta">
+            <div>
+                <span>판매자: <strong>{{ item.author.nickname|default:item.author.username }}</strong></span>
+            </div>
+            <div>
+                <span>{{ item.created_at|date:"Y.m.d H:i" }}</span>
+                <span>조회 {{ item.views }}</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= 본문(갤러리 + 내용) ================= -->
+    <div class="flea-body-card">
+        <div class="flea-body-grid">
+            <!-- ===== 좌측: 이미지(썸네일 지원) ===== -->
+            <div class="flea-gallery">
+                {% if item_images %}
+                    <div class="flea-image">
+                        <img id="itemImage" class="flea-main-img" src="{{ item_images.0.image.url }}" alt="{{ item.title }}">
+                        {% if item.status == 'sold' %}
+                        <div class="sold-overlay">SOLD OUT</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="flea-thumbs" aria-label="상품 이미지 목록">
+                        {% for im in item_images %}
+                        <button type="button" class="thumb-btn {% if forloop.first %}is-active{% endif %}"
+                                data-src="{{ im.image.url }}" onclick="setMainImage(this)">
+                            <img src="{{ im.image.url }}" alt="{{ item.title }} {{ forloop.counter }}">
+                            <span class="thumb-num">{{ forloop.counter }}</span>
+                        </button>
+                        {% endfor %}
+                    </div>
+                {% elif item.image %}
+                    <div class="flea-image">
+                        <img id="itemImage" class="flea-main-img"
+                             src="{{ item.image.url }}" alt="{{ item.title }}"
+                             {% if item.status == 'sold' %}style="opacity: 0.5;"{% endif %}>
+                        {% if item.status == 'sold' %}
+                        <div class="sold-overlay">SOLD OUT</div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="flea-image is-empty">
+                        <div class="no-image">이미지가 없습니다</div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ===== 우측: 내용/찜/신고/버튼 ===== -->
+            <div class="flea-body-content">
+                <div class="flea-description">
+                    {{ item.description|linebreaksbr }}
+                </div>
+
+                <!-- ================= 찜하기 ================= -->
+                <div class="like-section">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'board:flea_like_toggle' item.pk %}"
+                           class="wish-toggle {% if user in item.liked_by.all %}is-liked{% endif %}">
+                            <span class="wish-heart">♥</span>
+                            <span class="wish-text">{% if user in item.liked_by.all %}찜완료{% else %}찜하기{% endif %}</span>
+                            <span class="wish-heart">♥</span>
+                            <span class="wish-count">{{ item.liked_by.count|intcomma }}</span>
+                        </a>
+                    {% else %}
+                        <span class="wish-toggle is-disabled">
+                            <span class="wish-heart">♥</span>
+                            <span class="wish-text">찜하기</span>
+                            <span class="wish-heart">♥</span>
+                            <span class="wish-count">{{ item.liked_by.count|intcomma }}</span>
+                            <span class="wish-login">로그인 후 가능</span>
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- ================= 신고하기 ================= -->
+                <div class="report-box">
+                    <div class="report-top">
+                        <div>
+                            <div style="font-weight: 700;">신고하기</div>
+                            <div style="font-size: 12px; color: #666;">누적 0건 · 신고 접수 시 운영팀이 확인합니다.</div>
+                        </div>
+                        <div>
+                            {% if user.is_authenticated %}
+                            <button type="button" class="report-toggle" onclick="toggleReportForm()">신고하기</button>
+                            {% else %}
+                            <a href="{% url 'accounts:login' %}" class="report-toggle" style="text-decoration:none; display:inline-block; text-align:center;">로그인 후 신고</a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated %}
+                    <div id="reportForm" class="report-form {% if report_form.errors %}show{% endif %}">
+                        <form method="post" action="{% url 'board:flea_report_create' item.pk %}">
+                            {% csrf_token %}
+                            {% if report_form.non_field_errors %}
+                            <div style="color:#e03131; font-size:12px; margin-bottom:8px;">{{ report_form.non_field_errors }}</div>
+                            {% endif %}
+                            <div class="form-group">
+                                <label for="{{ report_form.reason.id_for_label }}">신고 사유</label>
+                                {{ report_form.reason }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ report_form.message.id_for_label }}">상세 내용(선택)</label>
+                                {{ report_form.message }}
+                            </div>
+                            <button type="submit" class="report-submit">신고 접수</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- ================= 액션 버튼 ================= -->
+                <div class="flea-actions">
+                    <a href="{% url 'board:flea_list' %}" class="btn btn-secondary">목록으로</a>
+
+                    {% if user == item.author %}
+                        <a href="{% url 'board:flea_edit' item.pk %}" class="btn btn-primary">수정</a>
+                        <button type="button" class="btn btn-danger"
+                                onclick="if(confirm('정말 삭제할까요?')){location.href='{% url 'board:flea_delete' item.pk %}'}">
+                            삭제
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<!-- ================= 댓글 영역 ================= -->
+<div class="flea-detail-container">
+    <div class="comments-section">
+        <div class="comments-box">
+
+            <div class="comments-header">댓글 {{ comments|length }}개</div>
+
+            <div class="comments-list">
+                {% for comment in comments %}
+                <div class="comment-item">
+                    <div class="comment-top">
+                        <div class="comment-author">
+                            작성자 : <span class="comment-author-name">{{ comment.nickname }}</span>
+                            {% if comment.is_secret %}<span class="secret-badge">🔒 비밀글</span>{% endif %}
+
+                            {% if user == comment.author %}
+                            <span class="comment-actions-inline">
+                                <a href="{% url 'board:flea_comment_edit' item.pk comment.id %}" class="comment-btn comment-btn-danger">수정</a>
+                                <a href="{% url 'board:flea_comment_delete' item.pk comment.id %}"
+                                class="comment-btn comment-btn-danger"
+                                onclick="return confirm('정말 삭제하시겠습니까?');">삭제</a>
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+
+                    <div class="comment-meta">{{ comment.created_at|date:"Y.m.d H:i" }}</div>
+
+                    {% if comment.is_secret and user != comment.author %}
+                        <div style="color:#999; font-size:13px;">비밀글입니다.</div>
+                    {% else %}
+                        <div class="comment-content">{{ comment.content|linebreaks }}</div>
+                    {% endif %}
+                </div>
+
+                {% empty %}
+                <p style="color: #888; text-align: center; padding: 20px;">아직 댓글이 없습니다.</p>
+                {% endfor %}
+            </div>
+
+            <!-- ================= 댓글 작성 폼 ================= -->
+            <div class="comment-form-wrap">
+                {% if user.is_authenticated %}
+                <div class="comment-form">
+                    <form method="post" action="{% url 'board:flea_comment_create' item.pk %}">
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label for="id_content">댓글</label>
+                            {{ comment_form.content }}
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
+                            {{ comment_form.is_secret }}
+                            <label style="margin: 0; font-size: 13px; color: #666;">비밀글로 작성</label>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_password">비밀글 비밀번호</label>
+                            {{ comment_form.password }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 120px;">댓글 등록</button>
+                    </form>
+                </div>
+                {% else %}
+                <p style="color: #999; text-align: center; padding: 10px 0;">
+                    댓글을 작성하려면 <a href="{% url 'accounts:login' %}">로그인</a>해주세요.
+                </p>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- ================= 상태 변경 스크립트 ================= -->
+<script>
+function toggleReportForm() {
+    const panel = document.getElementById('reportForm');
+    if (panel) {
+        panel.classList.toggle('show');
+    }
+}
+
+const statusMap = {
+    'selling': { label: '판매중', class: 'status-selling' },
+    'reserved': { label: '예약중', class: 'status-reserved' },
+    'sold': { label: '판매완료', class: 'status-sold' },
+    'share': { label: '나눔', class: 'status-share' }
+};
+
+const statusOrder = ['selling', 'reserved', 'sold', 'share'];
+let currentStatus = '{{ item.status }}';
+
+function setMainImage(btn){
+    const src = btn.getAttribute('data-src');
+    const img = document.getElementById('itemImage');
+    if (!img || !src) return;
+
+    img.src = src;
+
+    document.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('is-active'));
+    btn.classList.add('is-active');
+}
+
+
+function toggleStatusMenu(event) {
+    event.stopPropagation();
+    const menu = document.getElementById('statusMenu');
+    menu.classList.toggle('show');
+}
+
+async function changeStatus(newStatus, event) {
+    event.stopPropagation();
+    
+    const itemPk = {{ item.pk }};
+    
+    try {
+        const formData = new FormData();
+        formData.append('status', newStatus);
+        
+        const response = await fetch(`/board/flea/${itemPk}/status/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            currentStatus = newStatus;
+            const badge = document.getElementById('statusBadge');
+            badge.textContent = statusMap[newStatus].label + ' ';
+            const caret = document.createElement('span');
+            caret.className = 'status-caret';
+            caret.textContent = '▼';
+            badge.appendChild(caret);
+            badge.className = `status-badge ${statusMap[newStatus].class} status-toggle`;
+            
+            const img = document.getElementById('itemImage');
+            if (img) {
+                if (newStatus === 'sold') {
+                    img.style.opacity = '0.5';
+                    let overlay = document.querySelector('.sold-overlay');
+                    if (!overlay) {
+                        overlay = document.createElement('div');
+                        overlay.className = 'sold-overlay';
+                        overlay.textContent = 'SOLD OUT';
+                        img.parentElement.appendChild(overlay);
+                    }
+                } else {
+                    img.style.opacity = '1';
+                    const overlay = document.querySelector('.sold-overlay');
+                    if (overlay) overlay.remove();
+                }
+            }
+            
+            document.getElementById('statusMenu').classList.remove('show');
+            alert(`상태가 ${statusMap[newStatus].label}로 변경되었습니다.`);
+        } else {
+            alert(data.error || '상태 변경에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('오류가 발생했습니다.');
+    }
+}
+
+document.addEventListener('click', function(event) {
+    const menu = document.getElementById('statusMenu');
+    const btn = document.getElementById('statusBadge');
+    if (btn && !btn.contains(event.target) && !menu.contains(event.target)) {
+        menu.classList.remove('show');
+    }
+});
+
+// ✅ 화살표 키로 상태 변경
+{% if user == item.author %}
+document.addEventListener('keydown', function(event) {
+    // 작성자만 화살표로 상태 변경 가능
+    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        
+        const currentIndex = statusOrder.indexOf(currentStatus);
+        let newIndex;
+        
+        if (event.key === 'ArrowRight') {
+            // 오른쪽 화살표: 다음 상태
+            newIndex = (currentIndex + 1) % statusOrder.length;
+        } else {
+            // 왼쪽 화살표: 이전 상태
+            newIndex = (currentIndex - 1 + statusOrder.length) % statusOrder.length;
+        }
+        
+        const newStatus = statusOrder[newIndex];
+        
+        // changeStatus 함수 호출 (더미 이벤트 전달)
+        const dummyEvent = { stopPropagation: () => {} };
+        changeStatus(newStatus, dummyEvent);
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

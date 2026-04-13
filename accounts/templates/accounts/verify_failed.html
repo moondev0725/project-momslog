@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="card">
+    <h2>인증 실패</h2>
+    <p>인증 링크가 만료되었거나 올바르지 않습니다.</p>
+    <p>다시 회원가입을 진행하거나, (추후) 인증메일 재발송 기능을 추가할 수 있어요.</p>
+    <a href="{% url 'accounts:signup' %}">회원가입으로</a>
+  </div>
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends "accounts/mypage/base.html" %}
+{% load humanize %}
+
+{% block title %}내가 쓴 글 - 마이페이지{% endblock %}
+
+{% block mypage_content %}
+<style>
+.my-posts-container {
+    padding: 20px 0;
+}
+
+.posts-section {
+    margin-bottom: 40px;
+}
+
+.posts-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ff6b6b;
+}
+
+.posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.post-item {
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    transition: .2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.post-item:hover {
+    background: #f0f0f0;
+}
+
+.post-info {
+    flex: 1;
+}
+
+.post-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    text-decoration: none;
+    display: block;
+}
+
+.post-title:hover {
+    color: #ff6b6b;
+}
+
+.post-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 13px;
+    color: #999;
+}
+
+.post-actions {
+    display: flex;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.post-actions a {
+    padding: 6px 12px;
+    background: #ff6b6b;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: .2s;
+}
+
+.post-actions a:hover {
+    background: #ff5252;
+}
+
+.post-actions a.delete {
+    background: #dc3545;
+}
+
+.post-actions a.delete:hover {
+    background: #c82333;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.category-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #ffe0e0;
+    color: #ff6b6b;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+    .post-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .post-actions {
+        width: 100%;
+    }
+    
+    .post-actions a {
+        flex: 1;
+        text-align: center;
+    }
+    
+    .post-meta {
+        flex-wrap: wrap;
+    }
+}
+</style>
+
+<div class="my-posts-container">
+    <!-- 자유게시판 글 -->
+    <div class="posts-section">
+        <h3 class="posts-section-title">
+            자유게시판 ({{ free_posts.count }}개)
+        </h3>
+        
+        {% if free_posts %}
+        <div class="posts-list">
+            {% for post in free_posts %}
+            <div class="post-item">
+                <div class="post-info">
+                    <a href="{% url 'board:free_detail' post.pk %}?category={{ post.category }}" class="post-title">
+                        <span class="category-badge">
+                            {% if post.category == 'mom' %}육아수다
+                            {% elif post.category == 'husband' %}남편뒷담화
+                            {% elif post.category == 'family' %}시댁/친정
+                            {% elif post.category == 'preg' %}임신출산
+                            {% else %}{{ post.get_category_display }}
+                            {% endif %}
+                        </span>
+                        {{ post.title }}
+                    </a>
+                    <div class="post-meta">
+                        <span>작성일: {{ post.created_at|date:"Y.m.d H:i" }}</span>
+                        <span>조회: {{ post.views }}</span>
+                        <span>댓글: {{ post.comments.count }}</span>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <a href="{% url 'board:free_detail' post.pk %}?category={{ post.category }}">보기</a>
+                    <a href="{% url 'board:free_update' post.pk %}">수정</a>
+                    <a href="{% url 'board:free_delete' post.pk %}" class="delete" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-message">작성한 자유게시판 글이 없습니다.</div>
+        {% endif %}
+    </div>
+
+    <!-- 요리레시피 글 -->
+    <div class="posts-section">
+        <h3 class="posts-section-title">
+            요리레시피 ({{ recipes.count }}개)
+        </h3>
+        
+        {% if recipes %}
+        <div class="posts-list">
+            {% for recipe in recipes %}
+            <div class="post-item">
+                <div class="post-info">
+                    <a href="{% url 'recipes:recipe_detail' recipe.pk %}" class="post-title">
+                        <span class="category-badge">
+                            {% if recipe.category == 'korean' %}한식
+                            {% elif recipe.category == 'chinese' %}중식
+                            {% elif recipe.category == 'japanese' %}일식
+                            {% elif recipe.category == 'western' %}양식
+                            {% elif recipe.category == 'snack' %}간식/디저트
+                            {% elif recipe.category == 'baby' %}아기 이유식
+                            {% elif recipe.category == 'diet' %}다이어트
+                            {% elif recipe.category == 'simple' %}간단요리
+                            {% else %}{{ recipe.get_category_display }}
+                            {% endif %}
+                        </span>
+                        {{ recipe.title }}
+                    </a>
+                    <div class="post-meta">
+                        <span>작성일: {{ recipe.created_at|date:"Y.m.d H:i" }}</span>
+                        <span>조회: {{ recipe.views }}</span>
+                        <span>댓글: {{ recipe.comments.count }}</span>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <a href="{% url 'recipes:recipe_detail' recipe.pk %}">보기</a>
+                    <a href="{% url 'recipes:recipe_update' recipe.pk %}">수정</a>
+                    <a href="{% url 'recipes:recipe_delete' recipe.pk %}" class="delete" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-message">작성한 요리레시피 글이 없습니다.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}{{ post.title }} - 반려동물 게시판{% endblock %}
+
+{% block content %}
+<style>
+/* ================= 공통 컨테이너 ================= */
+.pet-detail-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+/* ================= 헤더 ================= */
+.pet-detail-header {
+    border-bottom: 2px solid #ff6b6b;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.pet-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.pet-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #666;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* ================= 이미지 (건강팁/고민상담과 동일) ================= */
+.pet-image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 25px 0;
+}
+
+.pet-image-gallery img {
+    width: 100%;
+    height: 260px;          /* 🔥 통일된 이미지 크기 */
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #eee;
+}
+
+/* ================= 본문 ================= */
+.pet-content {
+    line-height: 1.8;
+    font-size: 15px;
+    color: #333;
+    white-space: pre-wrap;
+    margin: 30px 0;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+/* ================= 액션 버튼 ================= */
+.pet-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn {
+    min-width: 90px;
+    height: 42px;
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-secondary { background: #6c757d; color: #fff; }
+.btn-primary   { background: #ff6b6b; color: #fff; }
+.btn-danger    { background: #dc3545; color: #fff; }
+
+/* ================= 댓글 ================= */
+.comments-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.comments-header {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.comment-item {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: #333;
+}
+
+.comment-time {
+    font-size: 12px;
+    color: #999;
+    margin-left: 10px;
+}
+
+.comment-content {
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    resize: none;
+    height: 120px;
+}
+
+@media (max-width: 768px) {
+    .pet-title { font-size: 22px; }
+    .pet-meta { flex-direction: column; gap: 5px; }
+
+    /* 📱 모바일 1열 */
+    .pet-image-gallery {
+        grid-template-columns: 1fr;
+    }
+
+    .pet-actions { flex-wrap: wrap; }
+}
+</style>
+
+<div class="pet-detail-container">
+
+    <!-- 헤더 -->
+    <div class="pet-detail-header">
+        <h1 class="pet-title">{{ post.title }}</h1>
+        <div class="pet-meta">
+            <span>작성자:
+                {% if post.author %}
+                    {{ post.author.nickname|default:post.author.username }}
+                {% else %}
+                    탈퇴한 사용자
+                {% endif %}
+            </span>
+            <span>작성일 {{ post.created_at|date:"Y.m.d H:i" }} | 조회 {{ post.views }}</span>
+        </div>
+    </div>
+
+    <!-- 이미지 -->
+    {% if post.images.exists %}
+    <div class="pet-image-gallery">
+        {% for img in post.images.all %}
+            <img src="{{ img.image.url }}" alt="반려동물 이미지">
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 본문 -->
+    <div class="pet-content">
+        {{ post.content|linebreaks }}
+    </div>
+
+    <!-- 액션 버튼 -->
+    <div class="pet-actions">
+        <a href="{% url 'board:pet_list' %}" class="btn btn-secondary">목록으로</a>
+
+        {% if user == post.author %}
+            <a href="{% url 'board:pet_edit' post.id %}" class="btn btn-primary">수정</a>
+            <form method="post"
+                  action="{% url 'board:pet_delete' post.id %}"
+                  style="display:inline;"
+                  onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">삭제</button>
+            </form>
+        {% endif %}
+    </div>
+
+    <!-- 댓글 -->
+    <div class="comments-section">
+        <div class="comments-header">💬 댓글 ({{ post.comments.count }})</div>
+
+        {% for comment in post.comments.all %}
+        <div class="comment-item">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <span class="comment-author">
+            {{ comment.author.nickname|default:comment.author.username|default:"익명" }}
+        </span>
+        <span class="comment-time">
+            {{ comment.created_at|date:"Y.m.d H:i" }}
+        </span>
+    </div>
+
+    {% if user == comment.author or user.is_staff %}
+    <div>
+        <button type="button"
+                onclick="openEditModal({{ comment.id }}, `{{ comment.content|escapejs }}`)"
+                style="font-size:12px; background:none; border:none; color:#ff6b6b; cursor:pointer;">
+            수정
+        </button>
+
+        <form method="post"
+              action="{% url 'board:pet_comment_delete' post.id comment.id %}"
+              style="display:inline;"
+              onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+            {% csrf_token %}
+            <button type="submit"
+                    style="font-size:12px; background:none; border:none; color:#dc3545; cursor:pointer;">
+                삭제
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+            <div class="comment-content">
+                {{ comment.content|linebreaks }}
+            </div>
+        </div>
+        {% empty %}
+            <p style="text-align:center; color:#999;">아직 댓글이 없습니다.</p>
+        {% endfor %}
+
+        {% if user.is_authenticated %}
+        <div class="comment-form">
+            <form method="post" action="{% url 'board:pet_comment_create' post.id %}">
+                {% csrf_token %}
+                <textarea name="content" placeholder="댓글을 입력하세요." required></textarea>
+                <button type="submit" class="btn btn-primary" style="margin-top:10px;">
+                    댓글 작성
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<div id="commentEditModal"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:9999;">
+    <div style="background:#fff; max-width:500px; margin:120px auto; padding:20px; border-radius:8px;">
+        <h3 style="margin-bottom:12px;">댓글 수정</h3>
+
+        <form method="post" id="commentEditForm">
+            {% csrf_token %}
+            <textarea id="editCommentContent"
+                      name="content"
+                      rows="4"
+                      style="width:100%; padding:12px; border:1px solid #ddd; border-radius:6px;"
+                      required></textarea>
+
+            <div style="text-align:right; margin-top:12px;">
+                <button type="submit" class="btn btn-primary">저장</button>
+                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">취소</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditModal(commentId, content) {
+    document.getElementById('editCommentContent').value = content;
+    document.getElementById('commentEditForm').action =
+        `/board/pet/{{ post.id }}/comment/${commentId}/edit/`;
+    document.getElementById('commentEditModal').style.display = 'block';
+}
+
+function closeEditModal() {
+    document.getElementById('commentEditModal').style.display = 'none';
+}
+</script>
+{% endblock %}

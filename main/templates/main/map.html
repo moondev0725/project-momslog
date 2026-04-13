@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<div class="container main-content">
+    <div class="map-wrapper">
+        <div class="map-controls">
+            <h3>📍 우리동네 찾기</h3>
+            <div class="select-group">
+                <select id="sido" disabled>
+                    <option>서울특별시</option>
+                </select>
+
+                <select id="gugun" onchange="changeGugun()">
+                    <option value="">모든 구</option>
+                    <option value="gangnam">강남구</option>
+                    <option value="seocho">서초구</option>
+                    <option value="songpa">송파구</option>
+                    <option value="mapo">마포구</option>
+                </select>
+
+                <select id="dong" onchange="moveMapToDong()">
+                    <option value="">모든 동</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="category-btn-group">
+            <button onclick="findPlaces('hospital')">🏥 병원</button>
+            <button onclick="findPlaces('pharmacy')">💊 약국</button>
+            <button onclick="findPlaces('cafe')">☕ 카페/맛집</button>
+            <button onclick="findPlaces('store')">🏪 편의점</button>
+        </div>
+
+        <div id="map"></div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // 기본 줌 컨트롤을 끄고 시작 후 오른쪽 상단으로 옮겨 추가
+    var map = L.map('map', { zoomControl: false }).setView([37.5665, 126.9780], 11);
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    // 구글 지도 타일 사용
+    L.tileLayer('http://mt0.google.com/vt/lyrs=m&hl=ko&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Google Maps',
+        maxZoom: 20
+    }).addTo(map);
+
+    // 구/동 좌표 데이터
+    const areaData = {
+        "gangnam": {
+            center: [37.5172, 127.0473],
+            dongs: {
+                "sinsa": { name: "신사동", coords: [37.5240, 127.0227] },
+                "apgujeong": { name: "압구정동", coords: [37.5273, 127.0284] },
+                "nonhyeon": { name: "논현동", coords: [37.5113, 127.0283] },
+                "yeoksam": { name: "역삼동", coords: [37.5007, 127.0365] }
+            }
+        },
+        "seocho": {
+            center: [37.4837, 127.0324],
+            dongs: {
+                "seocho": { name: "서초동", coords: [37.4878, 127.0175] },
+                "banpo": { name: "반포동", coords: [37.5024, 126.9961] },
+                "bangbae": { name: "방배동", coords: [37.4827, 126.9926] }
+            }
+        },
+        "mapo": {
+            center: [37.5663, 126.9016],
+            dongs: {
+                "hongdae": { name: "서교동", coords: [37.5547, 126.9224] },
+                "sangam": { name: "상암동", coords: [37.5791, 126.8893] },
+                "mangwon": { name: "망원동", coords: [37.5562, 126.9013] }
+            }
+        },
+        "songpa": {
+             center: [37.5145, 127.1066],
+             dongs: {
+                 "jamsil": { name: "잠실동", coords: [37.5133, 127.0827] },
+                 "munjeong": { name: "문정동", coords: [37.4849, 127.1235] }
+             }
+        }
+    };
+
+    function changeGugun() {
+        var guSelect = document.getElementById("gugun");
+        var dongSelect = document.getElementById("dong");
+        var selectedGu = guSelect.value;
+
+        dongSelect.innerHTML = '<option value="">모든 동</option>';
+
+        if (selectedGu && areaData[selectedGu]) {
+            map.flyTo(areaData[selectedGu].center, 13, { duration: 1.5 });
+            var dongs = areaData[selectedGu].dongs;
+            for (var key in dongs) {
+                var option = document.createElement("option");
+                option.value = key;
+                option.text = dongs[key].name;
+                option.setAttribute('data-lat', dongs[key].coords[0]);
+                option.setAttribute('data-lng', dongs[key].coords[1]);
+                dongSelect.appendChild(option);
+            }
+        } else {
+            map.flyTo([37.5665, 126.9780], 11);
+        }
+    }
+
+    function moveMapToDong() {
+        var dongSelect = document.getElementById("dong");
+        var selectedOption = dongSelect.options[dongSelect.selectedIndex];
+
+        if (selectedOption.value !== "") {
+            var lat = selectedOption.getAttribute('data-lat');
+            var lng = selectedOption.getAttribute('data-lng');
+            map.flyTo([lat, lng], 15, { duration: 1.5 });
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup("<b>" + selectedOption.text + "</b><br>맘스로그 우리동네!")
+                .openPopup();
+        }
+    }
+
+    var markers = [];
+
+    function findPlaces(category) {
+        for (var i = 0; i < markers.length; i++) {
+            map.removeLayer(markers[i]);
+        }
+        markers = [];
+
+        var center = map.getCenter();
+        map.flyTo(center, 16, { duration: 1.5 });
+
+        var label = "";
+        if (category === 'hospital') { label = "소아과"; }
+        else if (category === 'pharmacy') { label = "약국"; }
+        else if (category === 'cafe') { label = "카페"; }
+        else { label = "편의점"; }
+
+        for (var i = 0; i < 5; i++) {
+            var lat = center.lat + (Math.random() - 0.5) * 0.005;
+            var lng = center.lng + (Math.random() - 0.5) * 0.005;
+
+            var marker = L.marker([lat, lng]).addTo(map)
+                .bindPopup("<b> " + label + " " + (i + 1) + "호점</b><br>거리: 아주 가까움")
+                .openPopup();
+
+            markers.push(marker);
+        }
+    }
+</script>
+{% endblock %}

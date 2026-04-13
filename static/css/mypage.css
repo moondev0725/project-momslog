@@ -1,0 +1,499 @@
+/* =========================
+   MyPage (Sidebar + Card)
+========================= */
+
+.mypage-wrap{
+  max-width: 980px;
+  margin: 22px auto;
+  display:flex;
+  gap: 14px;
+  padding: 0 12px;
+}
+
+.mypage-side{
+  width: 200px;
+  background:#fff;
+  border:1px solid #eee;
+  border-radius: 14px;
+  padding: 14px;
+  height: fit-content;
+}
+
+.mypage-side__title{
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.mypage-nav{
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mypage-nav__item{
+  display:block;
+  padding: 9px 11px;
+  border-radius: 10px;
+  text-decoration: none;
+  color:#333;
+  border: 1px solid #f0f0f0;
+  background:#fafafa;
+  font-size: 13px;
+}
+
+.mypage-nav__item.is-active{
+  border-color:#ddd;
+  background:#fff;
+  font-weight:700;
+}
+
+.mypage-nav__item.is-disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.mypage-logout{
+  margin-top: 12px;
+}
+
+.mypage-logout__btn{
+  width:100%;
+  padding:9px 11px;
+  border-radius:10px;
+  border:1px solid #eee;
+  background:#fff;
+  cursor:pointer;
+  font-size: 13px;
+}
+
+.mypage-main{ flex: 1; }
+
+.mypage-card{
+  background:#fff;
+  border:1px solid #eee;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.mypage-h2{
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.mypage-msg{ margin-bottom: 10px; }
+
+.mypage-msg__item{
+  padding: 9px 11px;
+  border-radius: 10px;
+  border:1px solid #eee;
+  margin-bottom: 8px;
+  background:#fafafa;
+  font-size: 13px;
+}
+
+
+/* =========================
+   Profile Form (빨간선/중앙 정렬 최종)
+   - 기준선 폭: 520px
+   - 카드 안에서 520px 덩어리를 가운데로
+   - 이메일 인증 2줄(발송/확인) 폭 완전 동일
+========================= */
+
+#profileForm{
+  --formW: 520px; /* ✅ 필요하면 560/600으로만 바꾸면 전체 같이 변경 */
+}
+
+/* ✅ 카드 안에서 520px 덩어리 "가운데" */
+#profileForm .field,
+#profileForm .grid,
+#profileForm .actions,
+#profileForm .row{
+  max-width: var(--formW);
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* field spacing */
+#profileForm .field{ margin-bottom: 12px; }
+
+/* label */
+#profileForm .field__label{
+  display:block;
+  font-weight:700;
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+
+/* input */
+#profileForm .field__input{
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  box-sizing: border-box;
+  max-width: none !important;
+}
+
+#profileForm .field__input:focus{
+  outline: none;
+  border-color: #222;
+}
+
+#profileForm .field__input[readonly]{
+  background:#f3f4f6;
+  cursor:not-allowed;
+}
+
+#profileForm .field__help{
+  font-size: 12px;
+  color:#777;
+  margin-top: 5px;
+}
+
+#profileForm .field__msg{
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* row: input + button (윗줄/아랫줄 동일 규칙) */
+#profileForm .row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-top: 8px;
+}
+
+#profileForm .row--tight{ margin-top: 0; }
+
+#profileForm .row .field__input{
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ✅ 이메일 인증 2줄 완전 동일 (id=emailVerifyArea도 row 규칙 그대로) */
+#profileForm #emailVerifyArea{
+  margin-top: 8px; /* 윗줄과 리듬 맞추기 */
+}
+
+/* buttons */
+#profileForm .btn{
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border:1px solid #ddd;
+  background:#fff;
+  cursor:pointer;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+#profileForm .btn:hover{
+  background:#f5f5f5;
+}
+
+#profileForm .btn--sub{ background:#fafafa; }
+
+#profileForm .btn--primary{
+  border-color:#222;
+  background:#222;
+  color:#fff;
+}
+
+#profileForm .btn--primary:hover{
+  background:#333;
+}
+
+/* actions: save button */
+#profileForm .actions{
+  margin-top: 14px;
+  display:flex;
+  justify-content:flex-end;
+}
+
+/* grid */
+#profileForm .grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+/* hidden */
+#profileForm .is-hidden{ display:none !important; }
+
+/* small screen (선택) */
+@media (max-width: 840px){
+  #profileForm{ --formW: 100%; }
+}
+
+/* 카드 제목도 폼 기준선(520px) 안으로 중앙 정렬 */
+.mypage-card .mypage-h2{
+  max-width: 520px;     /* #profileForm --formW랑 동일 */
+  margin: 0 auto 12px;  /* 가운데 + 아래 간격 */
+}
+
+/* 닉네임 중복체크 UX */
+#profileForm #nickname.is-ok{
+  border-color: #2ecc71;
+}
+
+#profileForm #nickname.is-bad{
+  border-color: #e74c3c;
+}
+
+#profileForm #nickname.is-wait{
+  border-color: #999;
+}
+
+/* =========================
+   공통 폼 베이스 (Profile/Password 공용)
+========================= */
+
+.form--limit{
+  --formW: 520px;
+}
+
+.form--limit .field,
+.form--limit .grid,
+.form--limit .actions,
+.form--limit .row,
+.form--limit .danger-row{
+  max-width: var(--formW);
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.form--limit .field{ margin-bottom: 12px; }
+
+.form--limit .field__label{
+  display:block;
+  font-weight:700;
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+
+.form--limit .field__input{
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  box-sizing: border-box;
+  max-width: none !important;
+}
+
+.form--limit .field__input:focus{
+  outline: none;
+  border-color: #222;
+}
+
+.form--limit .field__input[readonly]{
+  background:#f3f4f6;
+  cursor:not-allowed;
+}
+
+.form--limit .field__help{
+  font-size: 12px;
+  color:#777;
+  margin-top: 5px;
+}
+
+.form--limit .field__msg{
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.form--limit .field__error{
+  margin-top: 6px;
+  font-size: 12px;
+  color: #c0392b;
+}
+
+.form--limit .row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-top: 8px;
+}
+
+.form--limit .row--tight{ margin-top: 0; }
+
+.form--limit .row .field__input{
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.form--limit .btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-sizing: border-box;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border:1px solid #ddd;
+  background:#fff;
+  cursor:pointer;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.form--limit .btn:hover{ background:#f5f5f5; }
+
+.form--limit .btn--sub{ background:#fafafa; }
+
+.form--limit .btn--primary{
+  border-color:#222;
+  background:#222;
+  color:#fff;
+}
+
+.form--limit .btn--primary:hover{ background:#333; }
+
+.form--limit .btn--danger{
+  border-color:#e74c3c;
+  background:#e74c3c;
+  color:#fff;
+}
+
+.form--limit .btn--danger:disabled{
+  opacity: .5;
+  cursor:not-allowed;
+}
+
+.form--limit .actions{
+  margin-top: 14px;
+  display:flex;
+  justify-content:flex-end;
+}
+
+.form--limit .grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.form--limit .is-hidden{ display:none !important; }
+
+.form--limit .msg-ok{ color:#2ecc71; }
+.form--limit .msg-bad{ color:#e74c3c; }
+.form--limit .msg-muted{ color:#777; }
+
+.form--limit .field__input.is-ok{ border-color:#2ecc71 !important; }
+.form--limit .field__input.is-bad{ border-color:#e74c3c !important; }
+.form--limit .field__input.is-wait{ border-color:#999 !important; }
+
+@media (max-width: 840px){ .form--limit{ --formW: 100%; } }
+
+/* Password Form */
+#passwordForm{ --formW: 520px; }
+
+.danger-row{
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid #ffe3e3;
+  border-radius: 12px;
+  background: #fff7f7;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+.danger-row__title{ font-weight: 800; margin-bottom: 4px; }
+.danger-row__desc{ font-size: 12px; color:#777; }
+
+.mypage-form .actions{ margin-top: 14px; display:flex; justify-content:flex-end; }
+.mypage-form .btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-sizing: border-box;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border:1px solid #ddd;
+  background:#fff;
+  cursor:pointer;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.mypage-form .btn--primary{ border-color:#222; background:#222; color:#fff; }
+.mypage-form .btn--primary:hover{ background:#333; }
+.mypage-form .btn--danger{ border-color:#e74c3c; background:#e74c3c; color:#fff; }
+.mypage-form .btn--danger:disabled{ opacity: .5; cursor:not-allowed; }
+.mypage-form .field__msg{ font-size: 12px; margin-top: 5px; }
+.mypage-form .msg-ok{ color:#2ecc71; }
+.mypage-form .msg-bad{ color:#e74c3c; }
+.mypage-form .msg-muted{ color:#777; }
+.field__input.is-ok{ border-color:#2ecc71 !important; }
+.field__input.is-bad{ border-color:#e74c3c !important; }
+.mypage-form .field__error{ margin-top: 6px; font-size: 12px; color: #c0392b; }
+
+#passwordForm .btn:hover{ background:#f5f5f5; }
+#passwordForm .btn--primary{ border-color:#222; background:#222; color:#fff; }
+#passwordForm .btn--primary:hover{ background:#333; }
+#passwordForm .btn--danger{ border-color:#e74c3c; background:#e74c3c; color:#fff; }
+#passwordForm .btn--danger:disabled{ opacity: .5; cursor:not-allowed; }
+
+#passwordForm .field__input.is-ok{ border-color:#2ecc71 !important; }
+#passwordForm .field__input.is-bad{ border-color:#e74c3c !important; }
+#passwordForm .msg-ok{ color:#2ecc71; }
+#passwordForm .msg-bad{ color:#e74c3c; }
+#passwordForm .msg-muted{ color:#777; }
+
+#passwordForm .danger-row{ margin-top: 16px; padding: 12px 14px; border: 1px solid #ffe3e3; border-radius: 12px; background: #fff7f7; display:flex; align-items:center; justify-content:space-between; gap: 12px; }
+#passwordForm .danger-row__title{ font-weight: 800; margin-bottom: 4px; }
+#passwordForm .danger-row__desc{ font-size: 12px; color:#777; }
+
+@media (max-width: 840px){ #passwordForm{ --formW: 100%; } }
+
+#passwordForm .pwbox{ position: relative; width: 100%; }
+#passwordForm .pwbox .field__input{ padding-right: 52px; }
+#passwordForm .pwbox__btn{
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: 12px;
+  color: #9ca3af;
+  cursor: pointer;
+}
+#passwordForm .pwbox__btn:hover{ background: transparent; color: #6b7280; text-decoration: underline; }
+
+.danger-box{
+  border: 1px solid #f3c3be;
+  background: #fff7f6;
+  border-radius: 12px;
+  padding: 10px 12px;
+  max-width: 520px;
+  margin: 10px auto 14px;
+}
+.danger-box__title{ font-weight: 800; margin-bottom: 4px; font-size: 13px; }
+.danger-box__list{ margin: 0; padding-left: 16px; color: #555; line-height: 1.35; font-size: 12.5px; }
+
+#deleteForm .btn--danger{ border-color:#e74c3c; background:#e74c3c; color:#fff; }
+#deleteForm .btn--danger:disabled{ opacity: .5; cursor:not-allowed; }
+#deleteForm .field__input.is-ok{ border-color:#2ecc71 !important; }
+#deleteForm .field__input.is-bad{ border-color:#e74c3c !important; }
+#deleteForm .msg-ok{ color:#2ecc71; }
+#deleteForm .msg-bad{ color:#e74c3c; }
+#deleteForm .msg-muted{ color:#777; }
+#deleteForm .pwbox{ position: relative; width: 100%; }
+#deleteForm .pwbox .field__input{ padding-right: 52px; }
+#deleteForm .pwbox__btn{ position: absolute; right: 12px; top: 50%; transform: translateY(-50%); border: none; background: transparent; color: #666; font-size: 12px; cursor: pointer; padding: 4px 6px; }
+#deleteForm .pwbox__btn:hover{ color:#111; }
+.field--check .checkline{ display:flex; gap: 10px; align-items: flex-start; color:#333; line-height: 1.4; }
+.field--check input[type="checkbox"]{ margin-top: 3px; }

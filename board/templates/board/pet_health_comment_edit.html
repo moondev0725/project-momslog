@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}댓글 수정{% endblock %}
+
+{% block content %}
+<div style="max-width:600px; margin:40px auto; padding:20px;">
+
+    <h2 style="font-size:22px; font-weight:700; margin-bottom:20px;">
+        댓글 수정
+    </h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <textarea name="content"
+                  rows="4"
+                  required
+                  style="
+                    width:100%;
+                    padding:12px;
+                    border:1px solid #ddd;
+                    border-radius:6px;
+                    resize:none;
+                    font-size:14px;
+                  ">{{ comment.content }}</textarea>
+
+        <div style="margin-top:12px; text-align:right;">
+            <button type="submit"
+                    style="
+                        padding:8px 16px;
+                        background:#ff6b6b;
+                        color:#fff;
+                        border:none;
+                        border-radius:6px;
+                        font-weight:600;
+                        cursor:pointer;
+                    ">
+                수정 완료
+            </button>
+
+            <a href="{% url 'board:pet_health_detail' comment.post.id %}"
+               style="margin-left:10px; color:#555;">
+                취소
+            </a>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

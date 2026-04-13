@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>실시간 채팅</title>
+<style>
+  body { margin:0; height:100vh; display:flex; align-items:center; justify-content:center; background:#fff; font-family: Pretendard, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  .box { text-align:center; padding:24px; }
+  .title { font-weight:800; color:#2d3436; margin-bottom:8px; }
+  .desc { color:#666; font-size:14px; margin-bottom:16px; }
+  .btn { appearance:none; border:none; background:#ff6b6b; color:#fff; padding:10px 16px; border-radius:10px; cursor:pointer; font-weight:700; }
+  .link { display:block; margin-top:10px; color:#888; font-size:12px; text-decoration:none; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="title">로그인이 필요합니다</div>
+    <div class="desc">채팅을 이용하려면 로그인 해주세요.</div>
+    <button class="btn" onclick="window.top.location.href='{% url 'accounts:login' %}'">로그인하기</button>
+    <a class="link" href="/accounts/signup/" target="_top">회원가입</a>
+  </div>
+</body>
+</html>

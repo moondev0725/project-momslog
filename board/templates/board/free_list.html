@@ -1,0 +1,536 @@
+<!--
+═══════════════════════════════════════════════════════════════════════
+free_list.html - 자유게시판 목록
+═══════════════════════════════════════════════════════════════════════
+작성일: 2025-12-29
+기능: 자유게시판 목록 표시, 글쓰기
+26-01-02 혜은 추가: 카테고리 기능 (육아수다, 남편뒷담화, 시댁/친정, 임신출산)
+-->
+{% extends 'base.html' %}
+{% load humanize %}
+{% block content %}
+<style>
+.free-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.free-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #ff6b6b;
+}
+
+.free-header-right {
+    display: flex;
+    flex-direction: column;   /* 🔴 세로 쌓기 */
+    align-items: flex-end;    /* 오른쪽 정렬 */
+    gap: 6px;
+}
+
+.free-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+}
+
+.free-create-btn {
+    padding: 10px 20px;
+    background: #ff6b6b;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: .2s;
+}
+
+.free-total-count {
+    font-size: 13px;
+    color: #666;
+}
+
+.free-create-btn:hover {
+    background: #ff5252;
+}
+
+.category-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.category-tab {
+    padding: 8px 16px;
+    background: #f8f9fa;
+    color: #666;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: .2s;
+}
+
+.category-tab.active {
+    background: #ff6b6b;
+    color: white;
+}
+
+.category-tab:hover {
+    background: #ffdede;
+}
+
+
+.free-category-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #ffe0e0;
+    color: #ff6b6b;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    width: fit-content;
+}
+
+.free-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    min-height: 40px;
+}
+
+.free-content-preview {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    flex-grow: 1;
+}
+
+.free-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #999;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 10px;
+}
+
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.pagination-container {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 30px;
+}
+
+.pagination-btn {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    transition: .2s;
+    min-width: 36px;
+    text-align: center;
+}
+
+.pagination-btn:hover {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+    background: #fff5f5;
+}
+
+.pagination-btn.active {
+    background: #495057;
+    color: white;
+    border-color: #495057;
+}
+
+.pagination-btn.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+    border-color: #eee;
+}
+
+@media (max-width: 768px) {
+    .free-container {
+        padding: 15px;
+    }
+
+    .free-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .free-create-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .category-tabs {
+        gap: 8px;
+    }
+
+    .category-tab {
+        padding: 7px 12px;
+        font-size: 13px;
+    }
+
+
+
+    .free-title {
+        font-size: 15px;
+    }
+
+    .free-content-preview {
+        font-size: 12px;
+    }
+}
+
+.free-board-header {
+    position: relative;   /* 기준점 */
+    padding-bottom: 40px; /* 버튼 들어갈 공간 */
+}
+/* 버튼을 2번째 줄 오른쪽으로 */
+.free-create-btn{
+    grid-column: 2 / 3;  /* 오른쪽 칸 */
+    grid-row: 2 / 3;     /* 두번째 줄 */
+
+    justify-self: end;   /* 오른쪽 끝 */
+    align-self: start;   /* 위쪽 붙임 */
+
+    background: #ff6b6b;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.free-total-count-bottom {
+    margin: 20px 0 8px 0;
+    text-align: center;   /* ← 스샷처럼 가운데가 가장 예쁨 */
+    font-size: 14px;
+    color: #666;
+}
+
+
+
+
+
+.free-table-wrap{
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+    margin-bottom: 30px;
+}
+
+.free-table{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.free-table thead th{
+    background: #fafafa;
+    font-weight: 700;
+    font-size: 13px;
+    color: #333;
+    padding: 14px 12px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+
+.free-table tbody td{
+    padding: 14px 12px;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+}
+
+.free-table tbody tr:hover{ background: #fff5f5;}
+
+.free-title-cell{ text-align: left !important; }
+
+.free-title-link{ color: #333; text-decoration: none; font-weight: 600; }
+
+.free-title-link:hover{ color: #ff6b6b; }
+
+.free-badge{ display: inline-block; padding: 4px 10px; background: #ffe0e0; color: #ff6b6b;
+    border-radius: 999px; font-size: 12px; font-weight: 700; margin-right: 8px; vertical-align: middle; }
+
+@media (max-width: 768px){ .col-author, .col-views { display:none; } .free-table thead th.col-author, .free-table thead th.col-views { display:none; } }
+
+/* 공감수/댓글수 아이콘 스타일 */
+.free-meta-icons{ margin-top: 6px; font-size: 13px; color: #888; display: flex; gap: 12px; align-items: center; }
+
+.free-meta-icons .meta-item{ display: inline-flex; align-items: center; gap: 4px; }
+
+
+/* 정렬 드롭다운 */
+.sort-dropdown{ position: relative; display: inline-flex; justify-content: flex-end; margin: 10px 0; width: 100%; }
+
+.sort-trigger{ margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid #e7e7e7; background: #fff;
+  border-radius: 10px; font-size: 14px; color: #333; cursor: pointer; transition: .15s; box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+
+.sort-trigger:hover{ border-color: #ffb3b3; background: #fff7f7; }
+
+.sort-caret{ font-size: 12px; color: #999; transform: translateY(-1px); }
+
+.sort-menu{ position: absolute; right: 0; top: calc(100% + 8px); min-width: 140px;
+  background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 6px; box-shadow: 0 12px 30px rgba(0,0,0,.08); display: none; z-index: 999; }
+
+.sort-dropdown.open .sort-menu{ display: block; }
+
+.sort-item{ display: flex; align-items: center; padding: 10px 10px; border-radius: 10px; color: #333; text-decoration: none; font-size: 14px; transition: .15s; }
+
+.sort-item:hover{ background: #f6f7f8; }
+
+.sort-item.active{ background: #fff0f0; color: #ff6b6b; font-weight: 700;}
+
+/* 인기순 새로운 글 배지 */
+.badge-new { margin-left: 6px; padding: 3px 7px; font-size: 11px; font-weight: 800; color: #fff; background: #ff6b6b; border-radius: 999px; vertical-align: middle; }
+
+
+</style>
+
+<div class="free-container">
+    <div class="free-header">
+        <h2>💬 커뮤니티</h2>
+
+        <div class="free-header-right">
+            {% if user.is_authenticated %}
+            <a href="/board/free_write/?category={{ selected_category }}" class="free-create-btn">글쓰기</a>
+            {% endif %}
+
+            
+        </div>
+    </div>
+
+    <!-- ✅ 정렬 드롭다운 (최신/조회/댓글) -->
+    <div class="sort-dropdown" id="sortDropdown">
+        <button type="button" class="sort-trigger" id="sortTrigger">
+            {% if sort == "views" %}조회수순
+            {% elif sort == "comments" %}댓글순
+            {% elif sort == "popular" %}인기순
+            {% else %}최신순{% endif %}
+            <span class="sort-caret">▾</span>
+        </button>
+
+        <div class="sort-menu">
+
+            <!-- ⭐ 인기순 -->
+            <a href="?category={{ selected_category|default:'all' }}&sort=popular&page=1"
+            class="sort-item {% if sort == 'popular' %}active{% endif %}">
+                인기순
+            </a>
+
+            <!-- 최신순 -->
+            <a href="?category={{ selected_category|default:'all' }}&sort=latest&page=1"
+            class="sort-item {% if sort == 'latest' or sort == None %}active{% endif %}">
+                최신순
+            </a>
+
+            <!-- 조회수순 -->
+            <a href="?category={{ selected_category|default:'all' }}&sort=views&page=1"
+            class="sort-item {% if sort == 'views' %}active{% endif %}">
+                조회수순
+            </a>
+
+            <!-- 댓글순 -->
+            <a href="?category={{ selected_category|default:'all' }}&sort=comments&page=1"
+            class="sort-item {% if sort == 'comments' %}active{% endif %}">
+                댓글순
+            </a>
+
+        </div>
+    </div>
+    
+    <!-- 카테고리 탭 -->
+    <div class="category-tabs">
+        <a href="?category=all" class="category-tab {% if selected_category == 'all' %}active{% endif %}">전체보기</a>
+        <a href="?category=mom" class="category-tab {% if selected_category == 'mom' %}active{% endif %}">육아수다</a>
+        <a href="?category=husband" class="category-tab {% if selected_category == 'husband' %}active{% endif %}">남편뒷담화</a>
+        <a href="?category=family" class="category-tab {% if selected_category == 'family' %}active{% endif %}">시댁/친정</a>
+        <a href="?category=preg" class="category-tab {% if selected_category == 'preg' %}active{% endif %}">임신출산</a>
+    </div>
+    
+    <!-- 자유게시판 목록 (테이블 리스트) -->
+    {% if posts %}
+    <div class="free-table-wrap">
+        <table class="free-table">
+            <thead>
+                <tr>
+                    <th style="width:60%;">제목</th>
+                    <th class="col-author" style="width:15%;">작성자</th>
+                    <th class="col-views" style="width:10%;">조회</th>
+                    <th style="width:15%;">작성일</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in posts %}
+                <tr>
+                    <td class="free-title-cell">
+                        <a class="free-title-link"
+                        href="{% url 'board:free_detail' post.pk %}?category={{ selected_category }}&page={{ page_obj.number }}">
+                            <span class="free-badge">
+                                {% if post.category == 'mom' %}육아수다
+                                {% elif post.category == 'husband' %}남편뒷담화
+                                {% elif post.category == 'family' %}시댁/친정
+                                {% elif post.category == 'preg' %}임신출산
+                                {% else %}{{ post.get_category_display }}{% endif %}
+                            </span>
+
+                            {{ post.title }}
+                            <!-- 게시글 인기순 : 새로운 게시글 표시  26-01-08 -->
+                            {% if sort == "popular" and forloop.counter <= 3 %}
+                                <span class="badge-popular">🔥 HOT 🔥</span>
+                            {% endif %}
+                        </a>
+
+                        <!-- 공감수/댓글수 -->
+                        <div class="free-meta-icons">
+                            <span class="meta-item">♡ {{ post.react_cnt|default:0 }}</span>
+                            <span class="meta-item">💬 {{ post.cmt_cnt|default:0 }}</span>
+                        </div>
+                        
+                    </td>
+
+                    <td class="col-author">
+                        {% if post.is_anonymous %}
+                            익명
+                        {% else %}
+                            {{ post.author.nickname|default:post.author.username }}
+                        {% endif %}
+                    </td>
+
+                    <td class="col-views">{{ post.views }}</td>
+
+                    <td>{{ post.created_at|date:"Y.m.d" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="no-results">
+        <p>등록된 게시글이 없습니다.</p>
+        {% if user.is_authenticated %}
+        <p><a href="/board/free_write/" style="color:#ff6b6b; text-decoration:none;">첫 번째 글을 작성해보세요!</a></p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+
+    <div class="free-total-count-bottom">
+        총 <strong>{{ total_count }}</strong>개
+    </div>
+
+    <!-- 페이지네이션 -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination-container">
+        <!-- 처음 페이지 -->
+        {% if page_obj.number > 1 %}
+        <a href="?category={{ selected_category }}&sort={{ sort }}&page=1" class="pagination-btn">«</a>
+        {% else %}
+        <span class="pagination-btn disabled">«</span>
+        {% endif %}
+
+        <!-- 이전 페이지 -->
+        {% if page_obj.has_previous %}
+        <a href="?category={{ selected_category }}&sort={{ sort }}&page={{ page_obj.previous_page_number }}" class="pagination-btn">‹</a>
+        {% else %}
+        <span class="pagination-btn disabled">‹</span>
+        {% endif %}
+
+        <!-- 페이지 번호 (5개 표시) -->
+        {% with start_page=page_obj.number|add:'-2' end_page=page_obj.number|add:'2' %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if num >= start_page and num <= end_page %}
+                {% if num == page_obj.number %}
+                <span class="pagination-btn active">{{ num }}</span>
+                {% else %}
+                <a href="?category={{ selected_category }}&sort={{ sort }}&page={{ num }}" class="pagination-btn">
+                    {{ num }}
+                </a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% endwith %}
+
+        <!-- 다음 페이지 -->
+        {% if page_obj.has_next %}
+        <a href="?category={{ selected_category }}&sort={{ sort }}&page={{ page_obj.next_page_number }}" class="pagination-btn">›</a>
+        {% else %}
+        <span class="pagination-btn disabled">›</span>
+        {% endif %}
+
+        <!-- 마지막 페이지 -->
+        {% if page_obj.number < page_obj.paginator.num_pages %}
+        <a href="?category={{ selected_category }}&sort={{ sort }}&page={{ page_obj.paginator.num_pages }}" class="pagination-btn">»</a>
+        {% else %}
+        <span class="pagination-btn disabled">»</span>
+        {% endif %}
+
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+(function () {
+  const dd = document.getElementById('sortDropdown');
+  const trigger = document.getElementById('sortTrigger');
+
+  if (!dd || !trigger) return;
+
+  function close() {
+    dd.classList.remove('open');
+  }
+
+  trigger.addEventListener('click', function (e) {
+    e.stopPropagation();
+    dd.classList.toggle('open');
+  });
+
+  document.addEventListener('click', function () {
+    close();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') close();
+  });
+})();
+</script>
+
+{% endblock %}

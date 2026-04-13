@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+.banner-slider {
+    position: relative;
+    width: 100%;
+    margin-bottom: 30px;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.banner-track {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.banner-item {
+    min-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30px 40px;
+    border-radius: 12px;
+}
+
+.banner-text {
+    flex: 1;
+    z-index: 2;
+}
+
+.banner-text h2 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 10px 0;
+}
+
+.banner-text p {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.banner-image {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    margin-left: 30px;
+}
+
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.3s;
+}
+
+.slider-btn:hover {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.prev-btn {
+    left: 10px;
+}
+
+.next-btn {
+    right: 10px;
+}
+</style>
+
+<!-- 배너 슬라이더 섹션 -->
+<div class="banner-slider">
+    <div class="banner-track">
+        <div class="banner-item" style="background-color:#fdf3e6;">
+            <div class="banner-text">
+                <h2>12월 맘스로그 베이비페어!</h2>
+                <p>사전등록하고 푸짐한 경품 받아가세요~</p>
+            </div>
+            <img src="{% static 'images/image_3.png' %}" class="banner-image" alt="베이비페어">
+        </div>
+
+        <div class="banner-item" style="background-color:#e6f7ff;">
+            <div class="banner-text">
+                <h2>우리 아이 첫 이유식 가이드</h2>
+                <p>초기부터 완료기까지 단계별 레시피!</p>
+            </div>
+            <img src="{% static 'images/image_2.png' %}" class="banner-image" alt="이유식 가이드">
+        </div>
+
+        <div class="banner-item" style="background-color:#fff0f6;">
+            <div class="banner-text">
+                <h2>겨울철 실내놀이 BEST 5</h2>
+                <p>집에서도 지루하지 않게 노는 방법</p>
+            </div>
+            <img src="{% static 'images/image_4.png' %}" class="banner-image" alt="실내놀이">
+        </div>
+
+        <div class="banner-item" style="background-color:#f6ffed;">
+            <div class="banner-text">
+                <h2>육아용품 중고장터 OPEN</h2>
+                <p>안 쓰는 장난감, 깨끗하게 나누세요</p>
+            </div>
+            <img src="{% static 'images/image_5.png' %}" class="banner-image" alt="중고장터">
+        </div>
+
+        <div class="banner-item" style="background-color:#fff7e6;">
+            <div class="banner-text">
+                <h2>맘스로그 신규가입 이벤트</h2>
+                <p>지금 가입하면 포인트 2배 적립!</p>
+            </div>
+            <img src="{% static 'images/image_1.png' %}" class="banner-image" alt="신규가입">
+        </div>
+    </div>
+
+    <button class="slider-btn prev-btn">❮</button>
+    <button class="slider-btn next-btn">❯</button>
+</div>
+
+<div class="recipe-steps">
+    {% for step in steps %}
+    <div class="step" style="display: flex; gap: 20px; margin-bottom: 40px; align-items: flex-start;">
+        <div class="step-image" style="flex: 0 0 45%; min-width: 0;">
+            {% if step.image %}
+                <img src="{{ step.image.url }}" alt="step {{ forloop.counter }}" style="width: 100%; height: auto; display: block; border-radius: 8px; object-fit: cover;">
+            {% else %}
+                <img src="{% static 'images/placeholder.png' %}" alt="no image" style="width: 100%; height: auto; display: block; border-radius: 8px; object-fit: cover;">
+            {% endif %}
+        </div>
+        <div class="step-desc" style="flex: 1; padding-top: 10px;">
+            <h3 style="margin-top: 0; color: #333;">Step {{ step.order }}</h3>
+            <p style="line-height: 1.6; color: #666;">{{ step.description|linebreaksbr }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+let currentSlide = 0;
+let totalSlides = 0;
+
+function moveSlide(direction) {
+    currentSlide += direction;
+    
+    if (currentSlide >= totalSlides) {
+        currentSlide = 0;
+    } else if (currentSlide < 0) {
+        currentSlide = totalSlides - 1;
+    }
+    
+    const offset = -currentSlide * 100;
+    const track = document.querySelector('.banner-track');
+    if (track) {
+        track.style.transform = `translateX(${offset}%)`;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    totalSlides = document.querySelectorAll('.banner-item').length;
+    
+    // 버튼에 이벤트 리스너 추가
+    document.querySelector('.prev-btn').addEventListener('click', function() {
+        moveSlide(-1);
+    });
+    
+    document.querySelector('.next-btn').addEventListener('click', function() {
+        moveSlide(1);
+    });
+    
+    // 자동 슬라이드
+    setInterval(() => moveSlide(1), 5000);
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,101 @@
+/* 게시판 스타일 */
+
+/* 게시판 컨테이너 */
+.board-container {
+    width: 100%;
+    margin: 30px auto;
+}
+
+/* 게시판 제목 영역 */
+.board-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+}
+
+.board-header h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+.post-count {
+    font-size: 14px;
+    color: #666;
+}
+
+/* 게시판 테이블 스타일 */
+.board-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+    text-align: center;
+}
+
+.board-table thead th {
+    background-color: #f8f9fa;
+    color: #333;
+    font-weight: bold;
+    padding: 15px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.board-table tbody td {
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+    color: #555;
+}
+
+/* 마우스 올렸을 때 효과 */
+.board-table tbody tr:hover {
+    background-color: #fbfbfb;
+}
+
+/* 제목 정렬 및 링크 스타일 */
+.board-table td.subject {
+    text-align: left;
+    padding-left: 20px;
+}
+
+.board-table td.subject a {
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    display: block;
+    width: 100%;
+}
+
+.board-table td.subject a:hover {
+    color: #6c5ce7;
+    text-decoration: underline;
+}
+
+/* 모바일 대응 */
+.mobile-hide {
+    display: table-cell;
+}
+
+/* 글쓰기 버튼 영역 */
+.btn-area {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.btn-write {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #6c5ce7;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-write:hover {
+    background-color: #5f48d0;
+}

@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .bamboo-wrapper {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+    
+    .bamboo-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .bamboo-header h1 {
+        font-size: 32px;
+        color: #1f2633;
+        margin: 0 0 10px 0;
+    }
+    
+    .bamboo-description {
+        color: #999;
+        font-size: 16px;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+    
+    .bamboo-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+    
+    .bamboo-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-top: 4px solid #667eea;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .bamboo-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .bamboo-mood {
+        font-size: 28px;
+        margin-bottom: 12px;
+    }
+    
+    .bamboo-content {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 15px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 60px;
+    }
+    
+    .bamboo-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: #999;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+    }
+    
+    .bamboo-date {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .bamboo-ai-badge {
+        background: #e9eff7;
+        color: #667eea;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+
+    .bamboo-author {
+        font-size: 12px;
+        color: #999;
+    }
+    
+    /* 페이지네이션 */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 40px;
+        padding-top: 40px;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .pagination a, .pagination span {
+        padding: 8px 12px;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #555;
+        transition: all 0.3s ease;
+    }
+    
+    .pagination a:hover {
+        background: #ff6b6b;
+        color: white;
+        border-color: #ff6b6b;
+    }
+    
+    .pagination .current {
+        background: #ff6b6b;
+        color: white;
+        border-color: #ff6b6b;
+    }
+    
+    .empty-message {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 12px;
+    }
+    
+    .empty-message-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+    
+    /* 다크모드 */
+    .dark-mode .bamboo-card {
+        background: #1a1a24;
+        color: #e0e0e6;
+    }
+    
+    .dark-mode .bamboo-content {
+        color: #a0a0a8;
+    }
+    
+    /* 카테고리 필터 버튼 */
+    .category-filter-container {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .category-filter-btn {
+        padding: 8px 16px;
+        border: 2px solid #ddd;
+        background: white;
+        color: #333;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 14px;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .category-filter-btn.active {
+        border: 2px solid #ff6b6b;
+        background: #ff6b6b;
+        color: white;
+    }
+    
+    .category-filter-btn:hover {
+        border-color: #ff6b6b;
+        background: #ff6b6b;
+        color: white;
+    }
+</style>
+
+<div class="bamboo-wrapper">
+    <div class="bamboo-header">
+        <h1> 대나무숲</h1>
+        <p class="bamboo-description">
+            다른 엄마들의 솔직한 감정을 공유하는 공간입니다.<br>
+            "나만 힘든 게 아니구나"를 느끼고, 함께 위로받을 수 있는 대나무숲입니다.
+        </p>
+    </div>
+    
+    <!-- 카테고리 필터 버튼 -->
+    <div class="category-filter-container">
+        <a href="/" class="category-filter-btn active">전체</a>
+        <a href="/board/free/" class="category-filter-btn">자유게시판</a>
+        <a href="/board/hotdeal/" class="category-filter-btn">핫딜공유</a>
+        <a href="/board/parenting/" class="category-filter-btn">육아정보</a>
+        <a href="/board/flea/" class="category-filter-btn">벼룩시장</a>
+    </div>
+    
+    {% if page_obj %}
+        <div class="bamboo-list">
+            {% for entry in page_obj %}
+                <div class="bamboo-card" onclick="location.href='{% url 'board:diary_detail' entry.id %}'">
+                    <div class="bamboo-mood">
+                        {% if entry.mood == 'happy' %}😊
+                        {% elif entry.mood == 'peaceful' %}😌
+                        {% elif entry.mood == 'tired' %}😫
+                        {% elif entry.mood == 'stressed' %}😰
+                        {% elif entry.mood == 'sad' %}😢
+                        {% elif entry.mood == 'angry' %}😠
+                        {% elif entry.mood == 'confused' %}😕
+                        {% endif %}
+                    </div>
+                    
+                    <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #1f2633; line-height: 1.4;">
+                        {{ entry.title|default:"제목 없음" }}
+                    </h3>
+                    
+                    <div class="bamboo-content">
+                        {{ entry.content|truncatewords:20 }}
+                    </div>
+                    
+                    <div class="bamboo-meta">
+                        <span class="bamboo-date">
+                            📅 {{ entry.created_at|date:"m.d" }}
+                        </span>
+                        {% if entry.ai_response_generated %}
+                            <span class="bamboo-ai-badge">🤖 상담사 답변</span>
+                        {% endif %}
+                        <span class="bamboo-author">
+                            ✍️ {% if entry.is_anonymous %}익명{% else %}{{ entry.diary.user.nickname|default:entry.diary.user.username }}{% endif %}
+                        </span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- 페이지네이션 -->
+        {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">« 처음</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">‹ 이전</a>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num == page_obj.number %}
+                        <span class="current">{{ num }}</span>
+                    {% else %}
+                        <a href="?page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">다음 ›</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">끝 »</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-message">
+            <div class="empty-message-icon">🌿</div>
+            <h2 style="color: #1f2633; margin: 0 0 10px 0;">아직 공개된 일기가 없어요</h2>
+            <p style="color: #999; margin: 0;">
+                첫 번째로 당신의 감정을 공유해주세요!
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

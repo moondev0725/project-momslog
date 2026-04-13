@@ -1,0 +1,155 @@
+/* ===== 배너 슬라이더 ===== */
+.banner2-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 30px 0;
+}
+
+.banner2-viewport {
+    overflow: hidden;
+    width: 100%;
+    border-radius: 16px;
+}
+
+.banner2-track {
+    display: flex;
+    transition: transform 0.45s ease;
+    width: 100%;
+}
+
+.banner2-item {
+    min-width: 100%;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    gap: 20px;
+    flex: 0 0 100%;
+}
+
+.banner2-item img {
+    width: 180px;
+    border-radius: 12px;
+}
+
+.banner2-content h3 {
+    margin: 6px 0 8px;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.banner2-content p {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.badge {
+    display: inline-block;
+    background: #ffe1db;
+    color: #ff6b6b;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+}
+
+.banner-btn {
+    display: inline-block;
+    margin-top: 10px;
+    background: #ff6b6b;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+/* 좌우 버튼 */
+.banner2-nav {
+    background: #fff;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.banner2-nav:hover {
+    background: #ffefea;
+}
+
+
+/* ✅ 추천 배너 크기(형태 유지 + 축소) */
+.banner2-card{
+  min-height: 220px !important;   /* 280 -> 220 */
+}
+
+.banner2-body{
+  padding: 28px 26px !important;  /* 40 36 -> 28 26 */
+}
+
+.banner2-body h4{
+  font-size: 20px !important;     /* 24 -> 20 */
+  margin-bottom: 12px !important;
+}
+
+.banner2-body p{
+  font-size: 14px !important;     /* 15 -> 14 */
+  line-height: 1.55 !important;
+}
+
+.banner2-media img{
+  height: 220px !important;       /* 카드 높이에 맞춰 이미지도 축소 */
+  width: 100% !important;
+  object-fit: cover !important;
+}
+
+/* 좌우 버튼도 살짝 작게 (원하면 유지해도 됨) */
+.banner2-nav{
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 20px !important;
+}
+
+
+
+/* ✅ 추천 배너2: 형태 유지 + 크기만 살짝 축소 */
+.banner2-card{
+  min-height: 220px !important;   /* 280 -> 220 */
+}
+
+.banner2-body{
+  padding: 28px 26px !important;  /* 40 36 -> 28 26 */
+}
+
+.banner2-body h4{
+  font-size: 20px !important;     /* 24 -> 20 */
+  margin-bottom: 12px !important;
+}
+
+.banner2-body p{
+  font-size: 14px !important;     /* 15 -> 14 */
+  line-height: 1.55 !important;
+}
+
+/* 이미지도 카드 높이에 맞게 축소 */
+.banner2-media img{
+  height: 220px !important;
+  width: 100% !important;
+  object-fit: cover !important;
+}
+
+/* 버튼도 살짝만 축소(원하면 삭제해도 됨) */
+.banner2-nav{
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 20px !important;
+}
+
+
+.banner2-viewport { overflow: hidden; }
+.banner2-track { display: flex; }
+.banner2-item { flex: 0 0 100%; }

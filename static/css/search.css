@@ -1,0 +1,48 @@
+/* 검색 결과 페이지 스타일 */
+
+.search-container {
+    max-width: 1000px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+.search-header {
+    border-bottom: 2px solid #333;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.search-keyword {
+    color: #6c5ce7;
+    font-weight: bold;
+}
+
+.result-item {
+    border-bottom: 1px solid #eee;
+    padding: 20px 0;
+}
+
+.result-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: block;
+    color: #333;
+    text-decoration: none;
+}
+
+.result-title:hover {
+    text-decoration: underline;
+    color: #6c5ce7;
+}
+
+.result-meta {
+    font-size: 14px;
+    color: #888;
+}
+
+.no-result {
+    text-align: center;
+    padding: 100px 0;
+    color: #999;
+}

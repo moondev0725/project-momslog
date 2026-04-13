@@ -1,0 +1,978 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+<style>
+/* ═══════════════════════════════════════════════════════════════ */
+/* #FF6B6B 기반 컬러 팔레트 */
+/* ═══════════════════════════════════════════════════════════════ */
+:root {
+  --color-primary: #ff6b6b;
+  --color-primary-dark: #ff5252;
+  --color-primary-darker: #ea4444;
+  --color-primary-light: #ffb3b3;
+  --color-bg-light: #fff5f5;
+  --color-border-light: #ffd6d6;
+  --color-border: #ffc2c2;
+  --color-text-primary: #2d2d2d;
+  --color-text-secondary: #8b5d5d;
+}
+
+.parenting-shell {
+    max-width: 960px;
+    margin: 32px auto 60px;
+    padding: 0 16px;
+}
+
+.guide-hero {
+    background: linear-gradient(180deg, #FDECEA 0%, #FFFFFF 100%);
+    border: none;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: none;
+}
+
+.hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.category-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    background: #fff;
+    color: #374151;
+    border: 1px solid #E5E7EB;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: none;
+}
+
+.category-chip small {
+    color: #6B7280;
+    font-weight: 600;
+}
+
+.meta-soft {
+    text-align: right;
+    color: #6B7280;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.guide-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: #111827;
+    margin: 14px 0 10px;
+    line-height: 1.25;
+}
+
+.meta-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 14px;
+    color: #6B7280;
+}
+
+.meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.reader-note {
+    margin: 22px 0 0;
+    padding: 14px 16px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+    color: #6B7280;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.guide-body {
+    margin-top: 26px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.10);
+    overflow: hidden;
+}
+
+.guide-content {
+    padding: 20px 22px 24px;
+    line-height: 1.8;
+    font-size: 16px;
+    color: #111827;
+    white-space: pre-wrap;
+}
+
+.action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 26px;
+}
+
+.btn-ghost,
+.btn-accent,
+.btn-soft,
+.btn-danger-soft {
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn-ghost {
+    background: #fff;
+    color: #744f4f;
+    border-color: #f1dcdc;
+}
+
+.btn-accent {
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.25);
+}
+
+.btn-accent:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 107, 107, 0.35);
+}
+
+.btn-accent:active {
+    background: var(--color-primary-darker);
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
+}
+
+.btn-soft {
+    background: transparent;
+    color: var(--color-primary);
+    border: 1.5px solid var(--color-border-light);
+    border-color: var(--color-border-light);
+}
+
+.btn-soft:hover {
+    background: var(--color-bg-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.btn-danger-soft {
+    background: var(--color-bg-light);
+    color: var(--color-primary);
+    border: 1.5px solid var(--color-border-light);
+}
+
+.btn-danger-soft:hover {
+    background: rgba(255, 107, 107, 0.1);
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
+}
+
+.btn-ghost:hover,
+.btn-accent:hover,
+.btn-soft:hover,
+.btn-danger-soft:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+}
+
+.admin-actions {
+    display: inline-flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.development-info {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.05) 0%, rgba(255, 107, 107, 0.02) 100%);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 4px solid var(--color-primary);
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.1);
+}
+
+.development-info h3 {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--color-primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+    align-items: center;
+    gap: 8px;
+}
+
+.dev-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.dev-item {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.dev-item-label {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.dev-item-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+.dev-item-value.physical { color: var(--color-primary); }
+.dev-item-value.cognitive { color: var(--color-primary); }
+.dev-item-value.language { color: var(--color-primary); }
+.dev-item-value.social { color: var(--color-primary); }
+.dev-item-value.height { color: var(--color-primary); }
+.dev-item-value.weight { color: var(--color-primary); }
+
+.comments-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.parenting-gallery {
+    margin-top: 20px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 14px;
+}
+.parenting-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+}
+.parenting-gallery-grid img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.comments-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.comments-lead {
+    color: #8b5d5d;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.comments-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #2f2a28;
+    margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 댓글 영역 - 미니멀 리디자인 */
+/* ═══════════════════════════════════════════════════════════════ */
+
+.comments-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.comments-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.comments-lead {
+    color: #9a9a9a;
+    font-size: 12px;
+    margin-bottom: 6px;
+    font-weight: 500;
+    letter-spacing: -0.3px;
+}
+
+.comments-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 공감 카운트 - 미니멀 스타일 */
+.count-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: #999;
+    font-weight: 500;
+    font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.count-pill::before {
+    content: "♡";
+    font-size: 14px;
+    color: #ddd;
+    transition: all 0.2s ease;
+}
+
+.count-pill.active::before {
+    content: "♥";
+    color: var(--color-primary);
+}
+
+/* 댓글 리스트 */
+.comment-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.comment-card {
+    padding: 20px 0;
+    border-bottom: 1px solid #f5f5f5;
+    transition: all 0.2s ease;
+}
+
+.comment-card:last-child {
+    border-bottom: none;
+}
+
+.comment-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+.comment-time {
+    color: #b8b8b8;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.comment-card:hover .comment-actions {
+    opacity: 1;
+}
+
+.comment-actions .btn-soft,
+.comment-actions .btn-danger-soft {
+    padding: 4px 8px;
+    font-size: 11px;
+    border: none;
+    background: transparent;
+    color: #b8b8b8;
+    transition: all 0.2s ease;
+}
+
+.comment-actions .btn-soft:hover,
+.comment-actions .btn-danger-soft:hover {
+    color: var(--color-primary);
+    background: rgba(255, 107, 107, 0.05);
+}
+
+.comment-content {
+    margin-top: 0;
+    line-height: 1.6;
+    color: #555;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* 비어있는 댓글 */
+.empty-comments {
+    margin-top: 32px;
+    text-align: center;
+    padding: 32px 20px;
+    color: #b8b8b8;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+/* 댓글 입력 영역 - 카드 스타일 */
+.comment-form-section {
+    margin-top: 28px;
+    padding: 20px;
+    background: #fafafa;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+}
+
+.comment-form-section textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #333;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.comment-form-section textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.08);
+    background: #fff;
+}
+
+.comment-form-section textarea::placeholder {
+    color: #ccc;
+}
+
+/* 댓글 입력 버튼 */
+.comment-form-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.comment-form-section .btn-accent {
+    background: transparent;
+    color: #999;
+    border: 1px solid #e8e8e8;
+    box-shadow: none;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.comment-form-section .btn-accent:hover {
+    background: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
+}
+
+.comment-placeholder {
+    margin-top: 32px;
+    padding: 20px;
+    text-align: center;
+    color: #b8b8b8;
+    font-size: 13px;
+    background: transparent;
+}
+
+.comment-placeholder a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+}
+
+.comment-placeholder a:hover {
+    opacity: 0.7;
+}
+
+/* 댓글 수정 폼 */
+.comment-edit-form {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 6px;
+}
+
+.comment-edit-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #333;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+    transition: all 0.2s ease;
+}
+
+.comment-edit-form textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.08);
+}
+
+.comment-edit-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 6px;
+}
+
+.comment-edit-actions .btn-accent,
+.comment-edit-actions .btn-soft {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+.comment-edit-actions .btn-accent {
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+}
+
+.comment-edit-actions .btn-soft {
+    background: transparent;
+    color: #999;
+    border: 1px solid #e8e8e8;
+}
+
+/* 댓글 이미지 미리보기 */
+.comment-image-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.image-preview-item {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f5f5f5;
+    border: 1px solid #e8e8e8;
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-preview-remove {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.image-preview-remove:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+/* 이미지 업로드 영역 */
+.image-upload-area {
+    margin-top: 12px;
+}
+
+.image-upload-input {
+    display: none;
+}
+
+.image-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px dashed #ddd;
+    border-radius: 4px;
+    color: #999;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.image-upload-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: rgba(255, 107, 107, 0.05);
+}
+
+.image-count {
+    font-size: 11px;
+    color: #ccc;
+    margin-left: 8px;
+}
+
+@media (max-width: 768px) {
+    .parenting-shell {
+        margin: 22px auto 40px;
+    }
+    .hero-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .guide-title {
+        font-size: 24px;
+    }
+    .meta-line {
+        flex-direction: column;
+        gap: 6px;
+    }
+    .action-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .admin-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+</style>
+
+<div class="parenting-shell">
+    <div class="guide-hero">
+        <div class="hero-top">
+            <div>
+                <span class="category-chip">{{ post.get_category_display }} <small>육아 가이드</small></span>
+                <h1 class="guide-title">{{ post.title }}</h1>
+                <div class="meta-line">
+                    <span class="meta-pill">{{ post.author.nickname|default:post.author.username }} 님이 정성껏 적은 기록</span>
+                    <span class="meta-pill">{{ post.created_at|date:"Y.m.d H:i" }}에 나눈 이야기</span>
+                    <span class="meta-pill">{{ post.views|intcomma }}명의 엄마가 읽었어요</span>
+                </div>
+            </div>
+            <div class="meta-soft">
+                낯선 정보도 덜어내고,<br>조금 더 안심할 수 있도록<br>따뜻하게 담았어요.
+            </div>
+        </div>
+        <div class="reader-note">
+            마음이 쪼그라드는 날엔, 비슷한 길을 걷는 엄마들의 이야기가 힘이 되죠. 이 글이 오늘 하루를 조금 더 가볍게 만들어주길 바라요.
+        </div>
+    </div>
+
+    {% if post.category == 'development' and post.month_age %}
+    <div class="development-info">
+        <h3>📊 월령별 발달 데이터 ({{ post.month_age }}개월)</h3>
+        <div class="dev-grid">
+            {% if post.physical_score %}
+            <div class="dev-item">
+                <div class="dev-item-label">신체발달</div>
+                <div class="dev-item-value physical">{{ post.physical_score }}점</div>
+            </div>
+            {% endif %}
+            {% if post.cognitive_score %}
+            <div class="dev-item">
+                <div class="dev-item-label">인지발달</div>
+                <div class="dev-item-value cognitive">{{ post.cognitive_score }}점</div>
+            </div>
+            {% endif %}
+            {% if post.language_score %}
+            <div class="dev-item">
+                <div class="dev-item-label">언어발달</div>
+                <div class="dev-item-value language">{{ post.language_score }}점</div>
+            </div>
+            {% endif %}
+            {% if post.social_score %}
+            <div class="dev-item">
+                <div class="dev-item-label">사회성발달</div>
+                <div class="dev-item-value social">{{ post.social_score }}점</div>
+            </div>
+            {% endif %}
+            {% if post.height %}
+            <div class="dev-item">
+                <div class="dev-item-label">키</div>
+                <div class="dev-item-value height">{{ post.height }}cm</div>
+            </div>
+            {% endif %}
+            {% if post.weight %}
+            <div class="dev-item">
+                <div class="dev-item-label">몸무게</div>
+                <div class="dev-item-value weight">{{ post.weight }}kg</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="guide-body">
+        <div class="guide-content">
+            {{ post.content|linebreaks }}
+        </div>
+    </div>
+
+    {% if post.images.all %}
+    <div class="parenting-gallery">
+        <div class="parenting-gallery-grid">
+            {% for image in post.images.all %}
+            <img src="{{ image.image.url }}" alt="첨부 이미지 {{ forloop.counter }}">
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="action-bar">
+        <a href="{% url 'board:parenting_list' %}" class="btn-ghost">← 목록으로 돌아가기</a>
+        <a href="#comments" class="btn-accent">💬 공감/댓글 남기기</a>
+        {% if user == post.author %}
+        <div class="admin-actions">
+            <a href="{% url 'board:parenting_update' post.pk %}" class="btn-soft">✏️ 수정</a>
+            <form method="post" action="{% url 'board:parenting_delete' post.pk %}" style="display:inline;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger-soft">🗑 삭제</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="comments-section" id="comments">
+        <div class="comments-head">
+            <div>
+                <div class="comments-lead">따뜻한 한마디가 다른 엄마의 하루를 덜 무겁게 해요</div>
+                <h3 class="comments-title">이 가이드, 어떠셨어요? <span class="count-pill">{{ post.comment_count|default:0 }}</span></h3>
+            </div>
+        </div>
+
+        {% if comments %}
+        <div class="comment-list">
+            {% for comment in comments %}
+            <div class="comment-card" id="comment-{{ comment.id }}">
+                <div class="comment-meta">
+                    <div>
+                        <span class="comment-author">{{ comment.author.nickname|default:comment.author.username }}</span>
+                        <span class="comment-time">{{ comment.created_at|date:"Y.m.d H:i" }}</span>
+                    </div>
+                    {% if user.is_staff or user == comment.author %}
+                    <div class="comment-actions">
+                        <button type="button" class="btn-soft" onclick="toggleEdit({{ comment.id }})">수정</button>
+                        <form method="post" action="{% url 'board:parenting_comment_delete' comment.id %}" onsubmit="return confirm('댓글을 삭제하시겠어요?');" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-danger-soft">삭제</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="comment-content" id="comment-content-{{ comment.id }}">{{ comment.content|linebreaksbr }}</div>
+                
+                {% if comment.images %}
+                <div class="comment-images" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 12px;">
+                    {% for image_data in comment.images %}
+                    <div style="position: relative; overflow: hidden; border-radius: 8px; aspect-ratio: 1;">
+                        <img src="{{ image_data }}" alt="댓글 이미지" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'board:parenting_comment_update' comment.id %}#comment-{{ comment.id }}" id="comment-edit-form-{{ comment.id }}" class="comment-edit-form" style="display:none;">
+                    {% csrf_token %}
+                    <textarea name="content" required>{{ comment.content }}</textarea>
+                    <div class="comment-edit-actions">
+                        <button type="submit" class="btn-accent">저장</button>
+                        <button type="button" class="btn-soft" onclick="toggleEdit({{ comment.id }}, true)">취소</button>
+                    </div>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-comments">
+            아직 댓글이 없어요. 비슷한 경험이나 위로 한마디를 남겨주시면 큰 힘이 돼요.
+        </div>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <div class="comment-form-section">
+            <form method="post" action="{% url 'board:parenting_comment_create' post.pk %}#comments" enctype="multipart/form-data">
+                {% csrf_token %}
+                <textarea name="content" placeholder="오늘 경험하신 것, 위로 한마디, 같은 고민을 나눠주세요 :)" required></textarea>
+                
+                <!-- 이미지 미리보기 -->
+                <div id="comment-image-preview" class="comment-image-preview"></div>
+                
+                <!-- 이미지 업로드 -->
+                <div class="image-upload-area">
+                    <input 
+                        type="file" 
+                        id="comment-image-input" 
+                        class="image-upload-input" 
+                        multiple 
+                        accept="image/*">
+                    <button 
+                        type="button" 
+                        class="image-upload-btn" 
+                        onclick="document.getElementById('comment-image-input').click()">
+                        📷 사진 추가
+                        <span class="image-count"><span id="image-count">0</span>/10</span>
+                    </button>
+                </div>
+                
+                <!-- 숨겨진 input (hidden, 실제 이미지 데이터) -->
+                <input type="hidden" id="comment-images-data" name="images" value="[]">
+                
+                <div class="comment-form-actions">
+                    <button type="submit" class="btn-accent">댓글 남기기</button>
+                </div>
+            </form>
+        </div>
+        {% else %}
+        <div class="comment-placeholder">
+            <a href="{% url 'accounts:login' %}">로그인</a>하면 오늘의 가이드에 응원을 남길 수 있어요.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+<script>
+/* 댓글 수정 토글 */
+function toggleEdit(id, cancel=false) {
+    const contentEl = document.getElementById('comment-content-' + id);
+    const formEl = document.getElementById('comment-edit-form-' + id);
+    if (!contentEl || !formEl) return;
+    if (cancel || formEl.style.display === 'block') {
+        formEl.style.display = 'none';
+        contentEl.style.display = 'block';
+    } else {
+        formEl.style.display = 'block';
+        contentEl.style.display = 'none';
+    }
+}
+
+/* 댓글 이미지 업로드 처리 */
+const commentImageInput = document.getElementById('comment-image-input');
+const commentImagePreview = document.getElementById('comment-image-preview');
+const commentImagesData = document.getElementById('comment-images-data');
+const imageCountEl = document.getElementById('image-count');
+
+let uploadedImages = []; // base64 이미지 저장
+
+commentImageInput.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files);
+    
+    // 최대 10장 제한
+    if (uploadedImages.length + files.length > 10) {
+        alert('최대 10장까지만 업로드할 수 있습니다.');
+        return;
+    }
+    
+    files.forEach((file, idx) => {
+        if (!file.type.startsWith('image/')) {
+            alert('이미지 파일만 업로드 가능합니다.');
+            return;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) { // 5MB 제한
+            alert('파일 크기는 5MB 이하여야 합니다.');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const base64 = event.target.result;
+            const imgId = Date.now() + '-' + idx;
+            
+            uploadedImages.push({
+                id: imgId,
+                src: base64
+            });
+            
+            renderImagePreview();
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    // input 초기화
+    commentImageInput.value = '';
+});
+
+function renderImagePreview() {
+    commentImagePreview.innerHTML = '';
+    
+    uploadedImages.forEach((img) => {
+        const div = document.createElement('div');
+        div.className = 'image-preview-item';
+        div.innerHTML = `
+            <img src="${img.src}" alt="미리보기">
+            <button type="button" class="image-preview-remove" onclick="removeImage('${img.id}')">✕</button>
+        `;
+        commentImagePreview.appendChild(div);
+    });
+    
+    imageCountEl.textContent = uploadedImages.length;
+    commentImagesData.value = JSON.stringify(uploadedImages.map(img => img.src));
+}
+
+function removeImage(imgId) {
+    uploadedImages = uploadedImages.filter(img => img.id !== imgId);
+    renderImagePreview();
+}
+
+// 폼 제출 전 이미지 데이터 준비
+document.querySelector('form').addEventListener('submit', (e) => {
+    commentImagesData.value = JSON.stringify(uploadedImages.map(img => img.src));
+});
+</script>

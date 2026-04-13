@@ -1,0 +1,394 @@
+<!--
+═══════════════════════════════════════════════════════════════════════
+pet_write.html - 반려동물 게시판 글쓰기
+═══════════════════════════════════════════════════════════════════════
+26-01-06 표준화: 요리레시피 스타일로 리뉴얼 (이미지 10개까지 지원)
+-->
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .pet-form-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .form-header {
+        margin-bottom: 30px;
+    }
+
+    .form-header h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .form-group input[type="text"],
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+
+    .form-group textarea {
+        min-height: 300px;
+        resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #ff6b6b;
+        box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+    }
+
+    .form-help-text {
+        font-size: 13px;
+        color: #999;
+        margin-top: 6px;
+    }
+
+    .image-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+    }
+
+    .image-upload-area {
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        padding: 30px;
+        text-align: center;
+        background: white;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .image-upload-area:hover {
+        border-color: #ff6b6b;
+        background: #fff5f5;
+    }
+
+    .image-upload-area.dragover {
+        border-color: #ff6b6b;
+        background: #fff5f5;
+    }
+
+    .image-upload-area p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .image-upload-area .icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+
+    #id_images {
+        display: none;
+    }
+
+    .image-preview-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .image-preview-item {
+        position: relative;
+        background: #f8f9fa;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .image-preview-item img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .image-preview-item .remove-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 28px;
+        height: 28px;
+        background: rgba(255, 107, 107, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: .2s;
+    }
+
+    .image-preview-item .remove-btn:hover {
+        background: rgba(255, 107, 107, 1);
+    }
+
+    .image-count {
+        font-size: 13px;
+        color: #666;
+        margin-top: 10px;
+    }
+
+    .form-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .btn-submit {
+        padding: 12px 32px;
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .btn-submit:hover {
+        background: #ff5252;
+    }
+
+    .btn-cancel {
+        padding: 12px 32px;
+        background: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: .2s;
+        display: inline-block;
+    }
+
+    .btn-cancel:hover {
+        background: #5a6268;
+    }
+
+    .image-error {
+        color: #d63031;
+        font-size: 13px;
+        margin-top: 6px;
+    }
+
+    @media (max-width: 768px) {
+        .pet-form-container {
+            padding: 15px;
+        }
+
+        .image-preview-container {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .form-buttons {
+            flex-direction: column;
+        }
+
+        .btn-submit,
+        .btn-cancel {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="pet-form-container">
+    <div class="form-header">
+        <h2>반려동물 이야기 작성</h2>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="petForm">
+        {% csrf_token %}
+        
+        <!-- 제목 -->
+        <div class="form-group">
+            <label for="id_title">제목 *</label>
+            <input type="text"
+                   name="title"
+                   id="id_title"
+                   required
+                   placeholder="반려동물과 관련된 제목을 입력하세요">
+        </div>
+
+        <!-- 내용 -->
+        <div class="form-group">
+            <label for="id_content">내용 *</label>
+            <textarea name="content"
+                      id="id_content"
+                      required
+                      placeholder="반려동물과 관련된 이야기를 자유롭게 작성해주세요"></textarea>
+        </div>
+
+        <!-- 이미지 업로드 -->
+        <div class="image-section">
+            <label>반려동물 사진 (최대 10개)</label>
+            
+            <div class="image-upload-area" id="imageUploadArea">
+                <div class="icon">🖼️</div>
+                <p>이미지를 여기에 드래그하거나 클릭하여 업로드하세요</p>
+                <p style="font-size: 12px; color: #999; margin-top: 5px;">JPG, PNG, GIF (최대 10개)</p>
+            </div>
+
+            <input type="file"
+                   name="images"
+                   id="id_images"
+                   multiple
+                   accept="image/*">
+
+            <div class="image-preview-container" id="imagePreviewContainer"></div>
+            <div class="image-count">
+                업로드된 이미지: <span id="imageCount">0</span>/10
+            </div>
+            <div class="image-error" id="imageError"></div>
+
+            <p class="form-help-text">
+                💡 팁: 여러 이미지를 한 번에 선택하거나 드래그하여 업로드할 수 있습니다.
+            </p>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="form-buttons">
+            <button type="submit" class="btn-submit">게시물 작성</button>
+            <a href="{% url 'board:pet_list' %}" class="btn-cancel">취소</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    const imageUploadArea = document.getElementById('imageUploadArea');
+    const imageInput = document.getElementById('id_images');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imageCountSpan = document.getElementById('imageCount');
+    const imageError = document.getElementById('imageError');
+    const petForm = document.getElementById('petForm');
+
+    let selectedFiles = [];
+
+    // 클릭으로 파일 선택
+    imageUploadArea.addEventListener('click', () => {
+        imageInput.click();
+    });
+
+    // 드래그 오버
+    imageUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        imageUploadArea.classList.add('dragover');
+    });
+
+    imageUploadArea.addEventListener('dragleave', () => {
+        imageUploadArea.classList.remove('dragover');
+    });
+
+    // 드롭
+    imageUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        imageUploadArea.classList.remove('dragover');
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+        handleFileSelect(files);
+    });
+
+    // 파일 입력 변경
+    imageInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        handleFileSelect(files);
+    });
+
+    function handleFileSelect(files) {
+        imageError.textContent = '';
+        
+        // 기존 파일 + 새 파일
+        const newFiles = [...selectedFiles, ...files];
+        
+        if (newFiles.length > 10) {
+            imageError.textContent = '최대 10개까지만 업로드 가능합니다.';
+            return;
+        }
+
+        selectedFiles = newFiles;
+        updatePreview();
+        updateFormData();
+    }
+
+    function updatePreview() {
+        imagePreviewContainer.innerHTML = '';
+        
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const item = document.createElement('div');
+                item.className = 'image-preview-item';
+                item.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                    <button type="button" class="remove-btn" data-index="${index}">✕</button>
+                `;
+                
+                item.querySelector('.remove-btn').addEventListener('click', (event) => {
+                    event.preventDefault();
+                    removeImage(index);
+                });
+                
+                imagePreviewContainer.appendChild(item);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        imageCountSpan.textContent = selectedFiles.length;
+    }
+
+    function removeImage(index) {
+        selectedFiles.splice(index, 1);
+        updatePreview();
+        updateFormData();
+    }
+
+    function updateFormData() {
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+        imageInput.files = dataTransfer.files;
+    }
+
+    // 폼 제출 전 검증
+    petForm.addEventListener('submit', (e) => {
+        if (imageInput.files.length > 10) {
+            e.preventDefault();
+            imageError.textContent = '최대 10개까지만 업로드 가능합니다.';
+            return false;
+        }
+    });
+</script>
+{% endblock %}

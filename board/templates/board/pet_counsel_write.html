@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+.pet-form-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.form-header {
+    margin-bottom: 30px;
+}
+
+.form-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.form-group textarea {
+    min-height: 300px;
+}
+
+/* ================= 이미지 ================= */
+.image-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+/* ===== 기존 이미지 ===== */
+.existing-images {
+    margin-bottom: 20px;
+}
+
+.existing-images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
+    gap: 15px;
+}
+
+.existing-image-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.existing-image-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.existing-image-item input {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.existing-image-item label {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,107,107,.85);
+    color: #fff;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: .2s;
+}
+
+.existing-image-item input:checked + label {
+    opacity: 1;
+}
+
+/* ===== 새 이미지 ===== */
+.image-upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    background: #fff;
+    cursor: pointer;
+}
+
+.image-preview-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.image-preview-item {
+    position: relative;
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+    background: rgba(255,107,107,.9);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.image-count {
+    font-size: 13px;
+    color: #666;
+    margin-top: 10px;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-submit {
+    padding: 12px 32px;
+    background: #ff6b6b;
+    color: #fff;
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+}
+
+.btn-cancel {
+    padding: 12px 32px;
+    background: #6c757d;
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+}
+</style>
+
+<div class="pet-form-container">
+
+    <div class="form-header">
+        <h2>
+            {% if is_edit %}반려동물 고민 상담 수정{% else %}반려동물 고민 상담 작성{% endif %}
+        </h2>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="petForm">
+        {% csrf_token %}
+
+        <!-- 제목 -->
+        <div class="form-group">
+            <label>제목 *</label>
+            <input type="text"
+                   name="title"
+                   required
+                   value="{{ post.title|default:'' }}"
+                   placeholder="어떤 고민이신가요?">
+        </div>
+
+        <!-- 내용 -->
+        <div class="form-group">
+            <label>내용 *</label>
+            <textarea name="content"
+                      required
+                      placeholder="반려동물에 대한 고민을 자세히 작성해 주세요.">{{ post.content|default:'' }}</textarea>
+        </div>
+
+        <!-- ===== 기존 이미지 (수정 시) ===== -->
+        {% if is_edit and post.images.exists %}
+        <div class="existing-images">
+            <p style="font-weight:600; margin-bottom:10px;">기존 이미지 (삭제 선택)</p>
+            <div class="existing-images-grid">
+                {% for img in post.images.all %}
+                <div class="existing-image-item">
+                    <input type="checkbox"
+                           name="delete_images"
+                           value="{{ img.id }}"
+                           id="del_img_{{ img.id }}">
+                    <label for="del_img_{{ img.id }}">삭제</label>
+                    <img src="{{ img.image.url }}">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ===== 새 이미지 ===== -->
+        <div class="image-section">
+            <label>이미지 추가 (최대 10개)</label>
+
+            <div class="image-upload-area" id="imageUploadArea">
+                클릭 또는 드래그로 이미지 업로드
+            </div>
+
+            <input type="file"
+                   id="id_images"
+                   name="images"
+                   multiple
+                   accept="image/*"
+                   hidden>
+
+            <div class="image-preview-container" id="preview"></div>
+            <div class="image-count">
+                총 이미지: <span id="imageCount">0</span> / 10
+            </div>
+        </div>
+
+        <div class="form-buttons">
+            <button type="submit" class="btn-submit">
+                {% if is_edit %}수정 완료{% else %}상담 글 등록{% endif %}
+            </button>
+            <a href="{% url 'board:pet_counsel_list' %}" class="btn-cancel">취소</a>
+        </div>
+    </form>
+</div>
+
+<script>
+const upload = document.getElementById('imageUploadArea');
+const input = document.getElementById('id_images');
+const preview = document.getElementById('preview');
+const countSpan = document.getElementById('imageCount');
+
+let files = [];
+const existingCount =
+    document.querySelectorAll('input[name="delete_images"]').length;
+
+upload.onclick = () => input.click();
+
+input.onchange = e => addFiles([...e.target.files]);
+
+function addFiles(newFiles) {
+    const deleted =
+        document.querySelectorAll('input[name="delete_images"]:checked').length;
+
+    if (existingCount - deleted + files.length + newFiles.length > 10) {
+        alert('이미지는 최대 10개까지 가능합니다.');
+        return;
+    }
+
+    files.push(...newFiles);
+    sync();
+}
+
+function sync() {
+    const dt = new DataTransfer();
+    files.forEach(f => dt.items.add(f));
+    input.files = dt.files;
+
+    preview.innerHTML = '';
+    files.forEach((f,i)=>{
+        const r = new FileReader();
+        r.onload = e => {
+            const d = document.createElement('div');
+            d.className = 'image-preview-item';
+            d.innerHTML = `
+                <img src="${e.target.result}">
+                <button type="button" class="remove-btn">✕</button>
+            `;
+            d.querySelector('button').onclick = ()=>{
+                files.splice(i,1);
+                sync();
+            };
+            preview.appendChild(d);
+        };
+        r.readAsDataURL(f);
+    });
+
+    countSpan.textContent = files.length + (existingCount -
+        document.querySelectorAll('input[name="delete_images"]:checked').length);
+}
+</script>
+{% endblock %}

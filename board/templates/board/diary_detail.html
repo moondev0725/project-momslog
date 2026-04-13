@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ entry.title|default:"일기" }} - 엄마 마음 일기장{% endblock %}
+
+{% block content %}
+<style>
+.diary-detail-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.diary-detail-header {
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.diary-mood-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.diary-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #1f2633;
+}
+
+.diary-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #999;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.diary-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.diary-content {
+    line-height: 1.8;
+    font-size: 16px;
+    color: #333;
+    white-space: pre-wrap;
+    margin: 30px 0;
+    padding: 25px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.diary-ai-response {
+    margin-top: 40px;
+    padding: 25px;
+    background: #e9eff7;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.ai-response-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ai-response-content {
+    font-size: 15px;
+    color: #333;
+    line-height: 1.7;
+    white-space: pre-wrap;
+}
+
+.diary-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5568d3;
+}
+
+.btn-secondary {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+</style>
+
+<div class="diary-detail-container">
+    <a href="{% url 'board:diary_list' %}" class="back-link">← 돌아가기</a>
+    
+    <div class="diary-detail-header">
+        <div class="diary-mood-icon">
+            {% if entry.mood == 'happy' %}😊
+            {% elif entry.mood == 'peaceful' %}😌
+            {% elif entry.mood == 'tired' %}😫
+            {% elif entry.mood == 'stressed' %}😰
+            {% elif entry.mood == 'sad' %}😢
+            {% elif entry.mood == 'angry' %}😠
+            {% elif entry.mood == 'confused' %}😕
+            {% endif %}
+        </div>
+        
+        <h1 class="diary-title">{{ entry.title|default:"제목 없음" }}</h1>
+        
+        <div class="diary-meta">
+            <div class="diary-meta-item">
+                📅 {{ entry.created_at|date:"Y년 m월 d일 H:i" }}
+            </div>
+            <div class="diary-meta-item">
+                ✍️ {% if entry.is_anonymous %}익명{% else %}{{ entry.diary.user.nickname|default:entry.diary.user.username }}{% endif %}
+            </div>
+            <div class="diary-meta-item">
+                💭 {{ entry.get_mood_display }}
+            </div>
+            {% if entry.tags %}
+            <div class="diary-meta-item">
+                🏷️ {{ entry.tags }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="diary-content">
+        {{ entry.content }}
+    </div>
+    
+    {% if entry.ai_response_generated and entry.ai_care_response %}
+    <div class="diary-ai-response">
+        <div class="ai-response-title">
+            🤖 AI 상담사의 답변
+        </div>
+        <div class="ai-response-content">
+            {{ entry.ai_care_response }}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if user == entry.diary.user %}
+    <div class="diary-actions">
+        <a href="{% url 'board:diary_edit' entry.pk %}" class="btn btn-primary">수정</a>
+        <form method="POST" action="{% url 'board:diary_delete' entry.pk %}" style="display: inline;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">삭제</button>
+        </form>
+    </div>
+    {% else %}
+    <p style="text-align: center; color: #999; margin-top: 30px;">
+        이 일기는 해당 사용자의 개인 일기입니다.
+    </p>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="login-container">
+    <h2>아이디 찾기</h2>
+
+    {% if found_id %}
+        <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 12px; margin-bottom: 20px;">
+            <p style="color: #868e96; font-size: 14px; margin-bottom: 20px;">회원님의 아이디는 아래와 같습니다.</p>
+            <h3 style="color: #343a40; font-size: 20px; font-weight: 800; margin: 20px 0;">{{ found_id }}</h3>
+        </div>
+        
+        <a href="{% url 'accounts:login' %}" class="btn-login-submit" style="display: block; text-align: center; text-decoration: none; line-height: 18px;">로그인 하러가기</a>
+
+    {% else %}
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>이름</label>
+                <input type="text" name="real_name" placeholder="가입시 등록한 이름" required>
+            </div>
+
+            <div class="form-group">
+                <label>이메일</label>
+                <input type="email" name="email" placeholder="가입시 등록한 이메일" required>
+            </div>
+
+            {% if error %}
+                <div class="error-msg">{{ error }}</div>
+            {% endif %}
+
+            <button type="submit" class="btn-login-submit">아이디 찾기</button>
+        </form>
+
+        <div class="login-links">
+            <a href="{% url 'accounts:login' %}">로그인</a> |
+            <a href="{% url 'accounts:find_pw' %}">비밀번호 찾기</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

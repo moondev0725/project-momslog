@@ -1,0 +1,16 @@
+{% extends "accounts/mypage/base.html" %}
+
+{% block mypage_content %}
+  <h2 class="mypage-title">마이페이지</h2>
+  <p class="mypage-subtitle">좌측 메뉴에서 원하는 항목을 선택해 주세요.</p>
+
+  <div style="display:grid; gap:10px; margin-top:18px;">
+    <a class="mypage-nav__item" href="{% url 'accounts:mypage_profile' %}">개인정보</a>
+    <a class="mypage-nav__item" href="{% url 'accounts:mypage_my_posts' %}">내가 쓴 글</a>
+    <a class="mypage-nav__item" href="{% url 'accounts:mypage_password_change' %}">계정관리</a>
+  </div>
+
+  <div style="margin-top:14px; color:#666; font-size:13px;">
+    ※ 개인정보/내가 쓴 글/계정관리 메뉴는 진입 시 비밀번호 재확인이 필요합니다.
+  </div>
+{% endblock %}

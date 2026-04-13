@@ -1,0 +1,847 @@
+/* style.css - 프리미엄 라이프스타일 플랫폼 스타일 */
+
+/* 1. 기본 설정 (폰트와 배경) */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+body {
+    /* 영문, 숫자, 한글 모두 프리텐다드 우선 적용 */
+    font-family: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    
+    margin: 0;
+    padding: 0;
+    background-color: #f4f6f8;
+    color: #333;
+    line-height: 1.6;
+    
+    /* ★ 핵심 포인트: 자간을 살짝 좁혀서 단단하고 정리된 느낌 주기 */
+    letter-spacing: -0.5px; 
+    
+    /* 글씨를 더 선명하게 렌더링 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -1px; /* 제목은 자간을 더 좁게 */
+    margin-top: 0;
+}
+
+/* 버튼 글씨도 폰트 적용 */
+button, input, select, textarea {
+    font-family: "Pretendard Variable", "Pretendard", sans-serif;
+    letter-spacing: -0.3px;
+}
+
+a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
+ul { list-style: none; padding: 0; margin: 0; }
+button { font-family: 'Pretendard', sans-serif; }
+
+/* 2. 레이아웃 (반응형 대응 준비) */
+.container {
+    width: 1140px; /* 조금 더 넓게 */
+    margin: 0 auto;
+    position: relative;
+}
+
+/* 3. 헤더 (완전 흰색으로 변경) */
+header {
+    background-color: #ffffff; /* [수정됨] 완전한 흰색 */
+    /* backdrop-filter: blur(10px); [삭제 또는 주석처리] 블러 효과 제거 */
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-top { padding: 15px 0; }
+
+.header-top .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* 로고 */
+.logo a { display: flex; align-items: center; }
+.logo img { height: 50px; width: auto; transition: transform 0.3s; }
+.logo a:hover img { transform: scale(1.05); /* 마우스 올리면 살짝 커짐 */ }
+
+/* 검색바 (트렌디한 캡슐형 + 그림자) */
+.search-bar {
+    display: flex;
+    background: #f0f2f5;
+    border-radius: 50px; /* 완전 둥글게 */
+    width: 420px;
+    padding: 5px 5px 5px 20px;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+}
+
+.search-bar:focus-within {
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* 입력하려 하면 그림자 생김 */
+    border-color: #ff6b6b; /* 포인트 컬러 */
+}
+
+.search-bar input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 15px;
+    outline: none;
+}
+
+.search-bar button {
+    background: linear-gradient(135deg, #ff9a9e 0%, #ff6b6b 100%); /* 그라데이션 버튼 */
+    color: white;
+    border: none;
+    border-radius: 50%; /* 동그라미 */
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(255, 107, 107, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+.search-bar button:hover { transform: scale(1.1); }
+
+.top-links { font-size: 13px; color: #888; font-weight: 500; }
+.top-links a:hover { color: #ff6b6b; }
+
+/* 메인 메뉴 (깔끔한 밑줄 효과) */
+.main-nav { background: #fff; border-bottom: 1px solid #eee; }
+.main-nav ul { display: flex; gap: 30px; }
+.main-nav li a {
+    font-size: 16px;
+    font-weight: 700;
+    color: #495057;
+    padding: 18px 10px;
+    display: block;
+    position: relative;
+}
+
+/* 메뉴 마우스 올렸을 때 애니메이션 */
+.main-nav li a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(to right, #ff9a9e, #ff6b6b);
+    transition: width 0.3s;
+}
+.main-nav li a:hover::after { width: 100%; }
+.main-nav li a:hover { color: #ff6b6b; }
+
+/* 4. 메인 콘텐츠 레이아웃 */
+.main-content { padding: 40px 0; }
+.content-wrapper { display: flex; gap: 30px; }
+.main-left { flex: 1; }
+.main-right { width: 350px; }
+
+/* 메인 배너 (현대적인 카드 뉴스 스타일) */
+.main-banner {
+    background: white;
+    border-radius: 20px; /* 둥근 모서리 */
+    margin-bottom: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06); /* 부드럽고 깊은 그림자 */
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(0,0,0,0.02);
+}
+
+/* 배너 장식용 그라데이션 바 (상단) */
+.main-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 6px;
+    background: linear-gradient(90deg, #ff9a9e, #ff6b6b, #fecfef);
+}
+
+.banner-item {
+    padding: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.banner-text h2 {
+    margin: 0 0 15px;
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #333 0%, #555 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; /* 글자에 그라데이션 입히기 */
+}
+.banner-text p { font-size: 16px; color: #666; margin: 0; }
+
+.banner-image {
+    width: 260px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transform: rotate(2deg); /* 사진을 살짝 기울여서 힙하게 */
+    transition: transform 0.3s;
+}
+.banner-item:hover .banner-image { transform: rotate(0deg) scale(1.02); }
+
+/* 5. 로그인 박스 (입체적인 카드) */
+.login-box {
+    background: #fff;
+    padding: 35px 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    text-align: center;
+    margin-bottom: 25px;
+    border: 1px solid #fff; /* 테두리 대신 빛 받는 느낌 */
+}
+
+.login-text { margin-bottom: 25px; color: #555; font-size: 15px; font-weight: 500; }
+
+/* 버튼 스타일 (그라데이션 & 둥글게) */
+.btn-login {
+    display: block;
+    background: linear-gradient(135deg, #ff9a9e 0%, #ff6b6b 100%); /* 코랄 핑크 그라데이션 */
+    color: white;
+    padding: 16px 0;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3); /* 버튼 그림자 */
+    margin-bottom: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-login:hover {
+    transform: translateY(-2px); /* 살짝 떠오름 */
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.btn-logout {
+    background: #e9ecef;
+    color: #495057;
+    box-shadow: none;
+}
+.btn-logout:hover { background: #dee2e6; color: #212529; }
+
+.login-links { margin-top: 20px; font-size: 13px; color: #adb5bd; }
+.login-links a { margin: 0 8px; color: #868e96; }
+.login-links a:hover { color: #ff6b6b; text-decoration: underline; }
+
+/* 로그인 후 정보 (뱃지 디자인 업그레이드) */
+.user-info-area { margin-bottom: 25px; line-height: 1.6; }
+.grade-badge {
+    background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%); /* 보라-파랑 그라데이션 */
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+    margin-right: 6px;
+    box-shadow: 0 2px 5px rgba(37, 117, 252, 0.3);
+}
+
+/* 광고 이미지 */
+.ad-image {
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s;
+}
+.ad-image:hover { transform: translateY(-3px); }
+
+/* 6. 게시글 리스트 (매거진 스타일) */
+.hot-posts {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    padding: 30px;
+}
+
+.section-header {
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #f1f3f5;
+    padding-bottom: 15px;
+}
+.section-header h3 {
+    margin: 0; font-size: 20px; font-weight: 800; color: #343a40;
+    position: relative;
+    display: inline-block;
+}
+/* 제목 옆에 작은 포인트 점 */
+.section-header h3::after {
+    content: '';
+    display: block;
+    width: 6px; height: 6px;
+    background-color: #ff6b6b;
+    border-radius: 50%;
+    position: absolute;
+    top: 0; right: -10px;
+}
+
+.more-link { font-size: 13px; color: #aaa; font-weight: 600; }
+
+.post-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+.post-card {
+    background: #fff;
+    border: 1px solid #f1f3f5;
+    border-radius: 15px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 카드에 마우스 올리면 일어나는 일 */
+.post-card:hover {
+    transform: translateY(-5px); /* 위로 쑥 올라옴 */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08); /* 그림자 진해짐 */
+    border-color: transparent;
+}
+/* 카드 왼쪽에 포인트 컬러 바 */
+.post-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; height: 100%; width: 4px;
+    background: #eee;
+    transition: background 0.3s;
+}
+.post-card:hover::before { background: #ff6b6b; }
+
+.post-card .category {
+    font-size: 12px;
+    color: #ff6b6b;
+    font-weight: 800;
+    margin-bottom: 8px;
+    display: inline-block;
+    background-color: #fff0f0;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+.post-card .title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #343a40;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    display: block;
+}
+.post-card .post-info { font-size: 13px; color: #adb5bd; }
+
+/* 7. 폼 스타일 (입력창 디자인) */
+.signup-container, .login-container {
+    width: 480px;
+    margin: 80px auto;
+    padding: 50px;
+    background: white;
+    border-radius: 25px; /* 아주 둥글게 */
+    box-shadow: 0 20px 50px rgba(0,0,0,0.08); /* 아주 큰 그림자 */
+}
+
+
+.signup-container h2, .login-container h2 {
+    color: #343a40;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 40px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #f1f3f5; /* 연한 테두리 */
+    border-radius: 12px;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+    background-color: #f8f9fa;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #f1f3f5;
+    border-radius: 12px;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+    background-color: #f8f9fa;
+    font-family: inherit;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+    border-color: #ff6b6b; /* 포커스시 포인트 컬러 */
+    background-color: #fff;
+    outline: none;
+}
+
+/* 벼룩시장 목록 */
+.flea-container {
+    max-width: 960px;
+    margin: 50px auto;
+}
+
+.flea-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.flea-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.flea-card {
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.flea-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+}
+
+.flea-card a {
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+    height: 100%;
+}
+
+.flea-thumb {
+    width: 180px;
+    height: 140px;
+    object-fit: cover;
+    background: #f1f3f5;
+    flex-shrink: 0;
+}
+
+.flea-thumb.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    font-size: 14px;
+}
+
+.flea-body {
+    padding: 16px 16px 16px 0;
+    flex: 1;
+}
+
+.flea-body h3 {
+    font-size: 17px;
+    margin: 0 0 8px;
+    color: #343a40;
+}
+
+.flea-price {
+    font-weight: 800;
+    color: #ff6b6b;
+    margin: 0 0 6px;
+}
+
+.flea-meta {
+    color: #868e96;
+    font-size: 13px;
+    margin: 0;
+}
+
+.flea-actions {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.btn-signup, .btn-login-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #ff9a9e 0%, #ff6b6b 100%);
+    color: white;
+    padding: 18px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 800;
+    margin-top: 20px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+    transition: transform 0.2s;
+}
+.btn-signup:hover { transform: translateY(-2px); }
+
+/* 중복확인 버튼 */
+.btn-search, .btn-check {
+    background: #495057;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 90px;
+    font-weight: 700;
+    margin-left: 8px;
+    cursor: pointer;
+}
+
+/* 에러 메시지 */
+.error-msg {
+    background: #fff5f5;
+    color: #ff6b6b;
+    border: 1px solid #ffc9c9;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 25px;
+}
+
+/* 프로필 페이지 스타일 */
+.login-container .info-group {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+}
+
+.login-container .info-group .label {
+    font-weight: bold;
+    color: #495057;
+    display: inline-block;
+    width: 100px;
+    font-size: 14px;
+}
+
+.login-container .btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: #6c757d;
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    margin-top: 10px;
+    margin-right: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.2s;
+}
+
+.login-container .btn:hover {
+    background-color: #545b62;
+    transform: translateY(-2px);
+}
+
+.login-container .btn-logout {
+    background: linear-gradient(135deg, #ff9a9e 0%, #ff6b6b 100%);
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+}
+
+.login-container .btn-logout:hover {
+    background: linear-gradient(135deg, #ff8a8e 0%, #ff5b5b 100%);
+}
+
+/* 푸터 */
+footer {
+    border-top: 1px solid #eee;
+    padding: 60px 0;
+    text-align: center;
+    color: #adb5bd;
+    background-color: #fff;
+    margin-top: 80px;
+}
+
+/* style.css 맨 아래 추가 */
+
+/* --- 회원가입 폼 레이아웃 보정 --- */
+
+/* 가로 배치용 박스들 */
+.id-check-box, .address-box, .jumin-box {
+    display: flex;
+    gap: 10px; /* 입력창과 버튼 사이 간격 */
+    align-items: center;
+}
+
+/* 입력창이 남은 공간을 꽉 채우도록 */
+.id-check-box input, .address-box input {
+    flex: 1;
+}
+
+/* 주민번호는 반반씩 */
+.jumin-box input {
+    width: 45%;
+    text-align: center;
+    letter-spacing: 2px; /* 글자 간격 넓게 */
+}
+
+.dash {
+    font-weight: bold;
+    color: #bbb;
+}
+
+/* 라디오 버튼 그룹 (자녀 정보) */
+.radio-group {
+    display: flex;
+    gap: 20px;
+}
+.radio-group label {
+    font-weight: normal;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 약관 박스 */
+.terms-box {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+.terms-box label { margin: 0; cursor: pointer; }
+
+/* style.css 맨 아래 추가 */
+
+/* --- 우리동네 지도 스타일 (MomsLog Design) --- */
+
+.map-wrapper {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    /* z-index 설정을 추가해서 확실히 바닥으로 보냅니다 */
+    z-index: 1; 
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* 지도는 제일 밑바닥 */
+    outline: none; /* 클릭 시 파란 테두리 제거 */
+}
+
+/* 지도 위에 둥둥 떠있는 컨트롤 박스 */
+.map-controls {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    /* ★ 핵심 수정: z-index를 9999로 올리고 !important로 강제 적용 */
+    z-index: 9999 !important; 
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    width: 300px;
+    /* 클릭 이벤트를 확실히 받도록 설정 */
+    pointer-events: auto; 
+}
+
+.map-controls h3 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.select-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.select-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #fff;
+    cursor: pointer;
+    font-family: 'Pretendard', sans-serif;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.select-group select:hover { border-color: #ff6b6b; }
+.select-group select:focus { 
+    border-color: #ff6b6b; 
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1); 
+}
+
+/* 비활성화된 select (서울특별시) 스타일 */
+.select-group select:disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    border-color: #eee;
+    cursor: default;
+}
+
+/* --- style.css 맨 아래 추가 --- */
+
+/* 📍 우리동네 지도 스타일 */
+
+.map-wrapper {
+    position: relative; /* 자식 요소 위치 기준점 */
+    width: 100%;
+    height: 600px; /* 지도 높이 */
+    border-radius: 20px; /* 둥근 모서리 */
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); /* 그림자 */
+    border: 1px solid rgba(0,0,0,0.05);
+    z-index: 1; /* 기준 레이어 */
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    outline: none;
+}
+
+/* 왼쪽 상단 컨트롤 패널 */
+.map-controls {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 9999 !important; /* 지도보다 무조건 위에 */
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    width: 300px;
+    pointer-events: auto; /* 클릭 가능하게 */
+}
+
+.map-controls h3 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.select-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.select-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Pretendard', sans-serif;
+    outline: none;
+    cursor: pointer;
+}
+.select-group select:hover { border-color: #ff6b6b; }
+
+/* 오른쪽 상단 카테고리 버튼 그룹 */
+.category-btn-group {
+    position: absolute;
+    top: 20px;
+    right: 60px; /* 줌 버튼(+/-) 옆 공간 확보 */
+    z-index: 9999 !important;
+    display: flex;
+    gap: 8px;
+}
+
+.category-btn-group button {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 20px; /* 알약 모양 */
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Pretendard', sans-serif;
+}
+
+.category-btn-group button:hover {
+    background: #ff6b6b; /* 맘스로그 포인트 컬러 */
+    color: white;
+    border-color: #ff6b6b;
+    transform: translateY(-2px);
+}
+
+.category-btn-group button:active {
+    transform: scale(0.95);
+}
+
+label {
+    min-width: 80px; /* 글자가 충분히 들어갈 만큼 최소 너비 확보 */
+    display: inline-block; /* 너비가 적용되도록 설정 */
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   25-12-29 슬기 수정: 알림 시스템 CSS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.notification-icon {
+    position: relative;
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 15px;
+    display: inline-block;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #ff6b6b;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(255, 107, 107, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
+    }
+}

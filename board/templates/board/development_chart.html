@@ -1,0 +1,1148 @@
+{% extends 'base.html' %}
+{% load static %}
+{# 26-01-04 슬기 수정: 새로운 UX 기반 월령별 발달 지표 #}
+{% block content %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .chart-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .header-section {
+        text-align: center;
+        margin-bottom: 50px;
+        padding: 40px;
+        background: linear-gradient(135deg, #ff8f8f 0%, #ffa8a8 100%);
+        border-radius: 24px;
+        color: white;
+        box-shadow: 0 15px 50px rgba(255, 107, 107, 0.3);
+    }
+
+    .header-section h2 {
+        font-size: 36px;
+        font-weight: 900;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .info-icon-btn {
+        background: rgba(255, 255, 255, 0.3);
+        border: 2px solid white;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .info-icon-btn:hover {
+        background: rgba(255, 255, 255, 0.5);
+        transform: scale(1.1);
+    }
+
+    .header-section p {
+        font-size: 16px;
+        opacity: 0.95;
+    }
+
+    .summary-box {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        border-left: 5px solid #ff8f8f;
+        animation: slideInRight 0.6s ease-out;
+    }
+
+    .summary-text {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        line-height: 1.8;
+    }
+
+    .summary-text .emoji {
+        font-size: 24px;
+        margin-right: 10px;
+    }
+
+    .radar-section {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        animation: slideInRight 0.6s ease-out 0.1s both;
+    }
+
+    .radar-section h3 {
+        font-size: 24px;
+        font-weight: 900;
+        color: #ff8f8f;
+        margin-bottom: 30px;
+    }
+
+    .radar-title-desc {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    .radar-chart-wrapper {
+        position: relative;
+        height: 550px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .slider-section {
+        background: white;
+        padding: 60px 40px;
+        border-radius: 20px;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        animation: slideInRight 0.6s ease-out 0.2s both;
+    }
+
+    .slider-section h3 {
+        font-size: 24px;
+        font-weight: 900;
+        color: #ff8f8f;
+        margin-bottom: 30px;
+    }
+
+    .month-slider {
+        width: 100%;
+        height: 8px;
+        border-radius: 5px;
+        background: linear-gradient(to right, #d1d5db 0%, #ff8f8f 100%);
+        outline: none;
+        -webkit-appearance: none;
+        margin-bottom: 20px;
+    }
+
+    .month-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff8f8f, #ffa8a8);
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(255, 143, 143, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .month-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 6px 20px rgba(255, 143, 143, 0.6);
+    }
+
+    .month-slider::-moz-range-thumb {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff8f8f, #ffa8a8);
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 4px 15px rgba(255, 143, 143, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .slider-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        font-weight: 600;
+        color: #999;
+        margin-bottom: 30px;
+    }
+
+    .selected-month {
+        font-size: 28px;
+        font-weight: 900;
+        color: #ff8f8f;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .area-buttons-section {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        animation: slideInRight 0.6s ease-out 0.3s both;
+    }
+
+    .area-buttons-section h3 {
+        font-size: 24px;
+        font-weight: 900;
+        color: #ff8f8f;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .area-buttons-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .area-buttons-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .area-btn {
+        padding: 25px;
+        border: none;
+        border-radius: 16px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .area-btn-physical {
+        background: linear-gradient(135deg, #ff8f8f 0%, #ffa8a8 100%);
+    }
+
+    .area-btn-cognitive {
+        background: linear-gradient(135deg, #74b9ff 0%, #a0d8ff 100%);
+    }
+
+    .area-btn-language {
+        background: linear-gradient(135deg, #feca57 0%, #fed456 100%);
+    }
+
+    .area-btn-social {
+        background: linear-gradient(135deg, #48dbfb 0%, #6ee7ff 100%);
+    }
+
+    .area-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .area-btn-icon {
+        font-size: 32px;
+    }
+        text-align: center;
+    }
+
+    .line-chart-wrapper {
+        position: relative;
+        height: 400px;
+        margin-top: 30px;
+    }
+
+    .cards-section {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-top: 40px;
+        margin-bottom: 40px;
+    }
+
+    @media (max-width: 1200px) {
+        .cards-section {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .cards-section {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .dev-card {
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        border-top: 4px solid;
+        transition: all 0.3s ease;
+        text-align: center;
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .dev-card:nth-child(1) { border-top-color: #ff8f8f; animation-delay: 0.3s; }
+    .dev-card:nth-child(2) { border-top-color: #74b9ff; animation-delay: 0.4s; }
+    .dev-card:nth-child(3) { border-top-color: #feca57; animation-delay: 0.5s; }
+    .dev-card:nth-child(4) { border-top-color: #48dbfb; animation-delay: 0.6s; }
+
+    .dev-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    }
+
+    .card-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #999;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .card-score {
+        font-size: 48px;
+        font-weight: 900;
+        margin: 15px 0;
+        background: linear-gradient(135deg, #ff8f8f 0%, #ffa8a8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .dev-card:nth-child(2) .card-score {
+        background: linear-gradient(135deg, #74b9ff 0%, #a3d8ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .dev-card:nth-child(3) .card-score {
+        background: linear-gradient(135deg, #feca57 0%, #fed456 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .dev-card:nth-child(4) .card-score {
+        background: linear-gradient(135deg, #48dbfb 0%, #6ee7ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .card-status {
+        font-size: 16px;
+        font-weight: 700;
+        padding: 8px 16px;
+        border-radius: 20px;
+        display: inline-block;
+        margin-top: 15px;
+    }
+
+    .status-normal { background: #d4f4dd; color: #22863a; }
+    .status-early { background: #cce5ff; color: #0052cc; }
+    .status-watch { background: #fff3cd; color: #856404; }
+
+    .status-desc {
+        font-size: 13px;
+        color: #666;
+        margin-top: 12px;
+        line-height: 1.5;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 50px;
+    }
+
+    .btn {
+        padding: 16px 40px;
+        border: none;
+        border-radius: 50px;
+        font-weight: 800;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        font-size: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-list {
+        background: linear-gradient(135deg, #ff8787 0%, #ffa5a5 100%);
+        color: white;
+    }
+
+    .btn-list:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 40px rgba(255, 135, 135, 0.4);
+    }
+
+    .btn-write {
+        background: linear-gradient(135deg, #ff8f8f 0%, #ffa8a8 100%);
+        color: white;
+    }
+
+    .btn-write:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 40px rgba(255, 107, 107, 0.5);
+    }
+
+    .no-data-icon {
+        font-size: 100px;
+        margin-bottom: 30px;
+        opacity: 0.3;
+    }
+</style>
+
+<div class="chart-container">
+    {% if developments %}
+        <div class="header-section">
+            <h2>
+                우리 아이 발달 흐름 살펴보기
+                <button class="info-icon-btn" onclick="openInfoModal()">?</button>
+            </h2>
+            <p>비교·평가가 아닌 참고용이에요. 아이마다 속도는 달라도 괜찮아요.</p>
+        </div>
+
+        <div class="area-buttons-section">
+            <h3>월령별 발달 지표란?</h3>
+            <div class="area-buttons-container">
+                <button class="area-btn area-btn-physical" onclick="openAreaModal('physical')">
+                    <span class="area-btn-icon"></span>
+                    <span>신체발달</span>
+                    <small style="font-size:13px; opacity:0.9;">몸의 힘과 움직임이 자라는 흐름</small>
+                </button>
+                <button class="area-btn area-btn-cognitive" onclick="openAreaModal('cognitive')">
+                    <span class="area-btn-icon"></span>
+                    <span>인지발달</span>
+                    <small style="font-size:13px; opacity:0.9;">보고 듣고 이해하는 힘이 커지는 흐름</small>
+                </button>
+                <button class="area-btn area-btn-language" onclick="openAreaModal('language')">
+                    <span class="area-btn-icon"></span>
+                    <span>언어발달</span>
+                    <small style="font-size:13px; opacity:0.9;">소리·단어로 마음을 나누는 흐름</small>
+                </button>
+                <button class="area-btn area-btn-social" onclick="openAreaModal('social')">
+                    <span class="area-btn-icon"></span>
+                    <span>사회성발달</span>
+                    <small style="font-size:13px; opacity:0.9;">사람과 관계 맺고 표현하는 흐름</small>
+                </button>
+            </div>
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-text">
+                <span class="emoji"></span>
+                <span id="summaryText">지금 흐름을 가볍게 살피고 있어요. 아이마다 속도는 달라도 괜찮아요.</span>
+            </div>
+        </div>
+
+        <div class="radar-section">
+            <h3>발달 영역별 균형</h3>
+            <div class="radar-title-desc">
+                신체·인지·언어·사회성 흐름을 한눈에 보되, 비교보다는 아이의 패턴을 읽어주세요.<br/>
+                모양이 달라도 괜찮아요. 우리 아이가 어떤 영역을 더 즐기는지 살펴보는 정도로 가볍게 봐주세요.
+            </div>
+            <div class="radar-chart-wrapper">
+                <canvas id="radarChart" width="550" height="550"></canvas>
+            </div>
+        </div>
+
+        <div class="slider-section">
+            <h3>월령별 성장 추이</h3>
+            <p style="color: #666; margin-bottom: 30px;">슬라이더를 움직여 흐름을 살펴보세요. 속도는 제각각이어도 자연스러운 성장 안에 있어요.</p>
+            
+            <input type="range" id="monthSlider" class="month-slider" min="1" max="12" value="6">
+            
+            <div class="slider-labels">
+                <span>1개월</span>
+                <span>12개월</span>
+            </div>
+
+            <div class="selected-month">
+                <span id="selectedMonth">6</span>개월
+            </div>
+
+            <div class="line-chart-wrapper">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+
+        <div class="cards-section">
+            <div class="dev-card">
+                <div class="card-label">신체발달</div>
+                <div class="card-score" id="physicalScore">72</div>
+                <div class="card-status status-normal" id="physicalStatus">편안한 흐름</div>
+                <div class="card-desc" id="physicalDesc"><div class="status-desc">월령 범위 내 정상 발달</div></div>
+            </div>
+
+            <div class="dev-card">
+                <div class="card-label">인지발달</div>
+                <div class="card-score" id="cognitiveScore">70</div>
+                <div class="card-status status-normal" id="cognitiveStatus">편안한 흐름</div>
+                <div class="card-desc" id="cognitiveDesc"><div class="status-desc">월령 범위 내 정상 발달</div></div>
+            </div>
+
+            <div class="dev-card">
+                <div class="card-label">언어발달</div>
+                <div class="card-score" id="languageScore">68</div>
+                <div class="card-status status-watch" id="languageStatus">천천히 살펴보기</div>
+                <div class="card-desc" id="languageDesc"><div class="status-desc">조금 느린 편이지만 정상 범위</div></div>
+            </div>
+
+            <div class="dev-card">
+                <div class="card-label">사회성발달</div>
+                <div class="card-score" id="socialScore">75</div>
+                <div class="card-status status-normal" id="socialStatus">편안한 흐름</div>
+                <div class="card-desc" id="socialDesc"><div class="status-desc">월령 범위 내 정상 발달</div></div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <a href="{% url 'board:parenting_list' %}" class="btn btn-list">다른 가이드 살펴보기</a>
+            <a href="{% url 'board:parenting_create' %}" class="btn btn-write">우리 집 성장 기록 남기기</a>
+        </div>
+
+    {% else %}
+        <div style="background: white; padding: 100px 40px; border-radius: 20px; text-align: center;">
+            <div class="no-data-icon">📭</div>
+            <p style="font-size: 24px; margin: 20px 0; font-weight: 900; color: #ff8f8f;">아직 등록된 발달 데이터가 없습니다.</p>
+            <p style="color: #666; font-size: 16px; margin-bottom: 30px;">월령별 발달 카테고리로 글을 작성하고 발달 지표를 입력해주세요!</p>
+            <div class="btn-group">
+                <a href="{% url 'board:parenting_list' %}" class="btn btn-list">다른 가이드 살펴보기</a>
+                <a href="{% url 'board:parenting_create' %}" class="btn btn-write">우리 집 성장 기록 남기기</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% if developments %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const months = {{ months_json|safe }};
+const physicalData = {{ physical_json|safe }};
+const cognitiveData = {{ cognitive_json|safe }};
+const languageData = {{ language_json|safe }};
+const socialData = {{ social_json|safe }};
+const avgMonths = {{ avg_months_json|safe }};
+const avgPhysicalDataAll = {{ avg_physical_json|safe }};
+const avgCognitiveDataAll = {{ avg_cognitive_json|safe }};
+const avgLanguageDataAll = {{ avg_language_json|safe }};
+const avgSocialDataAll = {{ avg_social_json|safe }};
+
+const avgPhysicalData = months.map(m => {
+    const idx = avgMonths.indexOf(m);
+    return idx !== -1 ? avgPhysicalDataAll[idx] : 0;
+});
+
+const avgCognitiveData = months.map(m => {
+    const idx = avgMonths.indexOf(m);
+    return idx !== -1 ? avgCognitiveDataAll[idx] : 0;
+});
+
+const avgLanguageData = months.map(m => {
+    const idx = avgMonths.indexOf(m);
+    return idx !== -1 ? avgLanguageDataAll[idx] : 0;
+});
+
+const avgSocialData = months.map(m => {
+    const idx = avgMonths.indexOf(m);
+    return idx !== -1 ? avgSocialDataAll[idx] : 0;
+});
+
+function generateSummary(physicalScore, cognitiveScore, languageScore, socialScore) {
+    const scores = [physicalScore, cognitiveScore, languageScore, socialScore];
+    const avg = Math.round(scores.reduce((a, b) => a + b) / 4);
+    const maxDiff = Math.max(...scores) - Math.min(...scores);
+
+    if (maxDiff < 15 && avg >= 70) {
+        return '✨ 전반적으로 편안한 흐름이에요. 지금처럼 아이의 호기심을 응원해 주세요.';
+    } else if (maxDiff >= 30) {
+        return '영역별 속도가 달라도 자연스러운 일이에요. 아이가 좋아하는 영역부터 함께 즐겨 주세요.';
+    } else if (avg < 60) {
+        return '조금 더 관찰하며 기록해 볼까요? 궁금한 점은 전문가와 상의해도 좋아요.';
+    } else {
+        return '우리 아이만의 속도로 잘 자라는 중이에요. 작은 변화를 따뜻하게 지켜봐 주세요.';
+    }
+}
+
+function getStatus(score, avgScore) {
+    if (score > avgScore + 10) {
+        return { status: '조금 빠른 흐름', class: 'status-early', desc: '이 영역을 더 즐기고 있어요. 무리하지 않고 지켜봐 주세요.' };
+    } else if (score < avgScore - 15) {
+        return { status: '천천히 살펴보기', class: 'status-watch', desc: '조금 느려도 괜찮아요. 아이 페이스를 응원해주세요.' };
+    } else {
+        return { status: '편안한 흐름', class: 'status-normal', desc: '무리 없이 자라는 중이에요.' };
+    }
+}
+
+const latestMonth = months[months.length - 1];
+const latestPhysical = physicalData[physicalData.length - 1];
+const latestCognitive = cognitiveData[cognitiveData.length - 1];
+const latestLanguage = languageData[languageData.length - 1];
+const latestSocial = socialData[socialData.length - 1];
+
+const latestAvgPhysical = avgPhysicalData[avgPhysicalData.length - 1];
+const latestAvgCognitive = avgCognitiveData[avgCognitiveData.length - 1];
+const latestAvgLanguage = avgLanguageData[avgLanguageData.length - 1];
+const latestAvgSocial = avgSocialData[avgSocialData.length - 1];
+
+document.getElementById('summaryText').textContent = generateSummary(latestPhysical, latestCognitive, latestLanguage, latestSocial);
+
+const physicalStatus = getStatus(latestPhysical, latestAvgPhysical);
+const cognitiveStatus = getStatus(latestCognitive, latestAvgCognitive);
+const languageStatus = getStatus(latestLanguage, latestAvgLanguage);
+const socialStatus = getStatus(latestSocial, latestAvgSocial);
+
+document.getElementById('physicalScore').textContent = latestPhysical;
+document.getElementById('physicalStatus').textContent = physicalStatus.status;
+document.getElementById('physicalStatus').className = 'card-status ' + physicalStatus.class;
+document.getElementById('physicalDesc').innerHTML = '<div class="status-desc">' + physicalStatus.desc + '</div>';
+
+document.getElementById('cognitiveScore').textContent = latestCognitive;
+document.getElementById('cognitiveStatus').textContent = cognitiveStatus.status;
+document.getElementById('cognitiveStatus').className = 'card-status ' + cognitiveStatus.class;
+document.getElementById('cognitiveDesc').innerHTML = '<div class="status-desc">' + cognitiveStatus.desc + '</div>';
+
+document.getElementById('languageScore').textContent = latestLanguage;
+document.getElementById('languageStatus').textContent = languageStatus.status;
+document.getElementById('languageStatus').className = 'card-status ' + languageStatus.class;
+document.getElementById('languageDesc').innerHTML = '<div class="status-desc">' + languageStatus.desc + '</div>';
+
+document.getElementById('socialScore').textContent = latestSocial;
+document.getElementById('socialStatus').textContent = socialStatus.status;
+document.getElementById('socialStatus').className = 'card-status ' + socialStatus.class;
+document.getElementById('socialDesc').innerHTML = '<div class="status-desc">' + socialStatus.desc + '</div>';
+
+let radarChart = new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+        labels: ['신체발달', '인지발달', '언어발달', '사회성발달'],
+        datasets: [
+            {
+                label: '우리 아이 (최근)',
+                data: [latestPhysical, latestCognitive, latestLanguage, latestSocial],
+                borderColor: '#ff8f8f',
+                backgroundColor: 'rgba(255, 143, 143, 0.15)',
+                borderWidth: 3,
+                pointBackgroundColor: '#ff8f8f',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                fill: true,
+                tension: 0.3
+            },
+            {
+                label: '월령 기준선 (평균)',
+                data: [latestAvgPhysical, latestAvgCognitive, latestAvgLanguage, latestAvgSocial],
+                borderColor: '#d1d5db',
+                backgroundColor: 'rgba(209, 213, 219, 0.05)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                pointBackgroundColor: '#d1d5db',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                fill: false,
+                tension: 0.3
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'bottom',
+                labels: { font: { size: 14, weight: 'bold' }, padding: 20, usePointStyle: true }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.85)',
+                padding: 15,
+                bodyFont: { size: 13 },
+                callbacks: { label: (context) => context.dataset.label + ': ' + context.parsed.r + '점' }
+            }
+        },
+        scales: {
+            r: {
+                beginAtZero: true,
+                max: 100,
+                ticks: { font: { size: 12, weight: 'bold' }, stepSize: 20, callback: (value) => value + '점' },
+                grid: { color: 'rgba(0,0,0,0.08)' },
+                pointLabels: { font: { size: 14, weight: '700' }, color: '#333' }
+            }
+        }
+    }
+});
+
+const monthSlider = document.getElementById('monthSlider');
+let lineChart = null;
+
+function updateLineChart(selectedMonth) {
+    const selectedIndex = months.indexOf(selectedMonth);
+    if (lineChart) lineChart.destroy();
+    document.getElementById('selectedMonth').textContent = selectedMonth;
+
+    const displayMonths = months.slice(0, selectedIndex + 1).map(m => m + '개월');
+    const displayPhysical = physicalData.slice(0, selectedIndex + 1);
+    const displayCognitive = cognitiveData.slice(0, selectedIndex + 1);
+    const displayLanguage = languageData.slice(0, selectedIndex + 1);
+    const displaySocial = socialData.slice(0, selectedIndex + 1);
+    
+    // 평균 범위 밴드를 위한 데이터 준비
+    const displayAvgPhysical = avgPhysicalData.slice(0, selectedIndex + 1);
+    const displayAvgCognitive = avgCognitiveData.slice(0, selectedIndex + 1);
+    const displayAvgLanguage = avgLanguageData.slice(0, selectedIndex + 1);
+    const displayAvgSocial = avgSocialData.slice(0, selectedIndex + 1);
+    
+    // 평균 범위 계산 (평균 ± 15점)
+    const avgPhysicalRange = displayAvgPhysical.map(v => Math.max(0, v - 15));
+    const avgCognitiveRange = displayAvgCognitive.map(v => Math.max(0, v - 15));
+    const avgLanguageRange = displayAvgLanguage.map(v => Math.max(0, v - 15));
+    const avgSocialRange = displayAvgSocial.map(v => Math.max(0, v - 15));
+
+    lineChart = new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: displayMonths,
+            datasets: [
+              
+                
+                // 우리 아이 데이터 (신체)
+                { label: '신체발달', data: displayPhysical, borderColor: '#ff8f8f', backgroundColor: 'transparent', borderWidth: 3, pointRadius: 6, pointBackgroundColor: '#ff8f8f', pointBorderColor: '#fff', pointBorderWidth: 2, fill: false, tension: 0.4 },
+                
+                
+                // 우리 아이 데이터 (인지)
+                { label: '인지발달', data: displayCognitive, borderColor: '#74b9ff', backgroundColor: 'transparent', borderWidth: 3, pointRadius: 6, pointBackgroundColor: '#74b9ff', pointBorderColor: '#fff', pointBorderWidth: 2, fill: false, tension: 0.4 },
+                
+                
+                
+                // 우리 아이 데이터 (언어)
+                { label: '언어발달', data: displayLanguage, borderColor: '#feca57', backgroundColor: 'transparent', borderWidth: 3, pointRadius: 6, pointBackgroundColor: '#feca57', pointBorderColor: '#fff', pointBorderWidth: 2, fill: false, tension: 0.4 },
+                
+               
+               
+                
+                // 우리 아이 데이터 (사회성)
+                { label: '사회성발달', data: displaySocial, borderColor: '#48dbfb', backgroundColor: 'transparent', borderWidth: 3, pointRadius: 6, pointBackgroundColor: '#48dbfb', pointBorderColor: '#fff', pointBorderWidth: 2, fill: false, tension: 0.4 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top', labels: { font: { size: 13, weight: 'bold' }, padding: 15, usePointStyle: true } },
+                tooltip: { backgroundColor: 'rgba(0,0,0,0.85)', padding: 15, bodyFont: { size: 13 }, callbacks: { label: (context) => context.dataset.label + ': ' + context.parsed.y + '점' } }
+            },
+            scales: {
+                y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.08)' }, ticks: { font: { size: 12, weight: 'bold' }, stepSize: 20, callback: (value) => value + '점' } },
+                x: { grid: { display: false }, ticks: { font: { size: 12, weight: 'bold' } } }
+            }
+        }
+    });
+}
+
+// 월령별 발달 해석 함수
+function getMonthlyGrowthMessage(selectedMonth) {
+    const monthIndex = months.indexOf(selectedMonth);
+    if (monthIndex === -1) return '';
+    
+    const currentPhysical = physicalData[monthIndex];
+    const currentCognitive = cognitiveData[monthIndex];
+    const currentLanguage = languageData[monthIndex];
+    const currentSocial = socialData[monthIndex];
+    
+    const avgPhysical = avgPhysicalDataAll[monthIndex] || 0;
+    const avgCognitive = avgCognitiveDataAll[monthIndex] || 0;
+    const avgLanguage = avgLanguageDataAll[monthIndex] || 0;
+    const avgSocial = avgSocialDataAll[monthIndex] || 0;
+    
+    // 모든 영역이 정상 범위 안인지 확인
+    const isPhysicalNormal = Math.abs(currentPhysical - avgPhysical) <= 15;
+    const isCognitiveNormal = Math.abs(currentCognitive - avgCognitive) <= 15;
+    const isLanguageNormal = Math.abs(currentLanguage - avgLanguage) <= 15;
+    const isSocialNormal = Math.abs(currentSocial - avgSocial) <= 15;
+    
+    const normalCount = [isPhysicalNormal, isCognitiveNormal, isLanguageNormal, isSocialNormal].filter(v => v).length;
+    
+    if (normalCount === 4) {
+        return `현재 ${selectedMonth}개월 기준 4가지 영역 모두 안정적인 성장 흐름이에요 ✨`;
+    } else if (normalCount === 3) {
+        return `현재 ${selectedMonth}개월 기준 대부분의 발달이 정상 범위 안이에요. 천천히 따라가고 있어요 👍`;
+    } else if (normalCount >= 2) {
+        return `현재 ${selectedMonth}개월 기준 발달 속도가 다양하네요. 아이만의 속도대로 자라고 있어요 💛`;
+    } else {
+        return `현재 ${selectedMonth}개월 기준 발달 추이를 자세히 살펴보세요. 궁금한 점은 전문가와 상담하세요 📞`;
+    }
+}
+
+updateLineChart(latestMonth);
+monthSlider.addEventListener('input', (e) => {
+    const selectedMonth = parseInt(e.target.value);
+    updateLineChart(selectedMonth);
+    // 슬라이더 변경 시 동적 메시지 업데이트
+    const summaryElement = document.getElementById('summaryText');
+    if (summaryElement) {
+        summaryElement.textContent = getMonthlyGrowthMessage(selectedMonth);
+    }
+});
+
+// 26-01-04 슬기 추가: 월령별 발달 지표 정보 모달
+function openInfoModal() {
+    document.getElementById('infoModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeInfoModal() {
+    document.getElementById('infoModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// 26-01-04 슬기 추가: 발달 영역별 상세 모달
+const areaModalData = {
+    physical: {
+        title: '신체발달',
+        subtitle: '신체적 성장과 운동 능력',
+        content: `
+            <h3 style="font-size: 20px; font-weight: 900; color: #ff8f8f; margin-bottom: 20px;">신체발달이란?</h3>
+            
+            <p style="margin-bottom: 25px;">신체발달은 아이가 성장하면서 고개 들기, 앉기, 기기, 서기, 걷기 등 몸을 조절하고 움직이는 능력이 단계적으로 발달하는 과정을 말합니다.</p>
+
+            <h4 style="font-size: 16px; font-weight: 900; color: #333; margin-top: 30px; margin-bottom: 15px;">월령별 신체발달 점수 (1점 ~ 100점 기준)</h4>
+            
+            <div style="background: #ffe0e0; border-left: 5px solid #ff8f8f; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 14px;">
+                <p style="margin: 0; color: #333;"><strong>기준:</strong> 12개월 = 100점</p>
+                <p style="margin: 8px 0 0 0; color: #666;">점수는 평균적인 발달 흐름을 기준으로 한 참고 지표입니다.</p>
+            </div>
+
+            <div style="margin-bottom: 25px; font-size: 14px; line-height: 2;">
+                <p style="margin: 0;"><strong>1개월</strong> · 10점<br/><span style="color: #666;">— 팔다리를 반사적으로 움직이고 엎드리면 고개를 잠깐 듭니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>2개월</strong> · 15점<br/><span style="color: #666;">— 고개 들기가 조금 안정되고 움직임이 부드러워집니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>3개월</strong> · 22점<br/><span style="color: #666;">— 엎드린 상태에서 팔로 몸을 지탱합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>4개월</strong> · 30점<br/><span style="color: #666;">— 목 가누기가 완성되고 손을 뻗어 물건을 잡으려 합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>5개월</strong> · 38점<br/><span style="color: #666;">— 뒤집기를 시도하고 몸통 움직임이 활발해집니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>6개월</strong> · 46점<br/><span style="color: #666;">— 혼자 앉을 수 있어 신체발달의 큰 전환점이 됩니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>7개월</strong> · 55점<br/><span style="color: #666;">— 기거나 이동을 시작합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>8개월</strong> · 63점<br/><span style="color: #666;">— 안정적으로 앉고 이동이 활발해집니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>9개월</strong> · 72점<br/><span style="color: #666;">— 붙잡고 서며 손가락으로 작은 물건을 집습니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>10개월</strong> · 82점<br/><span style="color: #666;">— 가구를 잡고 옆으로 이동합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>11개월</strong> · 90점<br/><span style="color: #666;">— 잠깐 혼자 서거나 첫 걸음을 시도합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>12개월</strong> · 100점<br/><span style="color: #666;">— 혼자 걷기 시작하며 영아기 신체발달 기준에 도달합니다</span></p>
+            </div>
+
+            <div style="background: #f5f5f5; border-left: 5px solid #999; padding: 15px; border-radius: 8px; margin-top: 30px; font-size: 14px;">
+                <p style="margin: 0; color: #666;"><strong>📌 참고:</strong> 신체발달 점수는 평균적인 발달 흐름을 기준으로 한 참고 지표이며, 아이마다 개인차가 있을 수 있습니다.</p>
+            </div>
+        `
+    },
+    cognitive: {
+        title: '인지발달',
+        subtitle: '생각하고 배우는 능력',
+        content: `
+            <h3 style="font-size: 20px; font-weight: 900; color: #74b9ff; margin-bottom: 20px;">인지발달이란?</h3>
+            
+            <p style="margin-bottom: 25px;">인지발달은 아이가 보고, 듣고, 기억하고, 이해하며 원인과 결과를 알아가는 사고 능력이 성장하는 과정을 말합니다.</p>
+
+            <h4 style="font-size: 16px; font-weight: 900; color: #333; margin-top: 30px; margin-bottom: 15px;">월령별 인지발달 점수 (1점 ~ 100점 기준)</h4>
+            
+            <div style="background: #c4e4ff; border-left: 5px solid #74b9ff; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 14px;">
+                <p style="margin: 0; color: #333;"><strong>기준:</strong> 12개월 = 100점</p>
+                <p style="margin: 8px 0 0 0; color: #666;">점수는 평균적인 인지발달 흐름을 기준으로 한 참고 지표입니다.</p>
+            </div>
+
+            <div style="margin-bottom: 25px; font-size: 14px; line-height: 2;">
+                <p style="margin: 0;"><strong>1개월</strong> · 8점<br/><span style="color: #666;">— 소리와 빛에 반응하며 감각을 통해 세상을 인식합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>2개월</strong> · 12점<br/><span style="color: #666;">— 얼굴과 소리를 구분하기 시작합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>3개월</strong> · 18점<br/><span style="color: #666;">— 익숙한 사람을 알아보고 자극에 반응합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>4개월</strong> · 26점<br/><span style="color: #666;">— 물건을 주의 깊게 바라보고 원인·결과를 탐색합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>5개월</strong> · 34점<br/><span style="color: #666;">— 물건을 입에 넣으며 탐색하고 반복 행동에 흥미를 보입니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>6개월</strong> · 42점<br/><span style="color: #666;">— 숨겨진 물건에 관심을 보이고 주변을 관찰합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>7개월</strong> · 52점<br/><span style="color: #666;">— 물건의 기능 차이를 인식하기 시작합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>8개월</strong> · 60점<br/><span style="color: #666;">— 간단한 행동을 따라 하며 기억력이 발달합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>9개월</strong> · 70점<br/><span style="color: #666;">— 이름을 인식하고 간단한 지시를 이해합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>10개월</strong> · 80점<br/><span style="color: #666;">— 문제 해결을 시도하고 목적 있는 행동을 합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>11개월</strong> · 90점<br/><span style="color: #666;">— 물건의 용도를 이해하고 선택 행동이 늘어납니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>12개월</strong> · 100점<br/><span style="color: #666;">— 간단한 말의 의미를 이해하고 사고 능력이 확장됩니다</span></p>
+            </div>
+
+            <div style="background: #f5f5f5; border-left: 5px solid #999; padding: 15px; border-radius: 8px; margin-top: 30px; font-size: 14px;">
+                <p style="margin: 0; color: #666;"><strong>📌 참고:</strong> 인지발달 점수는 평균적인 발달 흐름을 기준으로 한 참고 지표이며, 아이마다 개인차가 있습니다.</p>
+            </div>
+        `
+    },
+    language: {
+        title: '언어발달',
+        subtitle: '말하고 이해하는 능력',
+        content: `
+            <h3 style="font-size: 20px; font-weight: 900; color: #feca57; margin-bottom: 20px;">언어발달이란?</h3>
+            
+            <p style="margin-bottom: 25px;">언어발달은 아이가 소리를 듣고 이해하며, 옹알이와 단어를 통해 의사소통 능력을 키워가는 과정을 말합니다.</p>
+
+            <h4 style="font-size: 16px; font-weight: 900; color: #333; margin-top: 30px; margin-bottom: 15px;">월령별 언어발달 점수 (1점 ~ 100점 기준)</h4>
+            
+            <div style="background: #fff9e6; border-left: 5px solid #feca57; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 14px;">
+                <p style="margin: 0; color: #333;"><strong>기준:</strong> 12개월 = 100점</p>
+                <p style="margin: 8px 0 0 0; color: #666;">점수는 평균적인 언어발달 흐름을 기준으로 한 참고 지표입니다.</p>
+            </div>
+
+            <div style="margin-bottom: 25px; font-size: 14px; line-height: 2;">
+                <p style="margin: 0;"><strong>1개월</strong> · 5점<br/><span style="color: #666;">— 울음으로 욕구를 표현하고 소리에 반응합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>2개월</strong> · 8점<br/><span style="color: #666;">— 소리의 높낮이에 반응하며 발성을 시도합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>3개월</strong> · 14점<br/><span style="color: #666;">— '아', '우' 같은 옹알이를 시작합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>4개월</strong> · 22점<br/><span style="color: #666;">— 소리 내어 웃고 다양한 발성을 합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>5개월</strong> · 30점<br/><span style="color: #666;">— 반복적인 소리를 내며 소리 놀이를 합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>6개월</strong> · 38점<br/><span style="color: #666;">— 이름을 들으면 반응하고 소리를 흉내 냅니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>7개월</strong> · 48점<br/><span style="color: #666;">— '바바', '다다' 같은 음절 옹알이가 나타납니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>8개월</strong> · 58점<br/><span style="color: #666;">— 말하는 사람의 억양을 따라 합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>9개월</strong> · 68점<br/><span style="color: #666;">— 간단한 말의 의미를 이해하기 시작합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>10개월</strong> · 80점<br/><span style="color: #666;">— 의도적으로 소리를 사용해 요구를 표현합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>11개월</strong> · 90점<br/><span style="color: #666;">— 의미 있는 단어를 말하려 시도합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>12개월</strong> · 100점<br/><span style="color: #666;">— 한두 개의 의미 있는 단어로 의사표현을 합니다</span></p>
+            </div>
+
+            <div style="background: #f5f5f5; border-left: 5px solid #999; padding: 15px; border-radius: 8px; margin-top: 30px; font-size: 14px;">
+                <p style="margin: 0; color: #666;"><strong>📌 참고:</strong> 언어발달 점수는 평균적인 발달 흐름을 기준으로 한 참고 지표이며, 아이마다 개인차가 큽니다.</p>
+            </div>
+        `
+    },
+    social: {
+        title: '사회성발달',
+        subtitle: '다른 사람과 관계 맺기',
+        content: `
+            <h3 style="font-size: 20px; font-weight: 900; color: #48dbfb; margin-bottom: 20px;">사회성발달이란?</h3>
+            
+            <p style="margin-bottom: 25px;">사회성발달은 아이가 사람과 관계를 맺고 감정을 표현하며, 타인과 상호작용하는 능력이 자라나는 과정을 말합니다.</p>
+
+            <h4 style="font-size: 16px; font-weight: 900; color: #333; margin-top: 30px; margin-bottom: 15px;">월령별 사회성발달 점수 (1점 ~ 100점 기준)</h4>
+            
+            <div style="background: #d4f3f9; border-left: 5px solid #48dbfb; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 14px;">
+                <p style="margin: 0; color: #333;"><strong>기준:</strong> 12개월 = 100점</p>
+                <p style="margin: 8px 0 0 0; color: #666;">점수는 평균적인 사회성 발달 흐름을 기준으로 한 참고 지표입니다.</p>
+            </div>
+
+            <div style="margin-bottom: 25px; font-size: 14px; line-height: 2;">
+                <p style="margin: 0;"><strong>1개월</strong> · 8점<br/><span style="color: #666;">— 울음으로 불편함을 표현하고 사람의 얼굴을 바라봅니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>2개월</strong> · 12점<br/><span style="color: #666;">— 보호자의 얼굴을 보고 미소를 보이기 시작합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>3개월</strong> · 18점<br/><span style="color: #666;">— 사회적 미소가 뚜렷해지고 사람과 눈을 맞춥니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>4개월</strong> · 26점<br/><span style="color: #666;">— 사람의 표정과 목소리에 반응하며 교류를 즐깁니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>5개월</strong> · 34점<br/><span style="color: #666;">— 익숙한 사람에게 더 활발히 반응합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>6개월</strong> · 42점<br/><span style="color: #666;">— 낯선 사람을 구분하기 시작합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>7개월</strong> · 52점<br/><span style="color: #666;">— 보호자에게 애착 행동을 보입니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>8개월</strong> · 60점<br/><span style="color: #666;">— 낯가림이 나타나고 보호자를 찾습니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>9개월</strong> · 70점<br/><span style="color: #666;">— 감정을 표정과 행동으로 분명히 표현합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>10개월</strong> · 80점<br/><span style="color: #666;">— 간단한 사회적 놀이(까꿍 등)를 즐깁니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>11개월</strong> · 90점<br/><span style="color: #666;">— 타인의 반응을 살피며 행동을 조절합니다</span></p>
+                <p style="margin: 15px 0 0 0;"><strong>12개월</strong> · 100점<br/><span style="color: #666;">— 의도적으로 관심을 끌고 사회적 상호작용이 확장됩니다</span></p>
+            </div>
+
+            <div style="background: #f5f5f5; border-left: 5px solid #999; padding: 15px; border-radius: 8px; margin-top: 30px; font-size: 14px;">
+                <p style="margin: 0; color: #666;"><strong>📌 참고:</strong> 사회성발달 점수는 평균적인 발달 흐름을 기준으로 한 참고 지표이며, 아이마다 개인차가 있습니다.</p>
+            </div>
+        `
+    }
+};
+
+function openAreaModal(area) {
+    const data = areaModalData[area];
+    const modal = document.getElementById('areaModal');
+    
+    if (data) {
+        const header = document.getElementById('areaModalHeader');
+        document.getElementById('areaModalTitle').textContent = data.title;
+        document.getElementById('areaModalSubtitle').textContent = data.subtitle;
+        document.getElementById('areaModalContent').innerHTML = data.content;
+        
+        // 헤더 배경색 변경
+        const colors = {
+            physical: 'linear-gradient(135deg, #ff8f8f 0%, #ffa8a8 100%)',
+            cognitive: 'linear-gradient(135deg, #74b9ff 0%, #a0d8ff 100%)',
+            language: 'linear-gradient(135deg, #feca57 0%, #fed456 100%)',
+            social: 'linear-gradient(135deg, #48dbfb 0%, #6ee7ff 100%)'
+        };
+        
+        header.style.background = colors[area];
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeAreaModal() {
+    document.getElementById('areaModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('infoModal');
+    if (event.target === modal) {
+        closeInfoModal();
+    }
+    
+    const areaModal = document.getElementById('areaModal');
+    if (event.target === areaModal) {
+        closeAreaModal();
+    }
+});
+</script>
+
+<!-- 26-01-04 슬기 추가: 월령별 발달 지표 정보 모달 -->
+<div id="infoModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div style="background-color: white; margin: auto; padding: 0; width: 90%; max-width: 600px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-height: 90vh; overflow-y: auto;">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #ff8f8f 0%, #ffa8a8 100%); color: white; padding: 40px 30px; border-radius: 24px 24px 0 0; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0; font-size: 28px; font-weight: 900;">월령별 발달 지표란?</h2>
+            <button onclick="closeInfoModal()" style="background: rgba(255,255,255,0.3); border: none; color: white; font-size: 28px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+        </div>
+
+        <!-- Content -->
+        <div style="padding: 40px 30px; line-height: 1.8; font-size: 16px; color: #333;">
+            <p style="margin-bottom: 25px;">아이가 태어난 후 <strong>개월 수(월령)</strong>에 따라 대부분의 아이들이 보이는 신체·인지·정서 발달의 평균적인 기준을 정리한 참고 지표를 말해요.</p>
+
+            <div style="background: #fff3e0; border-left: 5px solid #ff9800; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                <strong style="font-size: 18px;">즉,</strong>
+                <p style="margin: 12px 0;">
+                    <em>"이 시기 아이들은 보통 이 정도를 할 수 있어요"</em>
+                </p>
+                <p style="margin: 12px 0 0 0;">를 알려주는 가이드라인이지,</p>
+                <p style="margin: 12px 0 0 0; color: #d32f2f; font-weight: 600;">반드시 지켜야 하는 시험표나 성적표는 아니에요.</p>
+            </div>
+
+            <p style="margin-bottom: 20px; font-weight: 600; color: #ff8f8f;">
+                부모가 아이의 성장을 이해하고,<br>
+                발달이 너무 빠르거나 늦지 않은지<br>
+                편안하게 확인하기 위한 기준으로 사용됩니다.
+            </p>
+
+            <hr style="border: none; border-top: 2px solid #f0f0f0; margin: 30px 0;">
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 12px; margin-top: 20px;">
+                <p style="margin: 0; font-size: 14px; color: #1976d2;">
+                    💡 <strong>팁:</strong> 우리 아이의 점수와 월령 기준선을 비교하며 발달 추이를 살펴보세요. 아이의 개인차는 당연하며, 궁금한 점은 전문가와 상담하세요.
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="padding: 20px 30px; border-top: 1px solid #f0f0f0; text-align: right;">
+            <button onclick="closeInfoModal()" style="background: linear-gradient(135deg, #ff8f8f 0%, #ffa8a8 100%); color: white; border: none; padding: 12px 30px; border-radius: 20px; font-weight: 700; cursor: pointer; font-size: 16px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 30px rgba(255,143,143,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">확인했어요</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    #infoModal {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    #infoModal > div {
+        animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translate(-50%, -45%);
+            opacity: 0;
+        }
+        to {
+            transform: translate(-50%, -50%);
+            opacity: 1;
+        }
+    }
+</style>
+
+<!-- 26-01-04 슬기 추가: 발달 영역별 상세 모달 -->
+<div id="areaModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div style="background-color: white; margin: auto; padding: 0; width: 90%; max-width: 600px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-height: 90vh; overflow-y: auto;">
+        <!-- Header -->
+        <div id="areaModalHeader" style="background: linear-gradient(135deg, #ff8f8f 0%, #ffa8a8 100%); color: white; padding: 40px 30px; border-radius: 24px 24px 0 0; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 id="areaModalTitle" style="margin: 0; font-size: 28px; font-weight: 900;">신체발달</h2>
+                <p id="areaModalSubtitle" style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;"></p>
+            </div>
+            <button onclick="closeAreaModal()" style="background: rgba(255,255,255,0.3); border: none; color: white; font-size: 28px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+        </div>
+
+        <!-- Content -->
+        <div style="padding: 40px 30px; line-height: 1.8; font-size: 16px; color: #333;">
+            <div id="areaModalContent"></div>
+        </div>
+
+        <!-- Footer -->
+        <div style="padding: 20px 30px; border-top: 1px solid #f0f0f0; text-align: right;">
+            <button onclick="closeAreaModal()" style="background: linear-gradient(135deg, #ff8f8f 0%, #ffa8a8 100%); color: white; border: none; padding: 12px 30px; border-radius: 20px; font-weight: 700; cursor: pointer; font-size: 16px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 30px rgba(255,143,143,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">닫기</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    #areaModal {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    #areaModal > div {
+        animation: slideUp 0.3s ease-out;
+    }
+</style>
+{% endif %}
+{% endblock %}

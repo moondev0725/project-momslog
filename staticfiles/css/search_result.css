@@ -1,0 +1,151 @@
+/* ===================================
+   25-12-29 슬기 수정: 검색 결과 페이지 CSS
+   - 검색 결과 레이아웃
+   - 게시판별 배지 스타일
+   - 모바일 반응형 디자인
+   =================================== */
+
+/* 검색 컨테이너 */
+.search-container { 
+    max-width: 1000px; 
+    margin: 50px auto; 
+    padding: 0 20px; 
+}
+
+/* 검색 헤더 영역 */
+.search-header { 
+    border-bottom: 2px solid #333; 
+    padding-bottom: 20px; 
+    margin-bottom: 30px; 
+}
+
+/* 검색 키워드 강조 */
+.search-keyword { 
+    color: #ff6b6b; 
+    font-weight: bold; 
+    font-size: 1.2em; 
+}
+
+/* 검색 결과 아이템 */
+.result-item { 
+    display: flex; 
+    flex-direction: column; 
+    border-bottom: 1px solid #eee; 
+    padding: 20px 0; 
+}
+
+/* 게시판 구분 배지 */
+.board-badge {
+    display: inline-block;
+    font-size: 12px;
+    color: white;
+    background-color: #888;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    width: fit-content;
+}
+
+/* 공지사항 배지 - 빨간색 */
+.badge-notice { 
+    background-color: #ff6b6b; 
+}
+
+/* 자유게시판 배지 - 파란색 */
+.badge-free { 
+    background-color: #74b9ff; 
+}
+
+/* 벼룩시장 배지 - 핑크색 */
+.badge-flea { 
+    background-color: #ff9a9e; 
+}
+
+/* 검색 결과 제목 */
+.result-title { 
+    font-size: 18px; 
+    font-weight: bold; 
+    color: #333; 
+    text-decoration: none; 
+    margin-bottom: 5px; 
+}
+
+.result-title:hover { 
+    color: #ff6b6b; 
+    text-decoration: underline; 
+}
+
+/* 검색 결과 미리보기 - 2줄까지만 표시 */
+.result-preview { 
+    font-size: 14px; 
+    color: #666; 
+    margin-bottom: 5px; 
+    display: -webkit-box; 
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical; 
+    overflow: hidden; 
+}
+
+/* 검색 결과 메타정보 (작성자, 날짜) */
+.result-meta { 
+    font-size: 13px; 
+    color: #999; 
+}
+
+/* 검색 결과 없을 때 */
+.no-result { 
+    text-align: center; 
+    padding: 100px 0; 
+    color: #999; 
+}
+
+/* 모바일 반응형 디자인 (768px 이하) */
+@media (max-width: 768px) {
+    /* 검색 컨테이너 모바일 여백 조정 */
+    .search-container { 
+        max-width: 100%; 
+        margin: 30px auto; 
+        padding: 0 12px; 
+    }
+    
+    /* 검색 헤더 모바일 스타일 */
+    .search-header { 
+        padding-bottom: 15px; 
+        margin-bottom: 20px; 
+    }
+    
+    .search-header h2 {
+        font-size: 18px;
+        margin: 0 0 10px 0;
+    }
+    
+    .search-header p {
+        font-size: 12px;
+        margin: 0;
+    }
+    
+    /* 검색 결과 아이템 모바일 스타일 */
+    .result-item { 
+        padding: 15px 0; 
+    }
+    
+    /* 검색 결과 제목 모바일 크기 */
+    .result-title { 
+        font-size: 15px; 
+    }
+    
+    /* 검색 결과 미리보기 모바일 크기 */
+    .result-preview { 
+        font-size: 13px; 
+    }
+    
+    /* 검색 결과 메타정보 모바일 크기 */
+    .result-meta { 
+        font-size: 12px; 
+    }
+    
+    /* 검색 결과 없을 때 모바일 스타일 */
+    .no-result { 
+        padding: 50px 0; 
+    }
+}

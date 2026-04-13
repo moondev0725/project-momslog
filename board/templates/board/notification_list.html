@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+<!-- 25-12-29 슬기 수정: 알림 목록 페이지 -->
+{% block content %}
+<style>
+    .notification-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    
+    .notification-header {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #ff6b6b;
+        padding-bottom: 12px;
+    }
+    
+    .notification-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .notification-item {
+        background: white;
+        padding: 16px;
+        border-radius: 8px;
+        border-left: 4px solid #ff6b6b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        user-select: none;
+    }
+    
+    .notification-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateX(4px);
+        background-color: #fffbfb;
+    }
+    
+    .notification-item:active {
+        transform: translateX(2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .notification-item.unread {
+        background-color: #fff5f5;
+        font-weight: 600;
+    }
+    
+    .notification-content {
+        flex: 1;
+    }
+    
+    .notification-message {
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 4px;
+    }
+    
+    .notification-time {
+        font-size: 12px;
+        color: #868e96;
+    }
+    
+    .notification-badge {
+        background-color: #ff6b6b;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        margin-left: 10px;
+    }
+    
+    .notification-empty {
+        text-align: center;
+        padding: 60px 20px;
+        color: #868e96;
+        font-size: 14px;
+    }
+    
+    .notification-action {
+        margin-top: 20px;
+        text-align: center;
+    }
+    
+    .notification-btn {
+        padding: 10px 20px;
+        background-color: #ff6b6b;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 700;
+        margin-right: 10px;
+    }
+    
+    .notification-btn:hover {
+        background-color: #ff5252;
+    }
+</style>
+
+<div class="notification-container">
+    <div class="notification-header">🔔 내 알림</div>
+    
+    {% if notifications_with_url %}
+    <div class="notification-list">
+        {% for item in notifications_with_url %}
+        <div class="notification-item {% if not item.notification.is_read %}unread{% endif %}" 
+             onclick="goToNotification({{ item.notification.id }}, '{{ item.target_url }}')">
+            <div class="notification-content">
+                <div class="notification-message">{{ item.notification.message }}</div>
+                <div class="notification-time">{{ item.notification.created_at|date:"Y.m.d H:i" }}</div>
+            </div>
+            {% if not item.notification.is_read %}
+            <div class="notification-badge">●</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="notification-action">
+        <button class="notification-btn" onclick="markAllAsRead()">모두 읽음</button>
+    </div>
+    {% else %}
+    <div class="notification-empty">
+        <p>알림이 없습니다.</p>
+        <p style="margin-top: 10px; font-size: 12px;">내가 작성한 글에 댓글이 달리면 여기에 알림이 나타납니다.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// CSRF 토큰 가져오기 (base.html의 함수 사용 또는 직접 정의)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+async function goToNotification(notificationId, targetUrl) {
+    try {
+        // 먼저 읽음 처리
+        const response = await fetch(`/board/notification/${notificationId}/read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // ★ 26-01-06 수정: 배지 업데이트 로직 개선
+            const badge = document.getElementById('notifBadge');
+            if (badge) {
+                const newCount = data.unread_count || 0;
+                if (newCount <= 0) {
+                    // 읽지 않은 알림이 0개면 배지 제거
+                    badge.remove();
+                } else {
+                    // 숫자 업데이트
+                    badge.textContent = newCount;
+                    badge.setAttribute('data-count', newCount);
+                }
+            }
+            
+            // 해당 페이지로 이동
+            window.location.href = targetUrl;
+        } else {
+            console.error('Failed to mark notification as read');
+            // 실패해도 페이지는 이동
+            window.location.href = targetUrl;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        // 에러가 발생해도 페이지는 이동
+        window.location.href = targetUrl;
+    }
+}
+
+async function markAllAsRead() {
+    try {
+        const response = await fetch('/board/notification/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // ★ 26-01-06 수정: 배지 제거 로직 개선
+            const badge = document.getElementById('notifBadge');
+            if (badge) {
+                badge.remove();
+            }
+            
+            // 페이지 새로고침
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+</script>
+{% endblock %}

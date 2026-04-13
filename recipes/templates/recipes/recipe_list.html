@@ -1,0 +1,533 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}요리레시피 - 맘스로그{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/flea_list.css' %}">
+
+<style>
+.recipe-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.recipe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #ff6b6b;
+}
+
+.recipe-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+}
+
+.recipe-toolbar{
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap:12px;
+    width:100%;
+}
+
+.recipe-search-box{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex:1;
+    max-width:600px;
+    border: 1px solid #eadede;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 10px 24px rgba(31, 41, 55, 0.06);
+    box-sizing: border-box;
+}
+
+.recipe-search-box:focus-within{
+    border-color: #ffd3d3;
+    box-shadow: 0 0 0 3px rgba(255, 143, 143, 0.12);
+}
+
+.recipe-search-input{
+    flex:1;
+    height:50px;
+    padding:0 84px 0 14px;
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius:14px;
+    font-size:14px;
+    outline:none;
+    color: #333;
+    box-sizing: border-box;
+}
+
+.recipe-search-input::placeholder{
+    color: #b08b8b;
+}
+
+.recipe-search-clear{
+    position:absolute;
+    right:60px;
+    width:16px;
+    height:16px;
+    border:none;
+    border-radius:50%;
+    background:#f3e6e6;
+    color:#8a6a6a;
+    font-size:8px;
+    cursor:pointer;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    font-weight: 900;
+}
+
+.recipe-search-clear:hover{
+    background:#ffdede;
+}
+
+.recipe-search-btn{
+    position:absolute;
+    right:0px;
+    height:50px;
+    padding:0 14px;
+    border:none;
+    border-radius:14px;
+    background:#fff;
+    cursor:pointer;
+}
+
+.recipe-create-btn{
+    height:42px;
+    padding:0 18px;
+    border-radius:6px;
+    background:#ff8f8f;
+    color:#fff;
+    text-decoration:none;
+    font-weight:700;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    white-space:nowrap;
+}
+
+.recipe-create-btn:hover {
+    background: #ff6b6b;
+}
+
+.category-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.category-tab {
+    padding: 8px 16px;
+    background: #f8f9fa;
+    color: #666;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: .2s;
+}
+
+.category-tab.active {
+    background: #ff6b6b;
+    color: white;
+}
+
+.category-tab:hover {
+    background: #ffdede;
+}
+
+.search-box {
+    margin-bottom: 20px;
+}
+
+.search-box form {
+    display: flex;
+    gap: 10px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.search-box button {
+    padding: 10px 24px;
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.filter-box{
+    margin-bottom:20px;
+}
+
+.filter-chips{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.filter-chips .chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 12px;
+    border-radius:999px;
+    background:#fff7f7;
+    color:#666;
+    text-decoration:none;
+    font-size:13px;
+    border:1px solid #ffe1e1;
+}
+
+.filter-chips .chip.active{
+    background:#ffefef;
+    color:#444;
+    border-color:#ffd1d1;
+}
+
+.filter-chips .chip .dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#ff8f8f;
+}
+
+.recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.recipe-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: .3s;
+}
+
+.recipe-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.recipe-thumbnail {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    background: #f0f0f0;
+}
+
+.recipe-info {
+    padding: 12px;
+}
+
+.recipe-category {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #ffe0e0;
+    color: #ff6b6b;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.recipe-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.recipe-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #999;
+}
+
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.pagination-container {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 30px;
+}
+
+.pagination-btn {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    transition: .2s;
+    min-width: 36px;
+    text-align: center;
+}
+
+.pagination-btn:hover {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+    background: #fff5f5;
+}
+
+.pagination-btn.active {
+    background: #495057;
+    color: white;
+    border-color: #495057;
+}
+
+.pagination-btn.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+    border-color: #eee;
+}
+
+.recipe-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.recipe-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.recipe-thumbnail {
+    height: 150px;
+}
+
+.recipe-info {
+    padding: 10px;
+}
+
+.recipe-title {
+    font-size: 14px;
+}
+</style>
+
+<div class="recipe-container">
+    <div class="recipe-header">
+        <h2>요리레시피</h2>
+    </div>
+
+    <div class="recipe-toolbar">
+        <form method="get" class="recipe-search-box">
+            {% if category != 'all' %}
+            <input type="hidden" name="category" value="{{ category }}">
+            {% endif %}
+
+            <input
+                type="text"
+                name="search"
+                value="{{ search_query }}"
+                placeholder="레시피 제목이나 내용을 검색하세요..."
+                class="recipe-search-input"
+                id="recipeSearchInput"
+            >
+
+            <!-- ✕ 초기화 버튼 -->
+            <button type="button"
+                    class="recipe-search-clear"
+                    id="recipeSearchClear"
+                    aria-label="검색어 초기화">
+                ✕
+            </button>
+
+            <button type="submit" class="recipe-search-btn" aria-label="검색">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </button>
+        </form>
+
+        {% if user.is_authenticated %}
+        <a href="{% url 'recipes:recipe_create' %}" class="recipe-create-btn">
+            레시피 작성
+        </a>
+        {% endif %}
+    </div>
+
+
+    <!-- 필터 칩 (검색 대체) -->
+    <div class="filter-box">
+        <div class="filter-chips">
+            <a class="chip {% if quick == '15' %}active{% endif %}" href="?quick=15{% if category and category != 'all' %}&category={{ category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"><span class="dot"></span>15분 완성</a>
+            <a class="chip {% if kid == '1' %}active{% endif %}" href="?kid=1{% if category and category != 'all' %}&category={{ category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"><span class="dot"></span>아이도 먹는</a>
+            <a class="chip {% if low == '1' %}active{% endif %}" href="?low=1{% if category and category != 'all' %}&category={{ category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"><span class="dot"></span>재료 적은</a>
+        </div>
+    </div>
+
+    <!-- 카테고리 탭 -->
+    <div class="category-tabs">
+        <a href="?category=all" class="category-tab {% if category == 'all' %}active{% endif %}">전체</a>
+        <a href="?category=main" class="category-tab {% if category == 'main' %}active{% endif %}">메인요리</a>
+        <a href="?category=snack" class="category-tab {% if category == 'snack' %}active{% endif %}">간식/디저트</a>
+        <a href="?category=baby" class="category-tab {% if category == 'baby' %}active{% endif %}">아기 이유식</a>
+        <a href="?category=diet" class="category-tab {% if category == 'diet' %}active{% endif %}">다이어트</a>
+        <a href="?category=simple" class="category-tab {% if category == 'simple' %}active{% endif %}">간단요리</a>
+    </div>
+
+
+    {% if search_query %}
+    <p style="color:#666; margin-bottom:15px;">
+        "<strong>{{ search_query }}</strong>" 검색 결과: <strong>{{ total_count }}</strong>건
+    </p>
+    {% endif %}
+
+    <!-- 레시피 목록 -->
+    {% if page_obj %}
+    <div class="recipe-grid">
+        {% for post in page_obj %}
+        <a href="{% url 'recipes:recipe_detail' post.pk %}" style="text-decoration: none; color: inherit;">
+            <div class="recipe-card">
+                {% with first_image=post.images.first %}
+                {% if first_image %}
+                <img src="{{ first_image.image.url }}" alt="{{ post.title }}" class="recipe-thumbnail">
+                {% else %}
+                <div class="recipe-thumbnail" style="display:flex;align-items:center;justify-content:center;background:#f5f5f5;color:#999;">
+                    이미지 없음
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                <div class="recipe-info">
+                    <span class="recipe-category">{{ post.get_category_display_name }}</span>
+                    <div class="recipe-title">{{ post.title }}</div>
+                    <div class="recipe-meta">
+                        <span>{{ post.author.nickname|default:post.author.username }}</span>
+                        <span>조회 {{ post.views }}</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- 페이지네이션 -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination-container">
+        <!-- 처음 페이지 -->
+        {% if page_obj.number > 1 %}
+        <a href="?page=1{% if category != 'all' %}&category={{ category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-btn">«</a>
+        {% else %}
+        <span class="pagination-btn disabled">«</span>
+        {% endif %}
+
+        <!-- 이전 페이지 -->
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if category != 'all' %}&category={{ category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-btn">‹</a>
+        {% else %}
+        <span class="pagination-btn disabled">‹</span>
+        {% endif %}
+
+        <!-- 페이지 번호 (5개 표시) -->
+        {% with start_page=page_obj.number|add:'-2'|add:'0' end_page=page_obj.number|add:'2'|add:'0' %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if num >= start_page and num <= end_page %}
+                {% if num == page_obj.number %}
+                <span class="pagination-btn active">{{ num }}</span>
+                {% else %}
+                <a href="?page={{ num }}{% if category != 'all' %}&category={{ category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-btn">{{ num }}</a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% endwith %}
+
+        <!-- 다음 페이지 -->
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if category != 'all' %}&category={{ category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-btn">›</a>
+        {% else %}
+        <span class="pagination-btn disabled">›</span>
+        {% endif %}
+
+        <!-- 마지막 페이지 -->
+        {% if page_obj.number < page_obj.paginator.num_pages %}
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if category != 'all' %}&category={{ category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-btn">»</a>
+        {% else %}
+        <span class="pagination-btn disabled">»</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+
+    {% else %}
+    <div class="no-results">
+        <p>등록된 레시피가 없습니다.</p>
+        {% if user.is_authenticated %}
+        <p><a href="{% url 'recipes:recipe_create' %}">첫 번째 레시피를 작성해보세요!</a></p>
+        {% endif %}
+    </div>
+    {% endif %}
+    </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("recipeSearchInput");
+    const clearBtn = document.getElementById("recipeSearchClear");
+
+    if (!input || !clearBtn) return;
+
+    // 초기 상태
+    toggleClear();
+
+    // 입력 시 토글
+    input.addEventListener("input", toggleClear);
+
+    function toggleClear() {
+        clearBtn.style.display = input.value.trim() ? "flex" : "none";
+    }
+
+    // X 클릭 → 검색어 제거 + 바로 이동
+    clearBtn.addEventListener("click", function () {
+        input.value = "";
+        toggleClear();
+
+        // GET 파라미터 제거하고 목록으로 이동
+        const url = new URL(window.location.href);
+        url.searchParams.delete("search");
+        url.searchParams.delete("page"); // 페이지도 초기화
+        window.location.href = url.toString();
+    });
+});
+</script>
+
+{% endblock %}

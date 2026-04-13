@@ -1,0 +1,385 @@
+/* ===============================
+   회원가입 폼 스타일
+================================ */
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  display: block;
+  font-size: 14px;
+  color: #444;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="email"]{
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-sizing: border-box;
+  height: 44px;
+}
+
+/* disabled 입력창 가시성 */
+.form-group input:disabled{
+  background:#f1f3f5;
+  color:#868e96;
+  cursor:not-allowed;
+}
+
+.text-danger { color: #ff6b6b; }
+
+.field-error{
+  color: red;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.help-msg{
+  font-size: 13px;
+  display:block;
+  margin-top: 6px;
+}
+
+/* inline row (예: 이메일+버튼, 주소+버튼) */
+.inline-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+/* 주민번호/폰 split row */
+.split-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.split-input{ flex:1; }
+.split-dash{ font-weight:700; }
+
+/* 규칙 박스 */
+.rule-box{
+  margin-top: 8px;
+  font-size: 13px;
+  background: #f8f9fa;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 10px;
+}
+.rule-title{
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.rule-item{ margin:4px 0; }
+.rule-sub{
+  margin-top: 8px;
+  color:#868e96;
+  line-height:1.4;
+}
+
+/* =========================
+   버튼(통일)
+========================= */
+
+.btn-check{
+  background: #ff6b6b;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.btn-check:disabled{
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* =========================
+   ✅ 가입 버튼 (핑크로 복구)
+========================= */
+.btn-login-submit{
+  width:100%;
+  padding: 15px;
+  background:#ff6b6b;        /* ✅ 핑크 */
+  color:#fff;
+  border:none;
+  border-radius: 12px;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+  transition: background .15s ease, transform .05s ease;
+}
+
+.btn-login-submit:hover{
+  background:#ff8787;        /* ✅ hover */
+}
+
+.btn-login-submit:active{
+  transform: translateY(1px);
+}
+
+/* 가입 버튼 - 비활성 상태 (자연스러운 음영 버전) */
+.btn-login-submit[disabled]{
+  background: linear-gradient(
+    to bottom,
+    #f1f3f5,
+    #e9ecef
+  );
+  color: #adb5bd;
+  cursor: not-allowed;
+
+  /* ✅ 페이지 하단과 어울리는 음영 */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    0 8px 20px rgba(0,0,0,0.06);
+
+  opacity: 1;              /* ❗ opacity 제거 */
+}
+
+/* =========================
+   약관 라인
+========================= */
+.terms-label{
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  font-weight: normal;
+  gap:10px;
+}
+.terms-label input{
+  width:18px;
+  height:18px;
+  margin:0;
+}
+
+/* =========================
+   메시지 알림 (messages)
+========================= */
+.msg-wrap {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: 90%;
+  max-width: 420px;
+}
+
+.msg {
+  padding: 14px 18px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  animation: slideDown 0.25s ease;
+}
+
+.msg-success { background: #e6fcf5; color: #087f5b; border: 1px solid #c3fae8; }
+.msg-error   { background: #fff5f5; color: #c92a2a; border: 1px solid #ffe3e3; }
+.msg-info    { background: #f8f9fa; color: #343a40; border: 1px solid #e9ecef; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* =========================
+   input 토글 버튼
+========================= */
+.input-with-toggle{
+  position: relative;
+  display:flex;
+  align-items:center;
+}
+.input-with-toggle input{
+  width:100%;
+  padding-right: 46px;
+}
+.toggle-eye{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform: translateY(-50%);
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  font-size: 13px;
+  color:#adb5bd;
+  padding:0;
+  line-height:1;
+  user-select:none;
+}
+.toggle-eye:hover{ color:#495057; }
+.toggle-eye:focus{ outline:none; }
+
+/* =========================
+   입력 상태 스타일 (OK/BAD/WAIT)
+========================= */
+.input-ok{
+  border-color:#2f9e44 !important;
+  box-shadow: 0 0 0 3px rgba(47, 158, 68, 0.12);
+}
+.input-bad{
+  border-color:#e03131 !important;
+  box-shadow: 0 0 0 3px rgba(224, 49, 49, 0.10);
+}
+.input-wait{
+  border-color:#adb5bd !important;
+  box-shadow: 0 0 0 3px rgba(173, 181, 189, 0.12);
+}
+
+/* shake */
+@keyframes shakeX{
+  0%{ transform: translateX(0); }
+  20%{ transform: translateX(-3px); }
+  40%{ transform: translateX(3px); }
+  60%{ transform: translateX(-2px); }
+  80%{ transform: translateX(2px); }
+  100%{ transform: translateX(0); }
+}
+.shake{ animation: shakeX 0.18s ease-in-out; }
+
+/* =========================
+   이메일 인증 영역
+========================= */
+.email-code-wrap{
+  display:none; /* 기본 숨김 */
+  margin-top:10px;
+}
+
+/* =========================
+   성별 라디오 라인
+========================= */
+.radio-label{
+  font-weight: normal;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  white-space: nowrap;
+}
+
+/* =========================
+   자녀 정보 칩 UI (정리본)
+========================= */
+.child-toggle{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-top:8px;
+}
+
+.stage-grid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+  margin-top:12px;
+}
+@media (max-width: 520px){
+  .stage-grid{ grid-template-columns: repeat(2, 1fr); }
+}
+
+.chip-ui{
+  position: relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:46px;
+  padding: 0 12px;
+  border:1px solid #e9ecef;
+  border-radius:16px;
+  background:#fff;
+  cursor:pointer;
+  user-select:none;
+  box-sizing:border-box;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+}
+
+.chip-ui input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+  margin:0;
+}
+
+.chip-ui span{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+  text-align:center;
+  font-size:15px;
+  font-weight:700;
+  color:#343a40;
+  line-height:1;
+}
+
+.chip-ui:hover{
+  border-color:#ced4da;
+  background:#f8f9fa;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,.05);
+}
+
+.chip-ui:has(input:checked){
+  border-color:#ff6b6b;
+  background:#fff5f5;
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 3px rgba(255,107,107,.14);
+}
+
+#children_stages_msg{
+  display:block;
+  margin-top:8px;
+  font-size:13px;
+  color:red;
+}
+
+/* =========================
+   이메일 인증 완료 - 잠금 스타일
+========================= */
+
+/* 이메일 input 잠김 */
+.input-locked{
+  background:#e9ecef !important;
+  color:#495057 !important;
+  border-color:#adb5bd !important;
+  box-shadow:none !important;
+  cursor:not-allowed !important;
+}
+
+/* 잠김 상태에서 클릭/포커스 느낌 제거 */
+.input-locked:focus{
+  outline:none !important;
+  box-shadow:none !important;
+}
+
+/* “인증 완료”면 초록 테두리 + 연한 초록 배경 */
+.input-locked.input-ok{
+  background:#ebfbee !important;
+  border-color:#2f9e44 !important;
+}
+
+/* 버튼 잠김도 확실하게 */
+.btn-locked{
+  background:#dee2e6 !important;
+  color:#868e96 !important;
+  cursor:not-allowed !important;
+  box-shadow:none !important;
+}
+
+.btn-locked:hover{
+  background:#dee2e6 !important;
+}
+

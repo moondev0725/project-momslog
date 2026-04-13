@@ -1,0 +1,27 @@
+<!--
+═══════════════════════════════════════════════════════════════════════
+notice_detail.html - 공지사항 상세
+═══════════════════════════════════════════════════════════════════════
+작성일: 2025-12-29
+기능: 공지 내용 표시, 조회수 증가
+-->
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 800px; margin: 50px auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+    <div style="border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
+        <h3 style="margin: 0 0 10px 0;">{{ notice.title }}</h3>
+        <div style="color: #666; font-size: 14px; display: flex; justify-content: space-between;">
+            <span> {{ notice.created_at|date:"Y.m.d H:i" }}</span>
+            <span> {{ notice.view_count }}</span>
+        </div>
+    </div>
+
+    <div style="min-height: 300px; line-height: 1.8; font-size: 16px; margin-bottom: 30px;">
+        {{ notice.content|linebreaksbr }}
+    </div>
+
+    <div style="text-align: right;">
+        <a href="{% url 'board:notice_list' %}" style="padding: 10px 25px; background: #333; color: white; border-radius: 5px; text-decoration: none; font-weight: bold;">목록으로</a>
+    </div>
+</div>
+{% endblock %}

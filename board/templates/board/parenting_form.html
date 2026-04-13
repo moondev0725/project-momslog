@@ -1,0 +1,442 @@
+{% extends 'base.html' %}
+{% load static %}
+{# 26-01-02 슬기 추가: 육아정보 작성/수정 폼 페이지 #}
+{% block content %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .form-box {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .form-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #ff6b6b;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    
+    .form-group textarea {
+        min-height: 300px;
+        resize: vertical;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    
+    .btn-submit {
+        background: #ff6b6b;
+        color: white;
+    }
+    .btn-submit:hover { background: #ff5252; }
+    
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .image-section { margin-top: 24px; }
+    .image-section h3 { font-size: 16px; margin-bottom: 10px; }
+    #id_images { display:block; padding:10px; border:1px dashed #ddd; border-radius:8px; background:#fafafa; }
+    .image-preview { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+    .image-preview-item { width:96px; height:96px; border-radius:8px; overflow:hidden; border:1px solid #eee; display:flex; align-items:center; justify-content:center; background:#fff; }
+    .image-preview-item img { width:100%; height:100%; object-fit:cover; }
+    .existing-images { margin-top:16px; }
+    .existing-images-grid { display:flex; flex-wrap:wrap; gap:10px; }
+    .existing-image-item { width:120px; }
+    .existing-image-item img { width:120px; height:90px; object-fit:cover; border-radius:6px; border:1px solid #eee; display:block; }
+    .delete-check { margin-top:6px; display:flex; align-items:center; gap:6px; font-size:12px; color:#555; }
+
+    /* 발달 점수 도움말 모달 */
+    .info-inline {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: #666;
+    }
+    .info-link {
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        width:24px;
+        height:24px;
+        border-radius:999px;
+        border:1px solid #ffb3b3;
+        background:#fff5f5;
+        color:#e03131;
+        font-weight:800;
+        cursor:pointer;
+    }
+    .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        padding: 16px;
+    }
+    .modal-card {
+        background: #fff;
+        max-width: 520px;
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 12px 36px rgba(0,0,0,0.18);
+        overflow: hidden;
+    }
+    .modal-head {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding:14px 16px 12px;
+        border-bottom:1px solid #f1f3f5;
+    }
+    .modal-title { margin:0; font-size:16px; font-weight:900; color:#222; }
+    .modal-close { border:none; background:none; font-size:20px; line-height:1; cursor:pointer; color:#888; }
+    .modal-body { padding:14px 16px 18px; color:#343a40; font-size:14px; line-height:1.5; }
+    .modal-body h4 { margin:10px 0 6px; font-size:14px; font-weight:900; }
+    .modal-body p { margin:6px 0; }
+    .modal-body ul { margin:8px 0 0 18px; padding:0; }
+    .modal-body li { margin:4px 0; }
+</style>
+
+<div class="form-container">
+    <div class="form-box">
+        <h2 class="form-title">{% if post %}육아정보 수정{% else %}육아정보 등록{% endif %}</h2>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>카테고리 *</label>
+                <select name="category" id="categorySelect" required onchange="toggleDevelopmentFields()">
+                    <option value="all" {% if post and post.category == 'all' %}selected{% endif %}>전체보기</option>
+                    <option value="development" {% if post and post.category == 'development' %}selected{% endif %}>월령별 발달</option>
+                    <option value="sleep" {% if post and post.category == 'sleep' %}selected{% endif %}>수면교육</option>
+                    <option value="discipline" {% if post and post.category == 'discipline' %}selected{% endif %}>훈육 노하우</option>
+                </select>
+            </div>
+            
+            <!-- 26-01-02 슬기 추가: 월령별 발달 전용 필드 -->
+            <div id="developmentFields" style="display: none;">
+                <div class="form-group">
+                    <label>월령 (개월) *</label>
+                    <input type="number" name="month_age" min="0" max="60" value="{{ post.month_age|default:'' }}" placeholder="예: 6">
+                </div>
+                
+                <div class="form-group">
+                    <label>신체발달 점수 (0-100)
+                        <span class="info-inline">
+                            <button type="button" class="info-link" id="infoPhysicalBtn">?</button>
+                            <span style="color:#999; font-size:12px;">점수 기준 안내</span>
+                        </span>
+                    </label>
+                    <input type="number" name="physical_score" min="0" max="100" value="{{ post.physical_score|default:'' }}" placeholder="0-100 사이 점수">
+                </div>
+                
+                <div class="form-group">
+                    <label>인지발달 점수 (0-100)
+                        <span class="info-inline">
+                            <button type="button" class="info-link" id="infoCognitiveBtn">?</button>
+                            <span style="color:#999; font-size:12px;">점수 기준 안내</span>
+                        </span>
+                    </label>
+                    <input type="number" name="cognitive_score" min="0" max="100" value="{{ post.cognitive_score|default:'' }}" placeholder="0-100 사이 점수">
+                </div>
+                
+                <div class="form-group">
+                    <label>언어발달 점수 (0-100)
+                        <span class="info-inline">
+                            <button type="button" class="info-link" id="infoLanguageBtn">?</button>
+                            <span style="color:#999; font-size:12px;">점수 기준 안내</span>
+                        </span>
+                    </label>
+                    <input type="number" name="language_score" min="0" max="100" value="{{ post.language_score|default:'' }}" placeholder="0-100 사이 점수">
+                </div>
+                
+                <div class="form-group">
+                    <label>사회성발달 점수 (0-100)
+                        <span class="info-inline">
+                            <button type="button" class="info-link" id="infoSocialBtn">?</button>
+                            <span style="color:#999; font-size:12px;">점수 기준 안내</span>
+                        </span>
+                    </label>
+                    <input type="number" name="social_score" min="0" max="100" value="{{ post.social_score|default:'' }}" placeholder="0-100 사이 점수">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>제목 *</label>
+                <input type="text" name="title" value="{{ post.title|default:'' }}" required placeholder="제목을 입력하세요">
+            </div>
+            
+            <div class="form-group">
+                <label>내용 *</label>
+                <textarea name="content" required placeholder="육아정보를 상세히 작성해주세요">{{ post.content|default:'' }}</textarea>
+            </div>
+
+            <!-- 이미지 업로드 섹션 -->
+            <div class="image-section">
+                <h3>사진 업로드 (최대 10장)</h3>
+                <input type="hidden" id="existing_image_count" value="{% if post %}{{ post.images.count }}{% else %}0{% endif %}">
+                {% if post and post.images.all %}
+                <div class="existing-images">
+                    <div class="existing-images-grid">
+                        {% for image in post.images.all %}
+                        <div class="existing-image-item">
+                            <img src="{{ image.image.url }}" alt="이미지 {{ forloop.counter }}">
+                            <label class="delete-check">
+                                <input type="checkbox" name="delete_images" value="{{ image.id }}"> 삭제
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <input type="file" name="images" id="id_images" accept="image/*" multiple>
+                <div id="image_preview" class="image-preview"></div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-submit">{% if post %}수정하기{% else %}등록하기{% endif %}</button>
+                <a href="{% if post %}{% url 'board:parenting_detail' post.pk %}{% else %}{% url 'board:parenting_list' %}{% endif %}" class="btn btn-cancel">취소</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// 26-01-02 슬기 추가: 월령별 발달 카테고리 선택 시 발달 지표 필드 표시
+function toggleDevelopmentFields() {
+    const category = document.getElementById('categorySelect').value;
+    const devFields = document.getElementById('developmentFields');
+    
+    if (category === 'development') {
+        devFields.style.display = 'block';
+    } else {
+        devFields.style.display = 'none';
+    }
+}
+
+// 페이지 로드 시 실행
+window.onload = function() {
+    toggleDevelopmentFields();
+};
+
+// 이미지 미리보기 및 업로드 개수 제한 (최대 10장)
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('id_images');
+    const preview = document.getElementById('image_preview');
+    if (!input) return;
+
+    input.addEventListener('change', function() {
+        const files = Array.from(input.files || []);
+        const existingCount = Number(document.getElementById('existing_image_count')?.value || 0);
+        const max = 10;
+        if (existingCount + files.length > max) {
+            alert(`이미지는 최대 ${max}장까지 업로드할 수 있어요.\n(기존 ${existingCount}장 포함)`);
+            input.value = '';
+            preview.innerHTML = '';
+            return;
+        }
+        preview.innerHTML = '';
+        files.forEach((file) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const div = document.createElement('div');
+                div.className = 'image-preview-item';
+                div.innerHTML = `<img src="${e.target.result}" alt="preview">`;
+                preview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+        // 발달 점수 안내 모달들
+        function bindModal(triggerId, backdropId, closeAttr) {
+            const trigger = document.getElementById(triggerId);
+            const backdropEl = document.getElementById(backdropId);
+            const closeEls = document.querySelectorAll('[data-close-modal="' + closeAttr + '"]');
+            if (!trigger || !backdropEl) return;
+            trigger.addEventListener('click', function(){ backdropEl.style.display = 'flex'; });
+            backdropEl.addEventListener('click', function(e){ if (e.target === backdropEl) backdropEl.style.display = 'none'; });
+            closeEls.forEach(function(btn){ btn.addEventListener('click', function(){ backdropEl.style.display = 'none'; }); });
+        }
+
+        bindModal('infoPhysicalBtn', 'modalPhysicalBackdrop', 'physical');
+        bindModal('infoCognitiveBtn', 'modalCognitiveBackdrop', 'cognitive');
+        bindModal('infoLanguageBtn', 'modalLanguageBackdrop', 'language');
+        bindModal('infoSocialBtn', 'modalSocialBackdrop', 'social');
+});
+</script>
+
+<!-- 신체발달 점수 안내 모달 -->
+<div class="modal-backdrop" id="modalPhysicalBackdrop">
+    <div class="modal-card" id="modalPhysical">
+        <div class="modal-head">
+            <h3 class="modal-title">신체발달이란?</h3>
+            <button type="button" class="modal-close" data-close-modal="physical">×</button>
+        </div>
+        <div class="modal-body">
+            <p>신체발달은 아이가 성장하면서 고개 들기, 앉기, 기기, 서기, 걷기 등 몸을 조절하고 움직이는 능력이 단계적으로 발달하는 과정을 말합니다.</p>
+
+            <h4>월령별 신체발달 점수 (1점 ~ 100점)</h4>
+            <p>기준: 12개월 = 100점. 점수는 평균적인 발달 흐름을 기준으로 한 참고 지표입니다.</p>
+            <ul>
+                <li>1개월 · 10점 — 팔다리를 반사적으로 움직이고 엎드리면 고개를 잠깐 듭니다</li>
+                <li>2개월 · 15점 — 고개 들기가 조금 안정되고 움직임이 부드러워집니다</li>
+                <li>3개월 · 22점 — 엎드린 상태에서 팔로 몸을 지탱합니다</li>
+                <li>4개월 · 30점 — 목 가누기가 완성되고 손을 뻗어 물건을 잡으려 합니다</li>
+                <li>5개월 · 38점 — 뒤집기를 시도하고 몸통 움직임이 활발해집니다</li>
+                <li>6개월 · 46점 — 혼자 앉을 수 있어 신체발달의 큰 전환점이 됩니다</li>
+                <li>7개월 · 55점 — 기거나 이동을 시작합니다</li>
+                <li>8개월 · 63점 — 안정적으로 앉고 이동이 활발해집니다</li>
+                <li>9개월 · 72점 — 붙잡고 서며 손가락으로 작은 물건을 집습니다</li>
+                <li>10개월 · 82점 — 가구를 잡고 옆으로 이동합니다</li>
+                <li>11개월 · 90점 — 잠깐 혼자 서거나 첫 걸음을 시도합니다</li>
+                <li>12개월 · 100점 — 혼자 걷기 시작하며 영아기 신체발달 기준에 도달합니다</li>
+            </ul>
+            <p style="margin-top:10px; font-weight:700;">📌 참고: 개인차가 있을 수 있으며, 점수는 참고 지표입니다.</p>
+        </div>
+    </div>
+</div>
+
+<!-- 인지발달 점수 안내 모달 -->
+<div class="modal-backdrop" id="modalCognitiveBackdrop">
+    <div class="modal-card" id="modalCognitive">
+        <div class="modal-head">
+            <h3 class="modal-title">인지발달이란?</h3>
+            <button type="button" class="modal-close" data-close-modal="cognitive">×</button>
+        </div>
+        <div class="modal-body">
+            <p>인지발달은 아이가 사물을 이해하고, 기억하고, 문제를 해결하며, 주변 세계를 학습하는 능력이 자라는 과정입니다.</p>
+            <h4>월령별 인지발달 점수 (1~100점)</h4>
+            <p>기준: 12개월 = 100점. 점수는 평균적인 발달 흐름을 기준으로 한 참고 지표입니다.</p>
+            <ul>
+                <li>1개월 · 8점 — 밝기/소리에 반응하고 잠깐 응시</li>
+                <li>2개월 · 14점 — 사람 얼굴/소리를 따라보며 주의가 늘어남</li>
+                <li>3개월 · 22점 — 원인-결과를 조금씩 인식, 간단한 패턴을 봄</li>
+                <li>4개월 · 30점 — 눈과 손 협응이 좋아져 장난감을 바라봄</li>
+                <li>5개월 · 38점 — 물건을 잡고 탐색, 반복 행동을 즐김</li>
+                <li>6개월 · 48점 — 거울 속 자신을 인식 시도, 낯선 물건 호기심</li>
+                <li>7개월 · 58점 — 간단한 순서를 기억, 소리 나는 곳을 찾음</li>
+                <li>8개월 · 68점 — 숨긴 물건을 찾으려 시도, 간단한 문제 해결</li>
+                <li>9개월 · 78점 — 쉬운 지시 이해(“안돼”), 흉내 내기 증가</li>
+                <li>10개월 · 86점 — 상자 여닫기·쌓기 등 조작 놀이 확장</li>
+                <li>11개월 · 93점 — 도구처럼 물건 활용, 눈치게임(기다리기) 시도</li>
+                <li>12개월 · 100점 — 숨긴 물건 찾기 성공률 높음, 간단한 규칙 이해</li>
+            </ul>
+            <p style="margin-top:10px; font-weight:700;">📌 개인차가 있으므로 점수는 참고 지표로만 활용하세요.</p>
+        </div>
+    </div>
+</div>
+
+<!-- 언어발달 점수 안내 모달 -->
+<div class="modal-backdrop" id="modalLanguageBackdrop">
+    <div class="modal-card" id="modalLanguage">
+        <div class="modal-head">
+            <h3 class="modal-title">언어발달이란?</h3>
+            <button type="button" class="modal-close" data-close-modal="language">×</button>
+        </div>
+        <div class="modal-body">
+            <p>언어발달은 소리를 내고, 옹알이하고, 단어를 이해·표현하며 의사소통 능력을 키워가는 과정입니다.</p>
+            <h4>월령별 언어발달 점수 (1~100점)</h4>
+            <p>기준: 12개월 = 100점. 점수는 평균적인 발달 흐름을 기준으로 한 참고 지표입니다.</p>
+            <ul>
+                <li>1개월 · 8점 — 울음으로 욕구 표현, 소리에 깜짝 반응</li>
+                <li>2개월 · 12점 — 가벼운 옹알이, 목소리 톤에 반응</li>
+                <li>3개월 · 18점 — 웃음/옹알이 증가, 사람 소리에 집중</li>
+                <li>4개월 · 26점 — 모음 위주 옹알이, 표정/소리 따라하기 시도</li>
+                <li>5개월 · 34점 — 자음 혼합 옹알이, 억양 비슷하게 흉내</li>
+                <li>6개월 · 44점 — ‘마마/바바’ 등 반복 옹알이, 이름 부르면 반응</li>
+                <li>7개월 · 55점 — 제스처(손 내밀기)와 소리 결합, 간단한 금지 이해</li>
+                <li>8개월 · 66점 — ‘줘/안돼’ 등 단순 지시 이해, 손짓/머리 젓기</li>
+                <li>9개월 · 78점 — 사물명 일부 이해, 의사 표현 제스처 늘어남</li>
+                <li>10개월 · 88점 — 첫 단어 시도(“맘마”, “빠”), 따라 말하기 시도</li>
+                <li>11개월 · 94점 — 단어+제스처 조합, 요구를 더 명확히 표현</li>
+                <li>12개월 · 100점 — 1~2개 단어 의미 있게 사용, 낱말 이해 폭 확장</li>
+            </ul>
+            <p style="margin-top:10px; font-weight:700;">📌 노출 환경·개인차에 따라 속도가 다르니, 점수는 참고용으로만 사용하세요.</p>
+        </div>
+    </div>
+</div>
+
+<!-- 사회성발달 점수 안내 모달 -->
+<div class="modal-backdrop" id="modalSocialBackdrop">
+    <div class="modal-card" id="modalSocial">
+        <div class="modal-head">
+            <h3 class="modal-title">사회성발달이란?</h3>
+            <button type="button" class="modal-close" data-close-modal="social">×</button>
+        </div>
+        <div class="modal-body">
+            <p>사회성발달은 타인과 상호작용하고, 감정을 표현·조절하며, 애착과 기본적인 규칙을 배우는 과정입니다.</p>
+            <h4>월령별 사회성발달 점수 (1~100점)</h4>
+            <p>기준: 12개월 = 100점. 점수는 평균적인 발달 흐름을 기준으로 한 참고 지표입니다.</p>
+            <ul>
+                <li>1개월 · 12점 — 사람 얼굴 쪽으로 시선, 편안/불편 신호 보임</li>
+                <li>2개월 · 18점 — 미소 반응 증가, 눈맞춤 시도</li>
+                <li>3개월 · 26점 — 옹알이/미소로 상호작용, 감정 표현이 분명해짐</li>
+                <li>4개월 · 34점 — 웃음/짖궂은 소리로 주목 끌기, 낯익은 사람 선호</li>
+                <li>5개월 · 42점 — 목소리/표정에 맞춰 반응, 간단한 놀이에 흥미</li>
+                <li>6개월 · 52점 — 낯가림 시작, 익숙한 이에게 애착 표현</li>
+                <li>7개월 · 62점 — 감정을 얼굴/몸짓으로 표현, 기다리기 짧게 가능</li>
+                <li>8개월 · 72점 — 숨바꼭질/까꿍에 즐겁게 반응, 모방 제스처 시작</li>
+                <li>9개월 · 82점 — 박수/안녕 등 제스처 모방, 간단한 순서 놀이</li>
+                <li>10개월 · 90점 — 차례 기다리기 연습, 친숙/낯선 구분 뚜렷</li>
+                <li>11개월 · 96점 — 감정 조율 시도(안아달라 표현), 규칙 놀이 흉내</li>
+                <li>12개월 · 100점 — 인사/헤어짐 표현, 타인 의도 파악 시도</li>
+            </ul>
+            <p style="margin-top:10px; font-weight:700;">📌 사회적 경험과 성향에 따라 차이가 크며, 점수는 참고 지표입니다.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
